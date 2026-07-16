@@ -1,234 +1,117 @@
-\# API Design
+# API Design
 
+## Project
 
+Government Subsidy & Grant Disbursement Tracking System
 
-\## Project
+---
 
+## API Standards
 
-
-Government Subsidy \& Grant Disbursement Tracking System
-
-
-
-\---
-
-
-
-\## API Standards
-
-
-
-\### Architecture
-
-
+### Architecture
 
 REST API
 
+### Base URL
 
-
-\### Base URL
-
-
-
-```
-
+```text
 http://localhost:8080/api/v1
-
 ```
 
-
-
-\### Authentication
-
-
+### Authentication
 
 JWT Bearer Token
 
-
-
-\### Data Format
-
-
+### Data Format
 
 JSON
 
+### HTTP Methods
 
+- GET
+- POST
+- PUT
+- DELETE
 
-\### HTTP Methods
+---
 
-
-
-\- GET
-
-\- POST
-
-\- PUT
-
-\- DELETE
-
-
-
-\---
-
-
-
-\## Standard Request Header
-
-
+## Standard Request Header
 
 ```http
-
 Content-Type: application/json
-
-Authorization: Bearer <JWT\_TOKEN>
-
+Authorization: Bearer <JWT_TOKEN>
 ```
 
+---
 
-
-\---
-
-
-
-\## Standard Response Format
-
-
+## Standard Response Format
 
 ```json
-
 {
-
-&#x20; "success": true,
-
-&#x20; "message": "Operation Successful",
-
-&#x20; "data": {}
-
+  "success": true,
+  "message": "Operation Successful",
+  "data": {}
 }
-
 ```
 
+---
 
-
-\---
-
-
-
-\## Standard HTTP Status Codes
-
-
+## Standard HTTP Status Codes
 
 | Code | Description |
-
 |------|-------------|
+| 200 | OK |
+| 201 | Created |
+| 400 | Bad Request |
+| 401 | Unauthorized |
+| 403 | Forbidden |
+| 404 | Not Found |
+| 500 | Internal Server Error |
 
-|200|OK|
+---
 
-|201|Created|
+## Validation Rules
 
-|400|Bad Request|
+- Aadhaar Number must contain 12 digits.
+- Mobile Number must contain 10 digits.
+- Annual Income must be greater than zero.
+- Scheme Name cannot be empty.
+- Beneficiary must exist before submitting an application.
+- Duplicate applications for the same scheme are not allowed.
+- Only authorized roles can access protected APIs.
 
-|401|Unauthorized|
+---
 
-|403|Forbidden|
+## Role Based Access Control (RBAC)
 
-|404|Not Found|
+### Admin
 
-|500|Internal Server Error|
+- Full system access
 
+### Beneficiary
 
+- Login
+- Register
+- Submit Application
+- View Own Application
 
-\---
+### Field Officer
 
+- View Assigned Applications
+- Verify Applications
 
+### District Officer
 
-\## Validation Rules
+- Review Applications
+- Approve / Reject Applications
 
+### Finance Officer
 
+- Final Approval
+- Schedule Fund Release
+- Release Funds
 
-\- Aadhaar Number must contain 12 digits.
+### Auditor
 
-\- Mobile Number must contain 10 digits.
-
-\- Annual Income must be greater than zero.
-
-\- Scheme Name cannot be empty.
-
-\- Beneficiary must exist before submitting an application.
-
-\- Duplicate applications for the same scheme are not allowed.
-
-\- Only authorized roles can access protected APIs.
-
-
-
-\---
-
-
-
-\## Role Based Access Control (RBAC)
-
-
-
-\### Admin
-
-
-
-\- Full system access
-
-
-
-\### Beneficiary
-
-
-
-\- Login
-
-\- Register
-
-\- Submit Application
-
-\- View Own Application
-
-
-
-\### Field Officer
-
-
-
-\- View Assigned Applications
-
-\- Verify Applications
-
-
-
-\### District Officer
-
-
-
-\- Review Applications
-
-\- Approve / Reject Applications
-
-
-
-\### Finance Officer
-
-
-
-\- Final Approval
-
-\- Schedule Fund Release
-
-\- Release Funds
-
-
-
-\### Auditor
-
-
-
-\- View Reports
-
-\- View Audit Logs
-
+- View Reports
+- View Audit Logs

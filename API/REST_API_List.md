@@ -1,228 +1,94 @@
-\# REST API List
+# REST API List
 
+## Base URL
 
-
-\## Base URL
-
-
-
-```
-
+```text
 http://localhost:8080/api/v1
-
 ```
 
+---
 
-
-\---
-
-
-
-\# Authentication
-
-
+# Authentication
 
 | Method | Endpoint | Description |
-
 |---------|----------|-------------|
+| POST | /auth/login | User Login |
 
-|POST|/auth/login|User Login|
+---
 
+c
 
+---
 
-\---
-
-
-
-\# Beneficiary Module
-
-
+# Application Module
 
 | Method | Endpoint | Description |
-
 |---------|----------|-------------|
+| POST | /applications | Submit Application |
+| GET | /applications | Get All Applications |
+| GET | /applications/{id} | Get Application |
+| PUT | /applications/{id} | Update Application |
+| DELETE | /applications/{id} | Withdraw/Delete Application |
 
-|POST|/beneficiaries|Register Beneficiary|
+---
 
-|GET|/beneficiaries|Get All Beneficiaries|
-
-|GET|/beneficiaries/{id}|Get Beneficiary|
-
-|PUT|/beneficiaries/{id}|Update Beneficiary|
-
-|DELETE|/beneficiaries/{id}|Delete Beneficiary|
-
-
-
-\---
-
-
-
-\# Scheme Module
-
-
+# Field Officer Module
 
 | Method | Endpoint | Description |
-
 |---------|----------|-------------|
+| GET | /field-officer/applications | View Assigned Applications |
+| POST | /field-officer/verify/{applicationId} | Submit Verification |
 
-|POST|/schemes|Create Scheme|
+---
 
-|GET|/schemes|Get All Schemes|
-
-|GET|/schemes/{id}|Get Scheme|
-
-|PUT|/schemes/{id}|Update Scheme|
-
-|DELETE|/schemes/{id}|Delete Scheme|
-
-
-
-\---
-
-
-
-\# Application Module
-
-
+# District Officer Module
 
 | Method | Endpoint | Description |
-
 |---------|----------|-------------|
+| GET | /district-officer/applications | View Verified Applications |
+| POST | /district-officer/review/{applicationId} | Approve / Reject Application |
 
-|POST|/applications|Submit Application|
+---
 
-|GET|/applications|Get All Applications|
-
-|GET|/applications/{id}|Get Application|
-
-|PUT|/applications/{id}|Update Application|
-
-|DELETE|/applications/{id}|Withdraw/Delete Application|
-
-
-
-\---
-
-
-
-\# Field Officer Module
-
-
+# Finance Module
 
 | Method | Endpoint | Description |
-
 |---------|----------|-------------|
+| GET | /finance/applications | View Approved Applications |
+| POST | /finance/approve/{applicationId} | Final Approval |
 
-|GET|/field-officer/applications|View Assigned Applications|
+---
 
-|POST|/field-officer/verify/{applicationId}|Submit Verification|
-
-
-
-\---
-
-
-
-\# District Officer Module
-
-
+# Disbursement Module
 
 | Method | Endpoint | Description |
-
 |---------|----------|-------------|
+| POST | /disbursement/schedule | Schedule Fund Release |
+| POST | /disbursement/release | Release Funds |
+| GET | /disbursement/history | View Disbursement History |
 
-|GET|/district-officer/applications|View Verified Applications|
+---
 
-|POST|/district-officer/review/{applicationId}|Approve / Reject Application|
-
-
-
-\---
-
-
-
-\# Finance Module
-
-
+# Reports Module
 
 | Method | Endpoint | Description |
-
 |---------|----------|-------------|
+| GET | /reports/beneficiaries | Beneficiary Report |
+| GET | /reports/schemes | Scheme Report |
+| GET | /reports/districts | District-wise Report |
+| GET | /reports/funds | Fund Utilization Report |
 
-|GET|/finance/applications|View Approved Applications|
+---
 
-|POST|/finance/approve/{applicationId}|Final Approval|
-
-
-
-\---
-
-
-
-\# Disbursement Module
-
-
+# Audit Log Module
 
 | Method | Endpoint | Description |
-
 |---------|----------|-------------|
+| GET | /audit/logs | View Audit Logs |
+| GET | /audit/logs?userId={id} | Filter Audit Logs |
 
-|POST|/disbursement/schedule|Schedule Fund Release|
+---
 
-|POST|/disbursement/release|Release Funds|
-
-|GET|/disbursement/history|View Disbursement History|
-
-
-
-\---
-
-
-
-\# Reports Module
-
-
-
-| Method | Endpoint | Description |
-
-|---------|----------|-------------|
-
-|GET|/reports/beneficiaries|Beneficiary Report|
-
-|GET|/reports/schemes|Scheme Report|
-
-|GET|/reports/districts|District-wise Report|
-
-|GET|/reports/funds|Fund Utilization Report|
-
-
-
-\---
-
-
-
-\# Audit Log Module
-
-
-
-| Method | Endpoint | Description |
-
-|---------|----------|-------------|
-
-|GET|/audit/logs|View Audit Logs|
-
-|GET|/audit/logs?userId={id}|Filter Audit Logs|
-
-
-
-\---
-
-
-
-\## Total APIs
-
-
+## Total APIs
 
 31 REST APIs
-
