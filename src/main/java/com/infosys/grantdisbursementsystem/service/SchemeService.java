@@ -3,6 +3,7 @@ package com.infosys.grantdisbursementsystem.service;
 import com.infosys.grantdisbursementsystem.entity.Scheme;
 import com.infosys.grantdisbursementsystem.repository.SchemeRepository;
 import org.springframework.stereotype.Service;
+import com.infosys.grantdisbursementsystem.exception.ResourceNotFoundException;
 
 import java.util.List;
 
@@ -20,7 +21,7 @@ public class SchemeService {
     }
 
     public Scheme getSchemeById(Long id) {
-        return schemeRepository.findById(id).orElse(null);
+        return schemeRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Scheme not found with ID: " + id));
     }
 
     public Scheme saveScheme(Scheme scheme) {

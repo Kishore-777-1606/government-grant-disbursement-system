@@ -3,6 +3,7 @@ package com.infosys.grantdisbursementsystem.service;
 import com.infosys.grantdisbursementsystem.entity.Beneficiary;
 import com.infosys.grantdisbursementsystem.repository.BeneficiaryRepository;
 import org.springframework.stereotype.Service;
+import com.infosys.grantdisbursementsystem.exception.ResourceNotFoundException;
 
 import java.util.List;
 
@@ -20,9 +21,7 @@ public class BeneficiaryService {
     }
 
     public Beneficiary getBeneficiaryById(Long id) {
-        Beneficiary beneficiary = beneficiaryRepository.findById(id).orElse(null);
-        System.out.println(beneficiary);
-        return beneficiary;
+        return beneficiaryRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Beneficiary not found with ID: " + id));
     }
 
     public Beneficiary saveBeneficiary(Beneficiary beneficiary) {
