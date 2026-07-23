@@ -38,7 +38,7 @@ public class FinanceApprovalService {
         approval.setApprovalDate(LocalDate.now());
         approval.setRemarks("Waiting for Finance Approval");
 
-        application.setApplicationStatus("Finance Approval Pending");
+        application.setStatus("Finance Approval Pending");
         applicationRepository.save(application);
 
         return financeApprovalRepository.save(approval);
@@ -68,7 +68,7 @@ public class FinanceApprovalService {
         Application application = approval.getApplication();
 
         // Final status after finance approval
-        application.setApplicationStatus("Approved");
+        application.setStatus("Approved");
 
         applicationRepository.save(application);
 
@@ -86,7 +86,7 @@ public class FinanceApprovalService {
 
         Application application = approval.getApplication();
 
-        application.setApplicationStatus("Rejected");
+        application.setStatus("Rejected");
 
         applicationRepository.save(application);
 

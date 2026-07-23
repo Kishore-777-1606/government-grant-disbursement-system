@@ -39,14 +39,14 @@ public class VerificationService {
         verification.setVerificationDate(LocalDate.now());
 
 
-        int score = application.getEligibilityScore();
+        double score = application.getEligibilityScore();
 
 
         // Eligibility Based Routing
 
         if (score < 60) {
 
-            application.setApplicationStatus("Rejected");
+           application.setStatus("Rejected");
 
             verification.setVerifiedBy("System");
             verification.setVerificationStatus("Rejected");
@@ -58,7 +58,7 @@ public class VerificationService {
         } else if (score >= 60 && score < 80) {
 
 
-            application.setApplicationStatus(
+           application.setStatus(
                     "Field Verification Pending"
             );
 
@@ -72,7 +72,7 @@ public class VerificationService {
         } else {
 
 
-            application.setApplicationStatus(
+           application.setStatus(
                     "District Verification Pending"
             );
 
@@ -126,7 +126,7 @@ public class VerificationService {
                 .equalsIgnoreCase("Field Officer")) {
 
 
-            application.setApplicationStatus(
+           application.setStatus(
                     "District Verification Pending"
             );
 
@@ -153,7 +153,7 @@ public class VerificationService {
                 .equalsIgnoreCase("District Officer")) {
 
 
-            application.setApplicationStatus(
+           application.setStatus(
                     "Finance Approval Pending"
             );
 
@@ -232,7 +232,7 @@ public class VerificationService {
                 verification.getApplication();
 
 
-        application.setApplicationStatus(
+       application.setStatus(
                 "Rejected"
         );
 
@@ -277,7 +277,7 @@ public class VerificationService {
                 verification.getApplication();
 
 
-        application.setApplicationStatus(
+       application.setStatus(
                 "Re-Verification Pending"
         );
 
