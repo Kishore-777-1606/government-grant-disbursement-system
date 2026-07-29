@@ -1,0 +1,51 @@
+{
+  "authentication": {
+    "login": {
+      "endpoint": "POST /api/v1/auth/login",
+      "description": "Authenticate user and generate JWT token.",
+      "request": {
+        "username": "admin",
+        "password": "password123"
+      },
+      "response": {
+        "success": true,
+        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+      }
+    }
+  },
+
+  "beneficiary": {
+    "registerBeneficiary": {
+      "endpoint": "POST /api/v1/beneficiaries",
+      "description": "Register a new beneficiary.",
+      "request": {
+        "fullName": "Ramesh Kumar",
+        "aadhaarNumber": "123456789012",
+        "mobileNumber": "9876543210",
+        "annualIncome": 180000,
+        "schemeId": 101
+      },
+      "response": {
+        "success": true,
+        "message": "Beneficiary registered successfully.",
+        "beneficiaryId": 1001
+      }
+    }
+  },
+
+  "scheme": {
+    "createScheme": {
+      "endpoint": "POST /api/v1/schemes",
+      "description": "Create a new government scheme.",
+      "request": {
+        "schemeName": "Farmer Support Scheme",
+        "maximumAmount": 50000,
+        "eligibility": "Annual income below ₹2,50,000"
+      },
+      "response": {
+        "success": true,
+        "message": "Scheme created successfully."
+      }
+    }
+  }
+}
