@@ -1,0 +1,4 @@
+com\infosys\grantdisbursementsystem\controller\HomeController.class
+com\infosys\grantdisbursementsystem\config\CorsConfig.class
+com\infosys\grantdisbursementsystem\GovernmentGrantDisbursementSystemApplication.class
+com\infosys\grantdisbursementsystem\config\CorsConfig$1.class
