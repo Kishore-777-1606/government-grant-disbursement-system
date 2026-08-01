@@ -8,16 +8,25 @@ import com.infosys.grantdisbursementsystem.repository.ApplicationRepository;
 import com.infosys.grantdisbursementsystem.service.DisbursementPlanService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import com.infosys.grantdisbursementsystem.repository.DisbursementInstallmentRepository;
+import java.util.List;
+import com.infosys.grantdisbursementsystem.repository.DisbursementPlanRepository;
 
 @RestController
 @RequestMapping("/disbursement-plans")
 public class DisbursementPlanController {
 
     @Autowired
+    private DisbursementPlanRepository planRepository;
+
+    @Autowired
     private DisbursementPlanService planService;
 
     @Autowired
     private ApplicationRepository applicationRepository;
+
+    @Autowired
+    private DisbursementInstallmentRepository installmentRepository;
 
     @PostMapping
     public DisbursementPlan createPlan(@RequestBody CreatePlanRequest request) {
@@ -37,5 +46,17 @@ public class DisbursementPlanController {
             @PathVariable Long installmentId) {
 
         return planService.releaseInstallmentIfMilestoneComplete(installmentId);
+    }
+
+    @GetMapping("/{planId}/installments")
+    public List<DisbursementInstallment> getInstallments(@PathVariable Long planId) {
+        return installmentRepository.findByDisbursementPlanPlanId(planId);
+    }
+
+    @GetMapping("/{id}")
+    public DisbursementPlan getPlan(@PathVariable Long id) {
+
+        return planRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Plan not found"));
     }
 }
