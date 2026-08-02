@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Service
 public class ComplianceMilestoneService {
@@ -36,5 +37,17 @@ public class ComplianceMilestoneService {
         milestone.setDueDate(LocalDate.now().plusDays(daysToAdd));
 
         return milestoneRepository.save(milestone);
+    }
+
+    public void flagOverdueMilestones() {
+        List<ComplianceMilestone> pending = milestoneRepository.findByStatus("Pending");
+
+        for (ComplianceMilestone milestone : pending) {
+            if (milestone.getDueDate().isBefore(LocalDate.now())) {
+                milestone.setStatus("Overdue");
+                milestone.setRemarks("Milestone missed deadline — flagged for review");
+                milestoneRepository.save(milestone);
+            }
+        }
     }
 }
