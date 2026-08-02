@@ -13,7 +13,8 @@ public class DisbursementPlanService {
 
     @Autowired private DisbursementPlanRepository planRepository;
     @Autowired private DisbursementInstallmentRepository installmentRepository;
-    @Autowired private ComplianceMilestoneRepository milestoneRepository; // Ravi's repository
+    @Autowired private ComplianceMilestoneRepository milestoneRepository;
+   @Autowired private ApplicationRepository applicationRepository;
 
     // Creates a plan AND its installments AND a linked milestone for each installment
     public DisbursementPlan createPlan(Application application, Double totalAmount, Integer numInstallments) {
@@ -59,6 +60,8 @@ public class DisbursementPlanService {
             installment.setStatus("Scheduled");
             installmentRepository.save(installment);
         }
+        application.setStatus("Disbursement In Progress");
+applicationRepository.save(application);
 
         return plan;
     }
