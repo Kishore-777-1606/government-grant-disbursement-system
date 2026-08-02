@@ -1,6 +1,6 @@
 import React from "react";
 
-import Navbar from "../../components/Navbar";
+import MainLayout from "../../layouts/MainLayout";
 import DashboardCards from "../../components/DashboardCards";
 
 import FundBarChart from "../../components/FundBarChart";
@@ -11,16 +11,9 @@ import BudgetExhaustionChart from "../../components/BudgetExhaustionChart";
 import PendingMilestones from "../../components/PendingMilestones";
 import RecentActivities from "../../components/RecentActivities";
 
-function Analytics() {
+  function Analytics() {
   return (
-    <div
-      style={{
-        background: "#f4f6f9",
-        minHeight: "100vh",
-      }}
-    >
-      <Navbar />
-
+    <MainLayout>
       <h1
         style={{
           textAlign: "center",
@@ -88,7 +81,7 @@ function Analytics() {
       <PendingMilestones />
 
       <RecentActivities />
-    </div>
+    </MainLayout>
   );
 }
 
