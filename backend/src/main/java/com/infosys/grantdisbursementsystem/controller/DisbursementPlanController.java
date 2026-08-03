@@ -1,5 +1,6 @@
 package com.infosys.grantdisbursementsystem.controller;
 
+
 import com.infosys.grantdisbursementsystem.dto.CreatePlanRequest;
 import com.infosys.grantdisbursementsystem.entity.Application;
 import com.infosys.grantdisbursementsystem.entity.DisbursementInstallment;
@@ -11,9 +12,10 @@ import org.springframework.web.bind.annotation.*;
 import com.infosys.grantdisbursementsystem.repository.DisbursementInstallmentRepository;
 import java.util.List;
 import com.infosys.grantdisbursementsystem.repository.DisbursementPlanRepository;
+import com.infosys.grantdisbursementsystem.exception.ResourceNotFoundException;
 
 @RestController
-@RequestMapping("/disbursement-plans")
+@RequestMapping("/api/disbursement-plans")
 public class DisbursementPlanController {
 
     @Autowired
@@ -32,7 +34,7 @@ public class DisbursementPlanController {
     public DisbursementPlan createPlan(@RequestBody CreatePlanRequest request) {
 
         Application application = applicationRepository.findById(request.getApplicationId())
-                .orElseThrow(() -> new RuntimeException("Application not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Application not found"));
 
         return planService.createPlan(
                 application,
@@ -57,6 +59,6 @@ public class DisbursementPlanController {
     public DisbursementPlan getPlan(@PathVariable Long id) {
 
         return planRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Plan not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Plan not found"));
     }
 }
