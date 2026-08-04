@@ -1,27 +1,67 @@
 import React from "react";
 import { recentActivities } from "../data/dashboardData";
 
+import {
+  Paper,
+  Typography,
+  List,
+  ListItem,
+  ListItemAvatar,
+  Avatar,
+  ListItemText,
+  Divider,
+} from "@mui/material";
+
+import {
+  CheckCircle,
+  Notifications,
+} from "@mui/icons-material";
+
 function RecentActivities() {
   return (
-    <div
-      style={{
-        background: "white",
-        margin: "20px",
-        padding: "20px",
-        borderRadius: "10px",
-        boxShadow: "0 2px 5px rgba(0,0,0,0.2)",
+    <Paper
+      elevation={4}
+      sx={{
+        p: 3,
+        mt: 4,
+        borderRadius: 3,
       }}
     >
-      <h2>📝 Recent Activities</h2>
+      <Typography
+        variant="h5"
+        fontWeight="bold"
+        mb={3}
+      >
+        📝 Recent Activities
+      </Typography>
 
-      <ul style={{ lineHeight: "2" }}>
-        {recentActivities.map((activity) => (
-          <li key={activity.id}>
-            {activity.activity}
-          </li>
+      <List>
+        {recentActivities.map((activity, index) => (
+          <React.Fragment key={activity.id}>
+            <ListItem>
+              <ListItemAvatar>
+                <Avatar
+                  sx={{
+                    bgcolor: "#1976d2",
+                  }}
+                >
+                  <CheckCircle />
+                </Avatar>
+              </ListItemAvatar>
+
+              <ListItemText
+                primary={activity.activity}
+                secondary="Recently Updated"
+              />
+            </ListItem>
+
+            {index !== recentActivities.length - 1 && (
+              <Divider />
+            )}
+          </React.Fragment>
         ))}
-      </ul>
-    </div>
+      </List>
+    </Paper>
   );
 }
 

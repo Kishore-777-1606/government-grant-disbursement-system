@@ -13,97 +13,138 @@ import PendingMilestones from "../../components/PendingMilestones";
 import RecentActivities from "../../components/RecentActivities";
 
 function Analytics() {
+  const cardStyle = {
+    background: "#fff",
+    padding: "20px",
+    borderRadius: "12px",
+    boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+    transition: "0.3s ease",
+    cursor: "pointer",
+  };
+
   return (
     <MainLayout>
-      <h1
-        style={{
-          textAlign: "center",
-          margin: "25px",
-          color: "#1976d2",
-        }}
-      >
-        Analytics Dashboard
-      </h1>
-
-      <DashboardCards />
-
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(450px, 1fr))",
-          gap: "20px",
-          padding: "20px",
-        }}
-      >
-        {/* Scheme-wise Fund Utilization */}
+      <div style={{ padding: "20px" }}>
+        {/* Header */}
         <div
           style={{
-            background: "#fff",
-            padding: "20px",
-            borderRadius: "12px",
-            boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+            textAlign: "center",
+            marginBottom: "30px",
           }}
         >
-          <h2>Scheme-wise Fund Utilization</h2>
-          <FundBarChart />
+          <h1
+            style={{
+              color: "#1976d2",
+              marginBottom: "10px",
+            }}
+          >
+            Analytics Dashboard
+          </h1>
+
+          <p
+            style={{
+              color: "#666",
+              fontSize: "16px",
+            }}
+          >
+            Monitor government grant allocation, beneficiary progress,
+            fund utilization and approval workflow.
+          </p>
         </div>
 
-        {/* Region-wise Fund Utilization */}
+        <DashboardCards />
+
         <div
           style={{
-            background: "#fff",
-            padding: "20px",
-            borderRadius: "12px",
-            boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit,minmax(450px,1fr))",
+            gap: "20px",
+            marginTop: "30px",
           }}
         >
-          <h2>Region-wise Fund Utilization</h2>
-          <RegionBarChart />
+          <div
+            style={cardStyle}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = "translateY(-5px)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = "translateY(0px)";
+            }}
+          >
+            <h2>Scheme-wise Fund Utilization</h2>
+            <FundBarChart />
+          </div>
+
+          <div
+            style={cardStyle}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = "translateY(-5px)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = "translateY(0px)";
+            }}
+          >
+            <h2>Region-wise Fund Utilization</h2>
+            <RegionBarChart />
+          </div>
+
+          <div
+            style={cardStyle}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = "translateY(-5px)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = "translateY(0px)";
+            }}
+          >
+            <h2>Category-wise Distribution</h2>
+            <CategoryPieChart />
+          </div>
+
+          <div
+            style={cardStyle}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = "translateY(-5px)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = "translateY(0px)";
+            }}
+          >
+            <h2>Budget Allocation vs Disbursement</h2>
+            <BudgetExhaustionChart />
+          </div>
+
+          <div
+            style={cardStyle}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = "translateY(-5px)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = "translateY(0px)";
+            }}
+          >
+            <h2>Approval Turnaround Time</h2>
+            <ApprovalTurnaroundChart />
+          </div>
         </div>
 
-        {/* Category-wise Distribution */}
-        <div
-          style={{
-            background: "#fff",
-            padding: "20px",
-            borderRadius: "12px",
-            boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-          }}
-        >
-          <h2>Category-wise Distribution</h2>
-          <CategoryPieChart />
-        </div>
+        <PendingMilestones />
 
-        {/* Budget Exhaustion */}
-        <div
-          style={{
-            background: "#fff",
-            padding: "20px",
-            borderRadius: "12px",
-            boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-          }}
-        >
-          <h2>Budget Exhaustion</h2>
-          <BudgetExhaustionChart />
-        </div>
+        <RecentActivities />
 
-        {/* Approval Turnaround Time */}
+        {/* Footer */}
         <div
           style={{
-            background: "#fff",
+            textAlign: "center",
+            marginTop: "40px",
             padding: "20px",
-            borderRadius: "12px",
-            boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+            color: "#777",
+            borderTop: "1px solid #ddd",
           }}
         >
-          <h2>Approval Turnaround Time</h2>
-          <ApprovalTurnaroundChart />
+          © 2026 Government Grant Disbursement Tracking System
         </div>
       </div>
-
-      <PendingMilestones />
-
-      <RecentActivities />
     </MainLayout>
   );
 }

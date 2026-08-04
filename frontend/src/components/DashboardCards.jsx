@@ -1,46 +1,100 @@
 import React from "react";
+import { Card, CardContent, Grid, Typography, Avatar } from "@mui/material";
+import {
+  People,
+  AccountBalance,
+  CurrencyRupee,
+  PendingActions,
+} from "@mui/icons-material";
+
 import { summaryData } from "../data/dashboardData";
 
 function DashboardCards() {
-  const cardStyle = {
-    background: "white",
-    padding: "20px",
-    borderRadius: "10px",
-    width: "230px",
-    textAlign: "center",
-    boxShadow: "0px 2px 6px rgba(0,0,0,0.2)",
-  };
+  const cards = [
+    {
+      title: "Total Beneficiaries",
+      value: summaryData.totalBeneficiaries,
+      description: "Registered beneficiaries",
+      icon: <People />,
+      color: "#1976d2",
+    },
+    {
+      title: "Total Schemes",
+      value: summaryData.totalSchemes,
+      description: "Active government schemes",
+      icon: <AccountBalance />,
+      color: "#2e7d32",
+    },
+    {
+      title: "Funds Released",
+      value: summaryData.fundsReleased,
+      description: "Total amount disbursed",
+      icon: <CurrencyRupee />,
+      color: "#ef6c00",
+    },
+    {
+      title: "Pending Milestones",
+      value: summaryData.pendingMilestones,
+      description: "Awaiting approval",
+      icon: <PendingActions />,
+      color: "#d32f2f",
+    },
+  ];
 
   return (
-    <div
-      style={{
-        display: "flex",
-        justifyContent: "space-around",
-        flexWrap: "wrap",
-        margin: "30px",
-        gap: "20px",
-      }}
-    >
-      <div style={cardStyle}>
-        <h3>Total Beneficiaries</h3>
-        <h2>{summaryData.totalBeneficiaries}</h2>
-      </div>
+    <Grid container spacing={3}>
+      {cards.map((card) => (
+        <Grid item xs={12} sm={6} md={3} key={card.title}>
+          <Card
+            sx={{
+              borderRadius: 3,
+              boxShadow: 4,
+              transition: "0.3s",
+              "&:hover": {
+                transform: "translateY(-6px)",
+                boxShadow: 8,
+              },
+            }}
+          >
+            <CardContent>
+              <Avatar
+                sx={{
+                  bgcolor: card.color,
+                  width: 55,
+                  height: 55,
+                  mb: 2,
+                }}
+              >
+                {card.icon}
+              </Avatar>
 
-      <div style={cardStyle}>
-        <h3>Total Schemes</h3>
-        <h2>{summaryData.totalSchemes}</h2>
-      </div>
+              <Typography
+                variant="subtitle2"
+                color="text.secondary"
+              >
+                {card.title}
+              </Typography>
 
-      <div style={cardStyle}>
-        <h3>Funds Released</h3>
-        <h2>{summaryData.fundsReleased}</h2>
-      </div>
+              <Typography
+                variant="h4"
+                fontWeight="bold"
+                sx={{ mt: 1 }}
+              >
+                {card.value}
+              </Typography>
 
-      <div style={cardStyle}>
-        <h3>Pending Milestones</h3>
-        <h2>{summaryData.pendingMilestones}</h2>
-      </div>
-    </div>
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{ mt: 1 }}
+              >
+                {card.description}
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+      ))}
+    </Grid>
   );
 }
 

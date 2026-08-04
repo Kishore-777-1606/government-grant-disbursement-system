@@ -1,67 +1,97 @@
 import React from "react";
 import { pendingMilestones } from "../data/dashboardData";
 
+import {
+  Paper,
+  Typography,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Chip,
+} from "@mui/material";
+
 function PendingMilestones() {
   return (
-    <div
-      style={{
-        background: "white",
-        margin: "20px",
-        padding: "20px",
-        borderRadius: "10px",
-        boxShadow: "0 2px 5px rgba(0,0,0,0.2)",
+    <Paper
+      elevation={4}
+      sx={{
+        p: 3,
+        mt: 4,
+        borderRadius: 3,
       }}
     >
-      <h2>📋 Pending Milestones</h2>
-
-      <table
-        style={{
-          width: "100%",
-          borderCollapse: "collapse",
-        }}
+      <Typography
+        variant="h5"
+        fontWeight="bold"
+        mb={3}
       >
-        <thead>
-          <tr style={{ background: "#1976d2", color: "white" }}>
-            <th style={{ padding: "10px" }}>Beneficiary</th>
-            <th style={{ padding: "10px" }}>Scheme</th>
-            <th style={{ padding: "10px" }}>Due Date</th>
-            <th style={{ padding: "10px" }}>Status</th>
-          </tr>
-        </thead>
+        📋 Pending Milestones
+      </Typography>
 
-        <tbody>
-          {pendingMilestones.map((item) => (
-            <tr key={item.id}>
-              <td style={{ padding: "10px", textAlign: "center" }}>
-                {item.beneficiary}
-              </td>
+      <TableContainer>
+        <Table>
 
-              <td style={{ padding: "10px", textAlign: "center" }}>
-                {item.scheme}
-              </td>
+          <TableHead>
+            <TableRow
+              sx={{
+                backgroundColor: "#1976d2",
+              }}
+            >
+              <TableCell sx={{ color: "white", fontWeight: "bold" }}>
+                Beneficiary
+              </TableCell>
 
-              <td style={{ padding: "10px", textAlign: "center" }}>
-                {item.dueDate}
-              </td>
+              <TableCell sx={{ color: "white", fontWeight: "bold" }}>
+                Scheme
+              </TableCell>
 
-              <td
-                style={{
-                  padding: "10px",
-                  textAlign: "center",
-                  color:
-                    item.status === "Completed"
-                      ? "green"
-                      : "red",
-                  fontWeight: "bold",
+              <TableCell sx={{ color: "white", fontWeight: "bold" }}>
+                Due Date
+              </TableCell>
+
+              <TableCell sx={{ color: "white", fontWeight: "bold" }}>
+                Status
+              </TableCell>
+            </TableRow>
+          </TableHead>
+
+          <TableBody>
+            {pendingMilestones.map((item, index) => (
+              <TableRow
+                key={item.id}
+                hover
+                sx={{
+                  backgroundColor:
+                    index % 2 === 0 ? "#fafafa" : "#ffffff",
                 }}
               >
-                {item.status}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+                <TableCell>{item.beneficiary}</TableCell>
+
+                <TableCell>{item.scheme}</TableCell>
+
+                <TableCell>{item.dueDate}</TableCell>
+
+                <TableCell>
+                  <Chip
+                    label={item.status}
+                    color={
+                      item.status === "Completed"
+                        ? "success"
+                        : "warning"
+                    }
+                    variant="filled"
+                  />
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+
+        </Table>
+      </TableContainer>
+    </Paper>
   );
 }
 
