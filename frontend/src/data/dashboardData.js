@@ -72,12 +72,24 @@ export const categoryData = [
 
 export const budgetData = [
   {
-    name: "Allocated",
-    amount: 1550000,
+    scheme: "Education",
+    allocated: 500000,
+    disbursed: 320000,
   },
   {
-    name: "Disbursed",
-    amount: 1310000,
+    scheme: "Farmer Support",
+    allocated: 300000,
+    disbursed: 280000,
+  },
+  {
+    scheme: "Women Welfare",
+    allocated: 450000,
+    disbursed: 390000,
+  },
+  {
+    scheme: "Solar Pump",
+    allocated: 650000,
+    disbursed: 520000,
   },
 ];
 
