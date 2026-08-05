@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 import MainLayout from "../../layouts/MainLayout";
 import DashboardCards from "../../components/DashboardCards";
@@ -12,7 +12,19 @@ import ApprovalTurnaroundChart from "../../components/ApprovalTurnaroundChart";
 import PendingMilestones from "../../components/PendingMilestones";
 import RecentActivities from "../../components/RecentActivities";
 
+import Loading from "../../components/Loading";
+
 function Analytics() {
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
   const cardStyle = {
     background: "#fff",
     padding: "20px",
@@ -21,6 +33,14 @@ function Analytics() {
     transition: "0.3s ease",
     cursor: "pointer",
   };
+
+  if (loading) {
+    return (
+      <MainLayout>
+        <Loading />
+      </MainLayout>
+    );
+  }
 
   return (
     <MainLayout>
@@ -57,11 +77,12 @@ function Analytics() {
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit,minmax(450px,1fr))",
+            gridTemplateColumns: "repeat(auto-fit, minmax(450px, 1fr))",
             gap: "20px",
             marginTop: "30px",
           }}
         >
+          {/* Scheme-wise Fund Utilization */}
           <div
             style={cardStyle}
             onMouseEnter={(e) => {
@@ -75,6 +96,7 @@ function Analytics() {
             <FundBarChart />
           </div>
 
+          {/* Region-wise Fund Utilization */}
           <div
             style={cardStyle}
             onMouseEnter={(e) => {
@@ -88,6 +110,7 @@ function Analytics() {
             <RegionBarChart />
           </div>
 
+          {/* Category-wise Distribution */}
           <div
             style={cardStyle}
             onMouseEnter={(e) => {
@@ -101,6 +124,7 @@ function Analytics() {
             <CategoryPieChart />
           </div>
 
+          {/* Budget Allocation vs Disbursement */}
           <div
             style={cardStyle}
             onMouseEnter={(e) => {
@@ -114,6 +138,7 @@ function Analytics() {
             <BudgetExhaustionChart />
           </div>
 
+          {/* Approval Turnaround Time */}
           <div
             style={cardStyle}
             onMouseEnter={(e) => {

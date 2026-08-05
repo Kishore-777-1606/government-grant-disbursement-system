@@ -1,5 +1,6 @@
 import React from "react";
 import { pendingMilestones } from "../data/dashboardData";
+import NoData from "./NoData";
 
 import {
   Paper,
@@ -14,6 +15,12 @@ import {
 } from "@mui/material";
 
 function PendingMilestones() {
+
+  // Show No Data component if there are no milestones
+  if (pendingMilestones.length === 0) {
+    return <NoData />;
+  }
+
   return (
     <Paper
       elevation={4}
@@ -33,7 +40,6 @@ function PendingMilestones() {
 
       <TableContainer>
         <Table>
-
           <TableHead>
             <TableRow
               sx={{
@@ -69,9 +75,7 @@ function PendingMilestones() {
                 }}
               >
                 <TableCell>{item.beneficiary}</TableCell>
-
                 <TableCell>{item.scheme}</TableCell>
-
                 <TableCell>{item.dueDate}</TableCell>
 
                 <TableCell>
@@ -82,13 +86,11 @@ function PendingMilestones() {
                         ? "success"
                         : "warning"
                     }
-                    variant="filled"
                   />
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
-
         </Table>
       </TableContainer>
     </Paper>

@@ -1,5 +1,6 @@
 import React from "react";
 import { recentActivities } from "../data/dashboardData";
+import NoData from "./NoData";
 
 import {
   Paper,
@@ -18,6 +19,12 @@ import {
 } from "@mui/icons-material";
 
 function RecentActivities() {
+
+  // Show No Data component if there are no activities
+  if (recentActivities.length === 0) {
+    return <NoData />;
+  }
+
   return (
     <Paper
       elevation={4}
