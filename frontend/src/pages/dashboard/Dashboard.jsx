@@ -65,7 +65,6 @@ function Dashboard() {
   return (
     <MainLayout>
       <Box>
-
         {/* Welcome Banner */}
         <Paper
           elevation={0}
@@ -206,7 +205,6 @@ function Dashboard() {
             </Table>
           </TableContainer>
         </Paper>
-
       </Box>
     </MainLayout>
   );
