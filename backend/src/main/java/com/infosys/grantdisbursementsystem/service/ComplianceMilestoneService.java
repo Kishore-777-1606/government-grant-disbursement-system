@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -49,5 +50,21 @@ public class ComplianceMilestoneService {
                 milestoneRepository.save(milestone);
             }
         }
+    }
+
+    public List<ComplianceMilestone> getUpcomingReminders() {
+
+        List<ComplianceMilestone> pending = milestoneRepository.findByStatus("Pending");
+        List<ComplianceMilestone> reminders = new ArrayList<>();
+
+        for (ComplianceMilestone milestone : pending) {
+            long daysLeft = LocalDate.now().until(milestone.getDueDate()).getDays();
+
+            if (daysLeft <= 3 && daysLeft >= 0) {
+                reminders.add(milestone);
+            }
+        }
+
+        return reminders;
     }
 }
