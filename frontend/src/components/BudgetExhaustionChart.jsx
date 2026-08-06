@@ -1,47 +1,103 @@
-import React from "react";
-import { budgetData } from "../data/dashboardData";
 
 import {
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  CartesianGrid,
-  Legend,
+
+BarChart,
+
+Bar,
+
+XAxis,
+
+YAxis,
+
+Tooltip,
+
+ResponsiveContainer
+
 } from "recharts";
 
-function BudgetExhaustionChart() {
-  return (
-    <ResponsiveContainer width="100%" height={350}>
-      <BarChart data={budgetData}>
-        <CartesianGrid strokeDasharray="3 3" />
 
-        <XAxis dataKey="scheme" />
 
-        <YAxis />
+function BudgetExhaustionChart(){
 
-        <Tooltip />
 
-        <Legend />
 
-        <Bar
-          dataKey="allocated"
-          fill="#1976d2"
-          name="Allocated"
-          radius={[5, 5, 0, 0]}
-        />
+const data=[
 
-        <Bar
-          dataKey="disbursed"
-          fill="#9c27b0"
-          name="Disbursed"
-          radius={[5, 5, 0, 0]}
-        />
-      </BarChart>
-    </ResponsiveContainer>
-  );
+
+{
+
+name:"Education Grant",
+
+utilizationPercentage:40
+
+},
+
+
+{
+
+name:"Farmer Support",
+
+utilizationPercentage:100
+
 }
+
+
+];
+
+
+
+return(
+
+
+<ResponsiveContainer
+
+width="100%"
+
+height={300}
+
+>
+
+
+<BarChart data={data}>
+
+
+<XAxis dataKey="name"/>
+
+
+<YAxis domain={[0,100]}/>
+
+
+<Tooltip/>
+
+
+<Bar
+
+
+dataKey="utilizationPercentage"
+
+fill="#1976d2"
+
+name="Utilization %"
+
+radius={[8,8,0,0]}
+
+animationDuration={1200}
+
+
+/>
+
+
+</BarChart>
+
+
+</ResponsiveContainer>
+
+
+);
+
+
+}
+
+
 
 export default BudgetExhaustionChart;

@@ -1,75 +1,209 @@
-import React from "react";
-import { recentActivities } from "../data/dashboardData";
-import NoData from "./NoData";
+import React, { useEffect, useState } from "react";
 
 import {
   Paper,
   Typography,
   List,
   ListItem,
-  ListItemAvatar,
-  Avatar,
   ListItemText,
   Divider,
 } from "@mui/material";
 
+
 import {
-  CheckCircle,
-  Notifications,
-} from "@mui/icons-material";
+  getRecentActivities,
+} from "../api/analyticsApi";
+
+
 
 function RecentActivities() {
 
-  // Show No Data component if there are no activities
-  if (recentActivities.length === 0) {
-    return <NoData />;
-  }
 
-  return (
-    <Paper
-      elevation={4}
-      sx={{
-        p: 3,
-        mt: 4,
-        borderRadius: 3,
-      }}
-    >
-      <Typography
-        variant="h5"
-        fontWeight="bold"
-        mb={3}
-      >
-        📝 Recent Activities
-      </Typography>
+const [activities,setActivities] = useState([]);
 
-      <List>
-        {recentActivities.map((activity, index) => (
-          <React.Fragment key={activity.id}>
-            <ListItem>
-              <ListItemAvatar>
-                <Avatar
-                  sx={{
-                    bgcolor: "#1976d2",
-                  }}
-                >
-                  <CheckCircle />
-                </Avatar>
-              </ListItemAvatar>
 
-              <ListItemText
-                primary={activity.activity}
-                secondary="Recently Updated"
-              />
-            </ListItem>
 
-            {index !== recentActivities.length - 1 && (
-              <Divider />
-            )}
-          </React.Fragment>
-        ))}
-      </List>
-    </Paper>
-  );
+
+useEffect(()=>{
+
+
+getRecentActivities()
+
+.then((res)=>{
+
+
+console.log(
+"Activities:",
+res.data
+);
+
+
+setActivities(
+res.data || []
+);
+
+
+})
+
+
+.catch((err)=>{
+
+
+console.log(
+"Activities Error:",
+err
+);
+
+
+setActivities([]);
+
+
+});
+
+
+},[]);
+
+
+
+
+
+
+return (
+
+
+<Paper
+
+sx={{
+
+p:3,
+
+borderRadius:5,
+
+height:450,
+
+overflow:"auto"
+
+}}
+
+>
+
+
+
+{
+
+activities.length === 0 ?
+
+
+<Typography
+
+sx={{
+
+mt:10,
+
+textAlign:"center",
+
+color:"text.secondary"
+
+}}
+
+>
+
+📝 No recent activities found
+
+</Typography>
+
+
+
+:
+
+
+<List>
+
+
+{
+
+activities.map((item,index)=>(
+
+
+<React.Fragment key={index}>
+
+
+<ListItem
+
+sx={{
+
+borderRadius:3,
+
+mb:1,
+
+background:"#f8f9ff"
+
+}}
+
+>
+
+
+<ListItemText
+
+
+primary={
+
+item.message ||
+
+item.activity ||
+
+item.description ||
+
+"No activity"
+
 }
+
+
+secondary={
+
+item.date ||
+
+item.createdDate ||
+
+""
+
+}
+
+
+/>
+
+
+</ListItem>
+
+
+<Divider/>
+
+
+</React.Fragment>
+
+
+))
+
+
+}
+
+
+
+</List>
+
+
+
+}
+
+
+
+</Paper>
+
+
+);
+
+
+}
+
 
 export default RecentActivities;

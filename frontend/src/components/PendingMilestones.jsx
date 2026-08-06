@@ -1,100 +1,105 @@
-import React from "react";
-import { pendingMilestones } from "../data/dashboardData";
-import NoData from "./NoData";
-
+import { useEffect, useState } from "react";
 import {
-  Paper,
-  Typography,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Chip,
+  Card,
+  CardContent,
+  Grid,
+  Typography
 } from "@mui/material";
+
+import { getMilestoneSummary } from "../api/analyticsApi";
+
 
 function PendingMilestones() {
 
-  // Show No Data component if there are no milestones
-  if (pendingMilestones.length === 0) {
-    return <NoData />;
-  }
+  const [data, setData] = useState({
+    totalMilestones: 0,
+    pendingMilestones: 0,
+    completedMilestones: 0,
+    overdueMilestones: 0
+  });
+
+
+  useEffect(() => {
+
+    getMilestoneSummary()
+      .then((response) => {
+        setData(response.data);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+
+  }, []);
+
 
   return (
-    <Paper
-      elevation={4}
-      sx={{
-        p: 3,
-        mt: 4,
-        borderRadius: 3,
-      }}
-    >
-      <Typography
-        variant="h5"
-        fontWeight="bold"
-        mb={3}
-      >
-        📋 Pending Milestones
-      </Typography>
 
-      <TableContainer>
-        <Table>
-          <TableHead>
-            <TableRow
-              sx={{
-                backgroundColor: "#1976d2",
-              }}
-            >
-              <TableCell sx={{ color: "white", fontWeight: "bold" }}>
-                Beneficiary
-              </TableCell>
+    <Grid container spacing={2}>
 
-              <TableCell sx={{ color: "white", fontWeight: "bold" }}>
-                Scheme
-              </TableCell>
+      <Grid item xs={12} md={3}>
+        <Card>
+          <CardContent>
+            <Typography>
+              Total Milestones
+            </Typography>
 
-              <TableCell sx={{ color: "white", fontWeight: "bold" }}>
-                Due Date
-              </TableCell>
+            <Typography variant="h5">
+              {data.totalMilestones}
+            </Typography>
+          </CardContent>
+        </Card>
+      </Grid>
 
-              <TableCell sx={{ color: "white", fontWeight: "bold" }}>
-                Status
-              </TableCell>
-            </TableRow>
-          </TableHead>
 
-          <TableBody>
-            {pendingMilestones.map((item, index) => (
-              <TableRow
-                key={item.id}
-                hover
-                sx={{
-                  backgroundColor:
-                    index % 2 === 0 ? "#fafafa" : "#ffffff",
-                }}
-              >
-                <TableCell>{item.beneficiary}</TableCell>
-                <TableCell>{item.scheme}</TableCell>
-                <TableCell>{item.dueDate}</TableCell>
+      <Grid item xs={12} md={3}>
+        <Card>
+          <CardContent>
+            <Typography>
+              Pending
+            </Typography>
 
-                <TableCell>
-                  <Chip
-                    label={item.status}
-                    color={
-                      item.status === "Completed"
-                        ? "success"
-                        : "warning"
-                    }
-                  />
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    </Paper>
+            <Typography variant="h5">
+              {data.pendingMilestones}
+            </Typography>
+          </CardContent>
+        </Card>
+      </Grid>
+
+
+      <Grid item xs={12} md={3}>
+        <Card>
+          <CardContent>
+            <Typography>
+              Completed
+            </Typography>
+
+            <Typography variant="h5">
+              {data.completedMilestones}
+            </Typography>
+          </CardContent>
+        </Card>
+      </Grid>
+
+
+      <Grid item xs={12} md={3}>
+        <Card>
+          <CardContent>
+            <Typography>
+              Overdue
+            </Typography>
+
+            <Typography variant="h5">
+              {data.overdueMilestones}
+            </Typography>
+          </CardContent>
+        </Card>
+      </Grid>
+
+    </Grid>
+
   );
+
 }
+
 
 export default PendingMilestones;

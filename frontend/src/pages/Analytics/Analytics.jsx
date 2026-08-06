@@ -1,177 +1,472 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+
+import {
+  Grid,
+  Typography,
+  Button,
+  Box,
+  CircularProgress,
+} from "@mui/material";
+
+import RefreshIcon from "@mui/icons-material/Refresh";
+
+import {
+  People,
+  AccountBalance,
+  Assignment,
+  PendingActions,
+} from "@mui/icons-material";
+
 
 import MainLayout from "../../layouts/MainLayout";
-import DashboardCards from "../../components/DashboardCards";
+
+import AnimatedDashboardCard from "../../components/AnimatedDashboardCard";
+import ChartCard from "../../components/ChartCard";
 
 import FundBarChart from "../../components/FundBarChart";
-import RegionBarChart from "../../components/RegionBarChart";
+import RegionPieChart from "../../components/RegionPieChart";
 import CategoryPieChart from "../../components/CategoryPieChart";
 import BudgetExhaustionChart from "../../components/BudgetExhaustionChart";
 import ApprovalTurnaroundChart from "../../components/ApprovalTurnaroundChart";
-
-import PendingMilestones from "../../components/PendingMilestones";
 import RecentActivities from "../../components/RecentActivities";
 
-import Loading from "../../components/Loading";
+
+import {
+  getDashboardSummary,
+  getFundUtilization,
+  getRegionUtilization,
+  getCategoryDistribution,
+  getBudgetExhaustion,
+} from "../../api/analyticsApi";
+
+
 
 function Analytics() {
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 1000);
 
-    return () => clearTimeout(timer);
-  }, []);
+const [loading,setLoading] = useState(false);
 
-  const cardStyle = {
-    background: "#fff",
-    padding: "20px",
-    borderRadius: "12px",
-    boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-    transition: "0.3s ease",
-    cursor: "pointer",
-  };
 
-  if (loading) {
-    return (
-      <MainLayout>
-        <Loading />
-      </MainLayout>
-    );
-  }
 
-  return (
-    <MainLayout>
-      <div style={{ padding: "20px" }}>
-        {/* Header */}
-        <div
-          style={{
-            textAlign: "center",
-            marginBottom: "30px",
-          }}
-        >
-          <h1
-            style={{
-              color: "#1976d2",
-              marginBottom: "10px",
-            }}
-          >
-            Analytics Dashboard
-          </h1>
+const [summary,setSummary] = useState({
 
-          <p
-            style={{
-              color: "#666",
-              fontSize: "16px",
-            }}
-          >
-            Monitor government grant allocation, beneficiary progress,
-            fund utilization and approval workflow.
-          </p>
-        </div>
+ totalBeneficiaries:0,
+ totalSchemes:0,
+ totalApplications:0,
+ pendingMilestones:0
 
-        <DashboardCards />
+});
 
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(450px, 1fr))",
-            gap: "20px",
-            marginTop: "30px",
-          }}
-        >
-          {/* Scheme-wise Fund Utilization */}
-          <div
-            style={cardStyle}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = "translateY(-5px)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = "translateY(0px)";
-            }}
-          >
-            <h2>Scheme-wise Fund Utilization</h2>
-            <FundBarChart />
-          </div>
 
-          {/* Region-wise Fund Utilization */}
-          <div
-            style={cardStyle}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = "translateY(-5px)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = "translateY(0px)";
-            }}
-          >
-            <h2>Region-wise Fund Utilization</h2>
-            <RegionBarChart />
-          </div>
 
-          {/* Category-wise Distribution */}
-          <div
-            style={cardStyle}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = "translateY(-5px)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = "translateY(0px)";
-            }}
-          >
-            <h2>Category-wise Distribution</h2>
-            <CategoryPieChart />
-          </div>
+const [fundData,setFundData] = useState([]);
+const [regionData,setRegionData] = useState([]);
+const [categoryData,setCategoryData] = useState([]);
+const [budgetData,setBudgetData] = useState([]);
 
-          {/* Budget Allocation vs Disbursement */}
-          <div
-            style={cardStyle}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = "translateY(-5px)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = "translateY(0px)";
-            }}
-          >
-            <h2>Budget Allocation vs Disbursement</h2>
-            <BudgetExhaustionChart />
-          </div>
 
-          {/* Approval Turnaround Time */}
-          <div
-            style={cardStyle}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = "translateY(-5px)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = "translateY(0px)";
-            }}
-          >
-            <h2>Approval Turnaround Time</h2>
-            <ApprovalTurnaroundChart />
-          </div>
-        </div>
 
-        <PendingMilestones />
 
-        <RecentActivities />
 
-        {/* Footer */}
-        <div
-          style={{
-            textAlign: "center",
-            marginTop: "40px",
-            padding: "20px",
-            color: "#777",
-            borderTop: "1px solid #ddd",
-          }}
-        >
-          © 2026 Government Grant Disbursement Tracking System
-        </div>
-      </div>
-    </MainLayout>
-  );
+const loadDashboardData = async()=>{
+
+
+try{
+
+
+setLoading(true);
+
+
+
+const summaryResponse =
+await getDashboardSummary();
+
+setSummary(
+summaryResponse.data || {}
+);
+
+
+
+const fundResponse =
+await getFundUtilization();
+
+setFundData(
+fundResponse.data || []
+);
+
+
+
+const regionResponse =
+await getRegionUtilization();
+
+setRegionData(
+regionResponse.data || []
+);
+
+
+
+const categoryResponse =
+await getCategoryDistribution();
+
+setCategoryData(
+categoryResponse.data || []
+);
+
+
+
+const budgetResponse =
+await getBudgetExhaustion();
+
+setBudgetData(
+budgetResponse.data || []
+);
+
+
+
 }
+
+catch(error){
+
+console.log(
+"Analytics Error:",
+error
+);
+
+}
+
+
+finally{
+
+setLoading(false);
+
+}
+
+
+};
+
+
+
+
+
+useEffect(()=>{
+
+
+const fetchData = async()=>{
+
+await loadDashboardData();
+
+};
+
+
+fetchData();
+
+
+},[]);
+
+
+
+
+
+
+return (
+
+<MainLayout>
+
+
+<Box
+
+sx={{
+
+background:"#f5f7fb",
+
+minHeight:"100vh",
+
+p:3
+
+}}
+
+>
+
+
+<Typography
+
+variant="h4"
+
+fontWeight="bold"
+
+mb={2}
+
+>
+
+Analytics Dashboard
+
+</Typography>
+
+
+
+<Typography mb={3}>
+
+Monitor government grant allocation,
+beneficiary progress, fund utilization
+and approval workflow.
+
+</Typography>
+
+
+
+
+
+<Box
+
+sx={{
+
+display:"flex",
+
+justifyContent:"flex-end",
+
+mb:3
+
+}}
+
+>
+
+
+<Button
+
+variant="contained"
+
+startIcon={<RefreshIcon/>}
+
+onClick={loadDashboardData}
+
+>
+
+Refresh Data
+
+</Button>
+
+
+</Box>
+
+
+
+
+
+
+
+<Grid container spacing={3}>
+
+
+<Grid size={{xs:12,md:3}}>
+
+
+<AnimatedDashboardCard
+
+title="Total Beneficiaries"
+
+value={summary.totalBeneficiaries}
+
+icon={<People/>}
+
+gradient="linear-gradient(135deg,#1976d2,#42a5f5)"
+
+/>
+
+
+</Grid>
+
+
+
+<Grid size={{xs:12,md:3}}>
+
+
+<AnimatedDashboardCard
+
+title="Total Schemes"
+
+value={summary.totalSchemes}
+
+icon={<AccountBalance/>}
+
+gradient="linear-gradient(135deg,#2e7d32,#66bb6a)"
+
+/>
+
+
+</Grid>
+
+
+
+
+<Grid size={{xs:12,md:3}}>
+
+
+<AnimatedDashboardCard
+
+title="Total Applications"
+
+value={summary.totalApplications}
+
+icon={<Assignment/>}
+
+gradient="linear-gradient(135deg,#ed6c02,#ffb74d)"
+
+/>
+
+
+</Grid>
+
+
+
+<Grid size={{xs:12,md:3}}>
+
+
+<AnimatedDashboardCard
+
+title="Pending Milestones"
+
+value={summary.pendingMilestones}
+
+icon={<PendingActions/>}
+
+gradient="linear-gradient(135deg,#9c27b0,#ce93d8)"
+
+/>
+
+
+</Grid>
+
+
+</Grid>
+
+
+
+
+
+{
+loading &&
+
+<Box
+
+sx={{
+
+display:"flex",
+
+justifyContent:"center",
+
+my:4
+
+}}
+
+>
+
+<CircularProgress/>
+
+</Box>
+
+}
+
+
+
+
+
+<Grid
+
+container
+
+spacing={3}
+
+mt={2}
+
+>
+
+
+<Grid size={{xs:12,md:6}}>
+
+<ChartCard title="Scheme-wise Fund Utilization">
+
+<FundBarChart data={fundData}/>
+
+</ChartCard>
+
+</Grid>
+
+
+
+<Grid size={{xs:12,md:6}}>
+
+<ChartCard title="Region-wise Fund Utilization">
+
+<RegionPieChart data={regionData}/>
+
+</ChartCard>
+
+</Grid>
+
+
+
+<Grid size={{xs:12,md:6}}>
+
+<ChartCard title="Category-wise Distribution">
+
+<CategoryPieChart data={categoryData}/>
+
+</ChartCard>
+
+</Grid>
+
+
+
+<Grid size={{xs:12,md:6}}>
+
+<ChartCard title="Budget Allocation vs Disbursement">
+
+<BudgetExhaustionChart data={budgetData}/>
+
+</ChartCard>
+
+</Grid>
+
+
+
+
+<Grid size={{xs:12,md:6}}>
+
+<ChartCard title="Approval Turnaround">
+
+<ApprovalTurnaroundChart/>
+
+</ChartCard>
+
+</Grid>
+
+
+
+
+<Grid size={{xs:12,md:6}}>
+
+<ChartCard title="Recent Activities">
+
+<RecentActivities/>
+
+</ChartCard>
+
+</Grid>
+
+
+
+</Grid>
+
+
+</Box>
+
+
+</MainLayout>
+
+);
+
+
+}
+
 
 export default Analytics;

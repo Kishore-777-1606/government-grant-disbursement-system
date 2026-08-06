@@ -1,112 +1,312 @@
 package com.infosys.grantdisbursementsystem.service;
 
+
 import com.infosys.grantdisbursementsystem.entity.Application;
 import com.infosys.grantdisbursementsystem.entity.FinanceApproval;
 import com.infosys.grantdisbursementsystem.exception.ResourceNotFoundException;
 import com.infosys.grantdisbursementsystem.repository.ApplicationRepository;
 import com.infosys.grantdisbursementsystem.repository.FinanceApprovalRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
+
+
 
 @Service
 public class FinanceApprovalService {
 
-    @Autowired
-    private FinanceApprovalRepository financeApprovalRepository;
 
-    @Autowired
-    private ApplicationRepository applicationRepository;
+
+    private final FinanceApprovalRepository financeApprovalRepository;
+
+    private final ApplicationRepository applicationRepository;
+
+
+
+
+    public FinanceApprovalService(
+            FinanceApprovalRepository financeApprovalRepository,
+            ApplicationRepository applicationRepository
+    ) {
+
+        this.financeApprovalRepository = financeApprovalRepository;
+
+        this.applicationRepository = applicationRepository;
+
+    }
+
+
+
+
+
 
     // Create Finance Approval
-    public FinanceApproval createApproval(Long applicationId, String financeOfficer) {
 
-        Application application = applicationRepository.findById(applicationId)
-                .orElseThrow(() -> new ResourceNotFoundException("Application not found with ID: " + applicationId));
+    public FinanceApproval createApproval(
+            @NonNull Long applicationId,
+            String financeOfficer
+    ) {
 
-        // Prevent duplicate approval records
-        if (financeApprovalRepository.findByApplication(application).isPresent()) {
-            throw new IllegalStateException("Finance approval already exists for this application.");
+
+
+        Application application =
+                applicationRepository.findById(
+                        Objects.requireNonNull(applicationId)
+                )
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Application not found with ID: "
+                                + applicationId
+                        )
+                );
+
+
+
+
+        if(financeApprovalRepository
+                .findByApplication(application)
+                .isPresent()) {
+
+
+            throw new IllegalStateException(
+                    "Finance approval already exists for this application."
+            );
+
         }
 
-        FinanceApproval approval = new FinanceApproval();
+
+
+
+        FinanceApproval approval =
+                new FinanceApproval();
+
+
 
         approval.setApplication(application);
-        approval.setApprovedBy(financeOfficer);
-        approval.setApprovalStatus("Pending");
-        approval.setApprovalDate(LocalDate.now());
-        approval.setRemarks("Waiting for Finance Approval");
 
-        application.setStatus("Finance Approval Pending");
+        approval.setApprovedBy(financeOfficer);
+
+        approval.setApprovalStatus("Pending");
+
+        approval.setApprovalDate(LocalDate.now());
+
+        approval.setRemarks(
+                "Waiting for Finance Approval"
+        );
+
+
+
+
+        application.setStatus(
+                "Finance Approval Pending"
+        );
+
+
         applicationRepository.save(application);
 
+
+
         return financeApprovalRepository.save(approval);
+
     }
+
+
+
+
+
+
 
     // Get All Approvals
+
     public List<FinanceApproval> getAllApprovals() {
+
         return financeApprovalRepository.findAll();
+
     }
+
+
+
+
+
+
 
     // Get Approval By ID
-    public FinanceApproval getApprovalById(Long id) {
 
-        return financeApprovalRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Finance approval not found with ID: " + id));
+    public FinanceApproval getApprovalById(
+            @NonNull Long id
+    ) {
+
+
+        return financeApprovalRepository.findById(
+                Objects.requireNonNull(id)
+        )
+        .orElseThrow(() ->
+                new ResourceNotFoundException(
+                        "Finance approval not found with ID: "
+                        + id
+                )
+        );
+
     }
+
+
+
+
+
+
 
     // Approve Finance
-    public FinanceApproval approve(Long id, String remarks) {
 
-        FinanceApproval approval = getApprovalById(id);
+    public FinanceApproval approve(
+            @NonNull Long id,
+            String remarks
+    ) {
 
-        approval.setApprovalStatus("Approved");
-        approval.setApprovalDate(LocalDate.now());
-        approval.setRemarks(remarks);
 
-        Application application = approval.getApplication();
 
-        // Final status after finance approval
-        application.setStatus("Approved");
+        FinanceApproval approval =
+                getApprovalById(id);
+
+
+
+        approval.setApprovalStatus(
+                "Approved"
+        );
+
+
+        approval.setApprovalDate(
+                LocalDate.now()
+        );
+
+
+        approval.setRemarks(
+                remarks
+        );
+
+
+
+        Application application =
+                approval.getApplication();
+
+
+
+        application.setStatus(
+                "Approved"
+        );
+
+
 
         applicationRepository.save(application);
 
+
+
         return financeApprovalRepository.save(approval);
+
     }
+
+
+
+
+
+
 
     // Reject Finance
-    public FinanceApproval reject(Long id, String remarks) {
 
-        FinanceApproval approval = getApprovalById(id);
+    public FinanceApproval reject(
+            @NonNull Long id,
+            String remarks
+    ) {
 
-        approval.setApprovalStatus("Rejected");
-        approval.setApprovalDate(LocalDate.now());
-        approval.setRemarks(remarks);
 
-        Application application = approval.getApplication();
 
-        application.setStatus("Rejected");
+        FinanceApproval approval =
+                getApprovalById(id);
+
+
+
+        approval.setApprovalStatus(
+                "Rejected"
+        );
+
+
+        approval.setApprovalDate(
+                LocalDate.now()
+        );
+
+
+        approval.setRemarks(
+                remarks
+        );
+
+
+
+        Application application =
+                approval.getApplication();
+
+
+
+        application.setStatus(
+                "Rejected"
+        );
+
+
 
         applicationRepository.save(application);
 
+
+
         return financeApprovalRepository.save(approval);
+
     }
+
+
+
+
+
+
 
     // Pending Approvals
+
     public List<FinanceApproval> getPendingApprovals() {
-        return financeApprovalRepository.findByApprovalStatus("Pending");
+
+        return financeApprovalRepository
+                .findByApprovalStatus("Pending");
+
     }
+
+
+
+
+
+
 
     // Approved Approvals
+
     public List<FinanceApproval> getApprovedApprovals() {
-        return financeApprovalRepository.findByApprovalStatus("Approved");
+
+        return financeApprovalRepository
+                .findByApprovalStatus("Approved");
+
     }
 
+
+
+
+
+
+
     // Rejected Approvals
+
     public List<FinanceApproval> getRejectedApprovals() {
-        return financeApprovalRepository.findByApprovalStatus("Rejected");
+
+        return financeApprovalRepository
+                .findByApprovalStatus("Rejected");
+
     }
+
 
 }
