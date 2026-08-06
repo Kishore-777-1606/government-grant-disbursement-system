@@ -1,62 +1,214 @@
-import React from "react";
+import { useEffect, useState } from "react";
+
 import {
-  ResponsiveContainer,
   BarChart,
   Bar,
   XAxis,
   YAxis,
   Tooltip,
-  CartesianGrid,
-  Legend,
+  ResponsiveContainer,
 } from "recharts";
 
-const approvalData = [
-  {
-    scheme: "Education",
-    days: 5,
-  },
-  {
-    scheme: "Farmer Support",
-    days: 3,
-  },
-  {
-    scheme: "Women Welfare",
-    days: 6,
-  },
-  {
-    scheme: "Solar Pump",
-    days: 4,
-  },
-];
+
+import {
+  Paper,
+  Typography
+} from "@mui/material";
+
+
+import {
+  getApprovalTurnaround
+} from "../api/analyticsApi";
+
+
 
 function ApprovalTurnaroundChart() {
-  return (
-    <ResponsiveContainer width="100%" height={350}>
-      <BarChart data={approvalData}>
-        <CartesianGrid strokeDasharray="3 3" />
 
-        <XAxis dataKey="scheme" />
 
-        <YAxis
-          label={{
-            value: "Days",
-            angle: -90,
-            position: "insideLeft",
-          }}
-        />
+const [data,setData] = useState([]);
 
-        <Tooltip />
 
-        <Legend />
 
-        <Bar
-          dataKey="days"
-          fill="#4CAF50"
-          radius={[5, 5, 0, 0]}
-        />
-      </BarChart>
-    </ResponsiveContainer>
-  );
+useEffect(()=>{
+
+
+getApprovalTurnaround()
+
+.then((res)=>{
+
+
+console.log(
+"Approval Turnaround Data:",
+res.data
+);
+
+
+setData(
+res.data || []
+);
+
+
+})
+
+.catch((err)=>{
+
+
+console.log(
+"Approval API Error:",
+err
+);
+
+
+setData([]);
+
+
+});
+
+
+},[]);
+
+
+
+
+
+
+return (
+
+
+<Paper
+
+sx={{
+
+p:3,
+
+borderRadius:5,
+
+height:450,
+
+display:"flex",
+
+flexDirection:"column"
+
+}}
+
+>
+
+
+
+
+
+{
+
+data.length === 0 ?
+
+
+<Typography
+
+sx={{
+
+mt:15,
+
+textAlign:"center"
+
+}}
+
+>
+
+No approval data available
+
+</Typography>
+
+
+
+:
+
+
+<ResponsiveContainer
+
+width="100%"
+
+height={350}
+
+>
+
+
+<BarChart
+
+data={data}
+
+margin={{
+
+top:20,
+
+right:20,
+
+left:10,
+
+bottom:20
+
+}}
+
+>
+
+
+<XAxis
+
+dataKey="stage"
+
+/>
+
+
+
+<YAxis
+
+label={{
+
+value:"Days",
+
+angle:-90,
+
+position:"insideLeft"
+
+}}
+
+/>
+
+
+
+<Tooltip />
+
+
+
+
+<Bar
+
+dataKey="days"
+
+fill="#1976d2"
+
+radius={[8,8,0,0]}
+
+/>
+
+
+
+</BarChart>
+
+
+</ResponsiveContainer>
+
+
+
 }
+
+
+</Paper>
+
+
+);
+
+
+}
+
 
 export default ApprovalTurnaroundChart;

@@ -1,98 +1,3 @@
-export const summaryData = {
-  totalBeneficiaries: 1250,
-  totalSchemes: 8,
-  fundsReleased: "₹2.5 Crore",
-  pendingMilestones: 45,
-};
-
-export const schemeData = [
-  {
-    scheme: "Education",
-    allocated: 500000,
-    disbursed: 320000,
-  },
-  {
-    scheme: "Farmer Support",
-    allocated: 300000,
-    disbursed: 280000,
-  },
-  {
-    scheme: "Women Welfare",
-    allocated: 450000,
-    disbursed: 390000,
-  },
-  {
-    scheme: "Solar Pump",
-    allocated: 650000,
-    disbursed: 520000,
-  },
-];
-
-export const regionData = [
-  {
-    region: "North",
-    allocated: 450000,
-    disbursed: 380000,
-  },
-  {
-    region: "South",
-    allocated: 350000,
-    disbursed: 300000,
-  },
-  {
-    region: "East",
-    allocated: 250000,
-    disbursed: 210000,
-  },
-  {
-    region: "West",
-    allocated: 500000,
-    disbursed: 420000,
-  },
-];
-
-export const categoryData = [
-  {
-    category: "SC",
-    beneficiaries: 320,
-  },
-  {
-    category: "ST",
-    beneficiaries: 180,
-  },
-  {
-    category: "OBC",
-    beneficiaries: 520,
-  },
-  {
-    category: "General",
-    beneficiaries: 230,
-  },
-];
-
-export const budgetData = [
-  {
-    scheme: "Education",
-    allocated: 500000,
-    disbursed: 320000,
-  },
-  {
-    scheme: "Farmer Support",
-    allocated: 300000,
-    disbursed: 280000,
-  },
-  {
-    scheme: "Women Welfare",
-    allocated: 450000,
-    disbursed: 390000,
-  },
-  {
-    scheme: "Solar Pump",
-    allocated: 650000,
-    disbursed: 520000,
-  },
-];
-
 export const pendingMilestones = [
   {
     id: 1,
@@ -116,6 +21,7 @@ export const pendingMilestones = [
     status: "Pending",
   },
 ];
+
 
 export const recentActivities = [
   {
