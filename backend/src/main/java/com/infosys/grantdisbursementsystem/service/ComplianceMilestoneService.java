@@ -1,6 +1,6 @@
 package com.infosys.grantdisbursementsystem.service;
 
-
+import java.util.Optional;
 import com.infosys.grantdisbursementsystem.entity.Application;
 import com.infosys.grantdisbursementsystem.entity.ComplianceMilestone;
 import com.infosys.grantdisbursementsystem.repository.ComplianceMilestoneRepository;
@@ -165,5 +165,18 @@ public class ComplianceMilestoneService {
 
     }
 
+public ComplianceMilestone completeMilestone(Long milestoneId) {
+
+    ComplianceMilestone milestone =
+            milestoneRepository.findById(milestoneId)
+                    .orElseThrow(() ->
+                            new RuntimeException("Milestone not found"));
+
+    milestone.setStatus("Completed");
+    milestone.setCompletedDate(LocalDate.now());
+    milestone.setRemarks("Milestone completed successfully");
+
+    return milestoneRepository.save(milestone);
+}
 
 }

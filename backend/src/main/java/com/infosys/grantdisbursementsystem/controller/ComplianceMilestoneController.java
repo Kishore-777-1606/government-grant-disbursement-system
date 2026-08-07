@@ -40,5 +40,10 @@ public class ComplianceMilestoneController {
 
         return milestoneService.getUpcomingReminders();
     }
+    @PutMapping("/{id}/complete")
+public ComplianceMilestone completeMilestone(@PathVariable Long id) {
+
+    return milestoneService.completeMilestone(id);
+}
 
 }
