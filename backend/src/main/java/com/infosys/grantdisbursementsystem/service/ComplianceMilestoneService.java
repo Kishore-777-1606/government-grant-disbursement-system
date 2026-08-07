@@ -1,10 +1,10 @@
 package com.infosys.grantdisbursementsystem.service;
-
+import org.springframework.scheduling.annotation.Scheduled;
 import java.util.Optional;
 import com.infosys.grantdisbursementsystem.entity.Application;
 import com.infosys.grantdisbursementsystem.entity.ComplianceMilestone;
 import com.infosys.grantdisbursementsystem.repository.ComplianceMilestoneRepository;
-
+import java.time.temporal.ChronoUnit;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -118,8 +118,10 @@ public class ComplianceMilestoneService {
         }
 
     }
-
-
+  @Scheduled(cron = "0 0 0 * * *")
+public void scheduledOverdueCheck() {
+    flagOverdueMilestones();
+}
 
 
 
@@ -143,12 +145,11 @@ public class ComplianceMilestoneService {
                 continue;
 
 
-
-            long daysLeft =
-                    LocalDate.now()
-                    .until(milestone.getDueDate())
-                    .getDays();
-
+long daysLeft =
+        ChronoUnit.DAYS.between(
+                LocalDate.now(),
+                milestone.getDueDate()
+        );
 
 
             if(daysLeft <= 3 && daysLeft >= 0) {
