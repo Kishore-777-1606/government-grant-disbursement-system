@@ -83,7 +83,7 @@ public class Beneficiary {
     @Column(name = "bank_account_number", length = 50)
     private String bankAccountNumber;
 
-    @Pattern(regexp = "^[A-Z]{4}0[A-Z0-9]{6}$", message = "IFSC code must be a valid 11-character IFSC code (e.g. SBIN0001234)")
+   @Pattern(regexp = "^$|^[A-Z]{4}0[A-Z0-9]{6}$", message = "IFSC code must be a valid 11-character IFSC code (e.g. SBIN0001234)")
     @Column(name = "ifsc_code", length = 20)
     private String ifscCode;
 
