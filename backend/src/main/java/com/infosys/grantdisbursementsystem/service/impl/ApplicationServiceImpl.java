@@ -122,6 +122,26 @@ public class ApplicationServiceImpl implements ApplicationService {
 
 
 
+// Default the applied amount to the scheme's grant amount when the
+        // caller didn't supply one, so downstream routing/disbursement
+        // always has an amount to work with. When the caller DID supply one
+        // (a per-application requested amount), it must not exceed what the
+        // scheme actually grants.
+        if(application.getAppliedAmount() == null) {
+
+            application.setAppliedAmount(scheme.getAmount());
+
+        }
+        else if(scheme.getAmount() != null
+                && application.getAppliedAmount().compareTo(scheme.getAmount()) > 0) {
+
+            throw new IllegalArgumentException(
+                    "Requested amount cannot exceed the scheme's grant amount of "
+                    + scheme.getAmount()
+            );
+
+        }
+
 
 
         double score =
@@ -132,8 +152,19 @@ public class ApplicationServiceImpl implements ApplicationService {
 
 
 
+        boolean meetsCriteria =
+                eligibilityScoringService.meetsSchemeCriteria(
+                        beneficiary,
+                        scheme
+                );
+
+
         boolean eligible =
-                eligibilityScoringService.isEligible(score);
+                eligibilityScoringService.isEligible(
+                        score,
+                        beneficiary,
+                        scheme
+                );
 
 
 
@@ -146,6 +177,26 @@ public class ApplicationServiceImpl implements ApplicationService {
                         ? "Eligible"
                         : "Not Eligible"
         );
+
+
+        // Make it clear in the record WHY an application was rejected -
+        // failing the scheme's own criteria (income/category) is a
+        // different reason than simply scoring too low.
+        if(!eligible && !meetsCriteria) {
+
+            application.setRemarks(
+                    "Does not meet this scheme's eligibility criteria "
+                    + "(income limit and/or beneficiary category)"
+            );
+
+        }
+        else if(!eligible) {
+
+            application.setRemarks(
+                    "Eligibility score below the required threshold"
+            );
+
+        }
 
 
 

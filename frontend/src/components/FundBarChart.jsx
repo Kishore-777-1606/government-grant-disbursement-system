@@ -1,4 +1,3 @@
-
 import {
 
 BarChart,
@@ -17,26 +16,30 @@ ResponsiveContainer
 
 } from "recharts";
 
+import NoData from "./NoData";
 
 
-function FundBarChart(){
+
+// Consumes FundUtilizationDTO[] from GET /api/analytics/fund-utilization
+// (schemeName, totalAmount, releasedAmount, remainingAmount), passed down
+// from Analytics.jsx as the `data` prop — mapped here to the field names
+// the chart itself renders (name, allocatedAmount, releasedAmount).
+function FundBarChart({ data: rawData }){
 
 
-const data=[
+const data = (rawData || []).map((item) => ({
+    name: item.schemeName,
+    allocatedAmount: item.totalAmount,
+    releasedAmount: item.releasedAmount
+}));
 
-{
-name:"Education",
-allocatedAmount:50000,
-releasedAmount:30000
-},
 
-{
-name:"Farmer Support",
-allocatedAmount:30000,
-releasedAmount:15000
+
+if(data.length === 0){
+
+    return <NoData />;
+
 }
-
-];
 
 
 

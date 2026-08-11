@@ -8,6 +8,7 @@ import com.infosys.grantdisbursementsystem.repository.*;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 
@@ -21,6 +22,8 @@ public class AnalyticsService {
     private final DisbursementPlanRepository disbursementPlanRepository;
     private final DisbursementInstallmentRepository installmentRepository;
     private final ComplianceMilestoneRepository milestoneRepository;
+    private final VerificationRepository verificationRepository;
+    private final FinanceApprovalRepository financeApprovalRepository;
 
 
 
@@ -30,7 +33,9 @@ public class AnalyticsService {
             SchemeRepository schemeRepository,
             DisbursementPlanRepository disbursementPlanRepository,
             DisbursementInstallmentRepository installmentRepository,
-            ComplianceMilestoneRepository milestoneRepository
+            ComplianceMilestoneRepository milestoneRepository,
+            VerificationRepository verificationRepository,
+            FinanceApprovalRepository financeApprovalRepository
     ) {
 
         this.beneficiaryRepository = beneficiaryRepository;
@@ -39,6 +44,8 @@ public class AnalyticsService {
         this.disbursementPlanRepository = disbursementPlanRepository;
         this.installmentRepository = installmentRepository;
         this.milestoneRepository = milestoneRepository;
+        this.verificationRepository = verificationRepository;
+        this.financeApprovalRepository = financeApprovalRepository;
 
     }
 
@@ -61,16 +68,20 @@ public class AnalyticsService {
                 .count();
 
 
-        long pending = applications.stream()
-                .filter(a ->
-                        "Pending".equalsIgnoreCase(a.getStatus()))
-                .count();
-
-
         long rejected = applications.stream()
                 .filter(a ->
-                        "Rejected".equalsIgnoreCase(a.getStatus()))
+                        "Rejected".equalsIgnoreCase(a.getStatus())
+                        ||
+                        "Not Eligible".equalsIgnoreCase(a.getStatus()))
                 .count();
+
+
+        // The workflow never sets a literal "Pending" status on Application —
+        // it uses stage-specific labels instead (e.g. "Field Verification
+        // Pending", "Finance Approval Pending", "Disbursement In Progress").
+        // "Pending" here means "still in flight": anything that hasn't
+        // reached a final approval or rejection outcome.
+        long pending = total - approved - rejected;
 
 
 
@@ -247,153 +258,204 @@ public class AnalyticsService {
 
     // ================= MILESTONE SUMMARY =================
 
-    public MilestoneSummaryDTO getMilestoneSummary(){
+    public MilestoneSummaryDTO getMilestoneSummary() {
 
+    List<ComplianceMilestone> list =
+            milestoneRepository.findAll();
 
-        List<ComplianceMilestone> list =
-                milestoneRepository.findAll();
+    LocalDate today = LocalDate.now();
 
+    long total =
+            list.size();
 
-
-        long total =
-                list.size();
-
-
-
-        long pending =
-                list.stream()
-                .filter(m ->
-                        "Pending".equalsIgnoreCase(m.getStatus()))
-                .count();
-
-
-
-        long completed =
-                list.stream()
-                .filter(m ->
-                        "Completed".equalsIgnoreCase(m.getStatus()))
-                .count();
-
-
-
-        long overdue =
-                list.stream()
-                .filter(m ->
+    /*
+     * A milestone is considered overdue when:
+     * 1. It has already been explicitly flagged as "Overdue", OR
+     * 2. It is still "Pending" but its due date has passed.
+     *
+     * The second condition makes the analytics accurate even if the
+     * scheduled overdue job has not executed yet.
+     */
+    long overdue =
+            list.stream()
+            .filter(m ->
+                    "Overdue".equalsIgnoreCase(m.getStatus())
+                    ||
+                    (
                         "Pending".equalsIgnoreCase(m.getStatus())
                         &&
-                        m.getDueDate()!=null
+                        m.getDueDate() != null
                         &&
-                        m.getDueDate().isBefore(LocalDate.now()))
-                .count();
+                        m.getDueDate().isBefore(today)
+                    )
+            )
+            .count();
 
+    /*
+     * Pending means a milestone that is still pending and whose
+     * due date has not passed yet.
+     *
+     * This keeps Pending and Overdue as separate categories.
+     */
+    long pending =
+            list.stream()
+            .filter(m ->
+                    "Pending".equalsIgnoreCase(m.getStatus())
+                    &&
+                    (
+                        m.getDueDate() == null
+                        ||
+                        !m.getDueDate().isBefore(today)
+                    )
+            )
+            .count();
 
+    long completed =
+            list.stream()
+            .filter(m ->
+                    "Completed".equalsIgnoreCase(m.getStatus()))
+            .count();
 
-        return new MilestoneSummaryDTO(
-                total,
-                pending,
-                completed,
-                overdue
-        );
-
-    }
+    return new MilestoneSummaryDTO(
+            total,
+            pending,
+            completed,
+            overdue
+    );
+}
         // ================= REGION UTILIZATION =================
 
-    public List<RegionUtilizationDTO> getRegionUtilization(){
+    // ================= REGION UTILIZATION =================
+
+public List<RegionUtilizationDTO> getRegionUtilization() {
+
+    /*
+     * Milestone 3 requires region-wise fund utilization.
+     *
+     * Utilization means the amount that has actually been released,
+     * not the total grant amount planned for a disbursement plan.
+     *
+     * Therefore, we calculate regional utilization using only
+     * installments whose status is "Released".
+     */
+
+    Map<Long, Double> regionReleasedAmount = new HashMap<>();
 
 
-        Map<Long,Double> map =
-                new HashMap<>();
+    List<DisbursementPlan> plans =
+            disbursementPlanRepository.findAll();
 
 
-        for(DisbursementPlan plan :
-                disbursementPlanRepository.findAll()){
+    List<DisbursementInstallment> installments =
+            installmentRepository.findAll();
 
 
-            Application app =
-                    plan.getApplication();
+    for (DisbursementPlan plan : plans) {
+
+        Application app =
+                plan.getApplication();
 
 
-            if(app == null)
-                continue;
-
-
-
-            Long beneficiaryId =
-                    app.getBeneficiaryId();
-
-
-
-            if(beneficiaryId == null)
-                continue;
-
-
-
-            Beneficiary beneficiary =
-                    beneficiaryRepository.findById(
-                            Objects.requireNonNull(beneficiaryId)
-                    )
-                    .orElse(null);
-
-
-
-            if(beneficiary == null)
-                continue;
-
-
-
-            Long stateId =
-                    beneficiary.getStateId();
-
-
-
-            if(stateId == null)
-                continue;
-
-
-
-            double amount =
-                    plan.getTotalGrantAmount()!=null
-                    ?
-                    plan.getTotalGrantAmount()
-                    :
-                    0;
-
-
-
-            map.put(
-                    stateId,
-                    map.getOrDefault(stateId,0.0)+amount
-            );
-
+        if (app == null) {
+            continue;
         }
 
 
+        Long beneficiaryId =
+                app.getBeneficiaryId();
 
 
-        List<RegionUtilizationDTO> result =
-                new ArrayList<>();
+        if (beneficiaryId == null) {
+            continue;
+        }
 
 
-
-        map.forEach((state,amount)->{
-
-
-            result.add(
-                    new RegionUtilizationDTO(
-                            "State-"+state,
-                            amount
-                    )
-            );
-
-        });
+        Beneficiary beneficiary =
+                beneficiaryRepository.findById(
+                        beneficiaryId
+                )
+                .orElse(null);
 
 
+        if (beneficiary == null) {
+            continue;
+        }
 
-        return result;
+
+        Long stateId =
+                beneficiary.getStateId();
+
+
+        if (stateId == null) {
+            continue;
+        }
+
+
+        /*
+         * Find the installments belonging to this plan
+         * that have actually been released.
+         */
+        double releasedAmount =
+                installments.stream()
+                .filter(i ->
+                        i.getDisbursementPlan() != null
+                        &&
+                        i.getDisbursementPlan()
+                                .getPlanId()
+                                .equals(plan.getPlanId())
+                )
+                .filter(i ->
+                        "Released".equalsIgnoreCase(
+                                i.getStatus()
+                        )
+                )
+                .mapToDouble(i ->
+                        i.getInstallmentAmount() != null
+                        ?
+                        i.getInstallmentAmount()
+                        :
+                        0.0
+                )
+                .sum();
+
+
+        /*
+         * Add the released amount to the beneficiary's region.
+         *
+         * Multiple disbursement plans belonging to the same
+         * state are therefore aggregated together.
+         */
+        regionReleasedAmount.put(
+                stateId,
+                regionReleasedAmount.getOrDefault(
+                        stateId,
+                        0.0
+                ) + releasedAmount
+        );
 
     }
 
 
+    List<RegionUtilizationDTO> result =
+            new ArrayList<>();
+
+
+    regionReleasedAmount.forEach(
+            (stateId, releasedAmount) -> {
+
+                result.add(
+                        new RegionUtilizationDTO(
+                                "State-" + stateId,
+                                releasedAmount
+                        )
+                );
+
+            }
+    );
+
+
+    return result;
+}
 
 
 
@@ -407,30 +469,34 @@ public class AnalyticsService {
 
 
 
+        // Module 4 asks for "beneficiary category-wise distribution" —
+        // grouped by the beneficiary's own category (General/SC/ST/OBC/
+        // EWS), not the scheme's type. Each application is looked up via
+        // its beneficiaryId.
         for(Application app :
                 applicationRepository.findAll()){
 
 
-            if(app.getSchemeId()==null)
+            if(app.getBeneficiaryId()==null)
                 continue;
 
 
 
-            Scheme scheme =
-                    schemeRepository.findById(
+            Beneficiary beneficiary =
+                    beneficiaryRepository.findById(
                             Objects.requireNonNull(
-                                    app.getSchemeId()
+                                    app.getBeneficiaryId()
                             )
                     )
                     .orElse(null);
 
 
 
-            if(scheme!=null){
+            if(beneficiary!=null && beneficiary.getCategory()!=null){
 
 
                 String category =
-                        scheme.getSchemeType();
+                        beneficiary.getCategory();
 
 
 
@@ -623,6 +689,153 @@ public class AnalyticsService {
 
     }
 
+
+
+
+
+    // ================= APPROVAL TURNAROUND =================
+
+    public List<Map<String,Object>> getApprovalTurnaround(){
+
+
+        List<Map<String,Object>> result =
+                new ArrayList<>();
+
+
+
+        // Stage 1: Application submitted -> first verification stage recorded.
+        // Each application can now have multiple Verification rows (one per
+        // stage), so this must use only the FIRST stage per application —
+        // otherwise later stages (District Officer, re-verification, etc.)
+        // would double/triple-count and skew the average.
+
+        List<Long> verificationDays =
+                new ArrayList<>();
+
+
+        for(Application app : applicationRepository.findAll()){
+
+
+            if(app.getApplicationDate() == null)
+                continue;
+
+
+            Verification firstStage =
+                    verificationRepository
+                    .findFirstByApplicationOrderByVerificationIdAsc(app)
+                    .orElse(null);
+
+
+            if(firstStage == null
+                    ||
+               firstStage.getVerificationDate() == null)
+                continue;
+
+
+            long days =
+                    ChronoUnit.DAYS.between(
+                            app.getApplicationDate(),
+                            firstStage.getVerificationDate()
+                    );
+
+            if(days >= 0)
+                verificationDays.add(days);
+
+        }
+
+
+        if(!verificationDays.isEmpty()){
+
+            double avgDays =
+                    verificationDays.stream()
+                    .mapToLong(Long::longValue)
+                    .average()
+                    .orElse(0);
+
+            Map<String,Object> stage =
+                    new HashMap<>();
+
+            stage.put("stage", "Verification");
+            stage.put("days", Math.round(avgDays * 10.0) / 10.0);
+
+            result.add(stage);
+
+        }
+
+
+
+        // Stage 2: Latest verification stage recorded -> Finance approval
+        // decided. Uses the most recent Verification row per application
+        // (typically the District Officer's approval, which is what
+        // triggers the Finance Approval record) rather than assuming a
+        // single row exists.
+
+        List<Long> financeDays =
+                new ArrayList<>();
+
+
+        for(FinanceApproval fa : financeApprovalRepository.findAll()){
+
+
+            boolean decided =
+                    "Approved".equalsIgnoreCase(fa.getApprovalStatus())
+                    ||
+                    "Rejected".equalsIgnoreCase(fa.getApprovalStatus());
+
+
+            if(!decided
+                    ||
+               fa.getApplication() == null
+                    ||
+               fa.getApprovalDate() == null)
+                continue;
+
+
+            Verification latestStage =
+                    verificationRepository
+                    .findFirstByApplicationOrderByVerificationIdDesc(fa.getApplication())
+                    .orElse(null);
+
+
+            if(latestStage == null || latestStage.getVerificationDate() == null)
+                continue;
+
+
+            long days =
+                    ChronoUnit.DAYS.between(
+                            latestStage.getVerificationDate(),
+                            fa.getApprovalDate()
+                    );
+
+
+            if(days >= 0)
+                financeDays.add(days);
+
+        }
+
+
+        if(!financeDays.isEmpty()){
+
+            double avgDays =
+                    financeDays.stream()
+                    .mapToLong(Long::longValue)
+                    .average()
+                    .orElse(0);
+
+            Map<String,Object> stage =
+                    new HashMap<>();
+
+            stage.put("stage", "Finance Approval");
+            stage.put("days", Math.round(avgDays * 10.0) / 10.0);
+
+            result.add(stage);
+
+        }
+
+
+        return result;
+
+    }
 
 
 

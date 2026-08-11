@@ -1,4 +1,16 @@
 -- ============================================================================
+-- ⚠ LEGACY / NOT USED BY THE RUNNING APPLICATION ⚠
+-- Table names and columns here (beneficiaries, schemes, applications with an
+-- application_status ENUM, etc.) do not match the actual JPA entities in
+-- src/main/java/.../entity, which use singular/different table names and
+-- free-text status values. Running this script sets up tables the app never
+-- reads from or writes to (Hibernate auto-creates its own via ddl-auto=update).
+-- See backend/6_actual_application_schema.sql for the schema that matches
+-- the real code. Kept here for historical reference only — do not run this
+-- against a DB you intend to use with the app.
+-- ============================================================================
+
+-- ============================================================================
 -- GOVERNMENT BENEFICIARY DISBURSEMENT SYSTEM
 -- Database Schema Design
 -- 

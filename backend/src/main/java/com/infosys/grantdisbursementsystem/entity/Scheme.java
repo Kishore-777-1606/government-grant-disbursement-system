@@ -50,6 +50,16 @@ public class Scheme {
     @Column(name = "amount", nullable = false)
     private BigDecimal amount;
 
+    // Eligibility criteria (Module 2 requirement: "configurable scheme criteria").
+    // Null max_annual_income means no income ceiling for this scheme.
+    @Column(name = "max_annual_income")
+    private BigDecimal maxAnnualIncome;
+
+    // Comma-separated beneficiary categories eligible for this scheme
+    // (e.g. "SC,ST,OBC"). Null/blank means every category is eligible.
+    @Column(name = "allowed_categories", length = 100)
+    private String allowedCategories;
+
     @Column(name = "max_beneficiaries")
     private Integer maxBeneficiaries;
 

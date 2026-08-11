@@ -1,4 +1,3 @@
-
 import {
 
 BarChart,
@@ -15,34 +14,29 @@ ResponsiveContainer
 
 } from "recharts";
 
-
-
-function BudgetExhaustionChart(){
+import NoData from "./NoData";
 
 
 
-const data=[
+// Consumes BudgetExhaustionDTO[] from GET /api/analytics/budget-exhaustion
+// (schemeName, utilizationPercentage), passed down from Analytics.jsx as
+// the `data` prop.
+function BudgetExhaustionChart({ data: rawData }){
 
 
-{
 
-name:"Education Grant",
-
-utilizationPercentage:40
-
-},
+const data = (rawData || []).map((item) => ({
+    name: item.schemeName,
+    utilizationPercentage: item.utilizationPercentage
+}));
 
 
-{
 
-name:"Farmer Support",
+if(data.length === 0){
 
-utilizationPercentage:100
+    return <NoData />;
 
 }
-
-
-];
 
 
 

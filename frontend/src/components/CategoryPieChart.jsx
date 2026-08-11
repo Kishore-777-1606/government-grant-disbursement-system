@@ -1,6 +1,3 @@
-
-
-
 import {
 
 PieChart,
@@ -17,27 +14,27 @@ ResponsiveContainer
 
 } from "recharts";
 
+import NoData from "./NoData";
 
 
-function CategoryPieChart(){
+
+// Consumes CategoryDistributionDTO[] from GET /api/analytics/category-distribution
+// (category, count), passed down from Analytics.jsx as the `data` prop.
+function CategoryPieChart({ data: rawData }){
 
 
-const data=[
+const data = (rawData || []).map((item) => ({
+    name: item.category,
+    value: item.count
+}));
 
 
-{
-name:"Agriculture",
-value:1
-},
 
+if(data.length === 0){
 
-{
-name:"Education",
-value:1
+    return <NoData />;
+
 }
-
-
-];
 
 
 
@@ -45,7 +42,13 @@ const COLORS=[
 
 "#1976d2",
 
-"#2e7d32"
+"#2e7d32",
+
+"#ed6c02",
+
+"#9c27b0",
+
+"#d32f2f"
 
 ];
 
@@ -97,7 +100,7 @@ data.map((entry,index)=>(
 
 key={index}
 
-fill={COLORS[index]}
+fill={COLORS[index % COLORS.length]}
 
 />
 

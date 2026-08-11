@@ -5,7 +5,12 @@ import com.infosys.grantdisbursementsystem.service.BeneficiaryService;
 
 import jakarta.validation.Valid;
 
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Objects;
@@ -30,14 +35,12 @@ public class BeneficiaryController {
 
 
 
-
     @GetMapping
     public List<Beneficiary> getAllBeneficiaries() {
 
         return beneficiaryService.getAllBeneficiaries();
 
     }
-
 
 
 
@@ -56,7 +59,6 @@ public class BeneficiaryController {
 
 
 
-
     @PostMapping
     public Beneficiary createBeneficiary(
             @Valid @RequestBody Beneficiary beneficiary
@@ -67,7 +69,6 @@ public class BeneficiaryController {
         );
 
     }
-
 
 
 
@@ -88,7 +89,6 @@ public class BeneficiaryController {
 
 
 
-
     @DeleteMapping("/{id}")
     public String deleteBeneficiary(
             @PathVariable Long id
@@ -99,6 +99,46 @@ public class BeneficiaryController {
         );
 
         return "Beneficiary deleted successfully!";
+
+    }
+
+
+
+
+    @PostMapping("/{id}/document")
+    public Beneficiary uploadDocument(
+            @PathVariable Long id,
+            @RequestParam("file") MultipartFile file
+    ) {
+
+        return beneficiaryService.uploadDocument(
+                Objects.requireNonNull(id),
+                file
+        );
+
+    }
+
+
+
+
+    @GetMapping("/{id}/document")
+    public ResponseEntity<Resource> downloadDocument(
+            @PathVariable Long id
+    ) {
+
+        Beneficiary beneficiary = beneficiaryService.getBeneficiaryById(
+                Objects.requireNonNull(id)
+        );
+
+        Resource file = beneficiaryService.loadDocument(id);
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .header(
+                        HttpHeaders.CONTENT_DISPOSITION,
+                        "inline; filename=\"" + beneficiary.getDocumentOriginalName() + "\""
+                )
+                .body(file);
 
     }
 

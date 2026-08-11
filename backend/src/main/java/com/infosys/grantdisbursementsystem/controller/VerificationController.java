@@ -85,6 +85,21 @@ public class VerificationController {
 
 
 
+    // Full stage-by-stage audit trail for one application (oldest first).
+    // Backs the "expand row to see history" action on the Verification page.
+    @GetMapping("/application/{applicationId:[0-9]+}/history")
+    public ResponseEntity<List<Verification>> getVerificationHistory(
+            @PathVariable Long applicationId
+    ) {
+
+        return ResponseEntity.ok(
+                verificationService.getVerificationHistory(applicationId)
+        );
+
+    }
+
+
+
     // Approve Verification
     @PutMapping("/{id:[0-9]+}/approve")
     public ResponseEntity<Verification> approveVerification(

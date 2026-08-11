@@ -18,6 +18,7 @@ import {
   AccountTree,
   AccountBalanceWallet,
   Assessment,
+  Payments,
 } from "@mui/icons-material";
 
 import { Link, useLocation } from "react-router-dom";
@@ -36,6 +37,7 @@ const menuItems = [
     icon: <AccountBalanceWallet />,
     path: "/finance",
   },
+  { text: "Disbursement", icon: <Payments />, path: "/disbursement" },
   { text: "Status Tracking", icon: <AccountTree />, path: "/status" },
   { text: "Analytics", icon: <Assessment />, path: "/analytics" },
 ];

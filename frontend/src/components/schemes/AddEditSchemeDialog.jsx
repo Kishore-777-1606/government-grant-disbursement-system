@@ -9,11 +9,20 @@ import {
     TextField,
     Grid,
     MenuItem,
+    Select,
+    InputLabel,
+    FormControl,
+    Checkbox,
+    ListItemText,
     Snackbar,
     Alert
 } from "@mui/material";
 
 import { createScheme, updateScheme } from "../../services/schemeService";
+
+// Must match the backend's @Pattern on Beneficiary.category exactly —
+// these are the only categories a scheme's allowedCategories can restrict to.
+const CATEGORY_OPTIONS = ["General", "SC", "ST", "OBC", "EWS"];
 
 const EMPTY_SCHEME = {
     schemeCode: "",
@@ -24,6 +33,15 @@ const EMPTY_SCHEME = {
     frequency: "",
     amount: "",
     maxBeneficiaries: "",
+    // Eligibility criteria (Module 2: "configurable scheme criteria").
+    // maxAnnualIncome: income ceiling, blank = no ceiling.
+    // allowedCategories: kept as an ARRAY in component state (easiest for
+    // the multi-select UI) and converted to/from the backend's
+    // comma-separated string only at the API boundary (see useEffect
+    // below and handleSubmit's payload). Empty array = every category
+    // eligible.
+    maxAnnualIncome: "",
+    allowedCategories: [],
     startDate: "",
     endDate: "",
     isActive: true
@@ -40,7 +58,20 @@ function AddEditSchemeDialog({ open, handleClose, refreshData, schemeToEdit }) {
 
     useEffect(() => {
         if (open) {
-            setScheme(schemeToEdit ? { ...EMPTY_SCHEME, ...schemeToEdit } : EMPTY_SCHEME);
+            if (schemeToEdit) {
+                setScheme({
+                    ...EMPTY_SCHEME,
+                    ...schemeToEdit,
+                    // Backend sends allowedCategories as "SC,ST,OBC" — convert
+                    // to an array once here so the rest of the component only
+                    // ever deals with arrays.
+                    allowedCategories: schemeToEdit.allowedCategories
+                        ? schemeToEdit.allowedCategories.split(",").map((c) => c.trim()).filter(Boolean)
+                        : []
+                });
+            } else {
+                setScheme(EMPTY_SCHEME);
+            }
             setErrors({});
         }
     }, [open, schemeToEdit]);
@@ -49,6 +80,15 @@ function AddEditSchemeDialog({ open, handleClose, refreshData, schemeToEdit }) {
         const { name, value } = e.target;
         setScheme((prev) => ({ ...prev, [name]: value }));
         setErrors((prev) => ({ ...prev, [name]: undefined }));
+    };
+
+    const handleCategoriesChange = (e) => {
+        const { value } = e.target;
+        // MUI's Select occasionally delivers a comma-joined string instead
+        // of an array depending on how the change was triggered - normalize
+        // either way back to an array for state.
+        const asArray = typeof value === "string" ? value.split(",") : value;
+        setScheme((prev) => ({ ...prev, allowedCategories: asArray }));
     };
 
     const validate = () => {
@@ -74,6 +114,10 @@ function AddEditSchemeDialog({ open, handleClose, refreshData, schemeToEdit }) {
             newErrors.endDate = "End date cannot be before start date";
         }
 
+        if (scheme.maxAnnualIncome !== "" && scheme.maxAnnualIncome !== null && Number(scheme.maxAnnualIncome) < 0) {
+            newErrors.maxAnnualIncome = "Income ceiling cannot be negative";
+        }
+
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -91,7 +135,13 @@ function AddEditSchemeDialog({ open, handleClose, refreshData, schemeToEdit }) {
             const payload = {
                 ...scheme,
                 amount: Number(scheme.amount),
-                maxBeneficiaries: scheme.maxBeneficiaries === "" ? null : Number(scheme.maxBeneficiaries)
+                maxBeneficiaries: scheme.maxBeneficiaries === "" ? null : Number(scheme.maxBeneficiaries),
+                maxAnnualIncome: scheme.maxAnnualIncome === "" ? null : Number(scheme.maxAnnualIncome),
+                // Convert the array back to the comma-separated string the
+                // backend/entity expects.
+                allowedCategories: scheme.allowedCategories && scheme.allowedCategories.length > 0
+                    ? scheme.allowedCategories.join(",")
+                    : null
             };
 
             if (isEditMode) {
@@ -246,11 +296,50 @@ function AddEditSchemeDialog({ open, handleClose, refreshData, schemeToEdit }) {
                             <TextField
                                 fullWidth
                                 type="number"
+                                label="Max Annual Income (eligibility ceiling)"
+                                name="maxAnnualIncome"
+                                value={scheme.maxAnnualIncome}
+                                onChange={handleChange}
+                                error={Boolean(errors.maxAnnualIncome)}
+                                helperText={errors.maxAnnualIncome || "Leave blank for no income ceiling"}
+                            />
+                        </Grid>
+
+                        <Grid item xs={6}>
+                            <TextField
+                                fullWidth
+                                type="number"
                                 label="Max Beneficiaries"
                                 name="maxBeneficiaries"
                                 value={scheme.maxBeneficiaries || ""}
                                 onChange={handleChange}
                             />
+                        </Grid>
+
+                        <Grid item xs={6}>
+                            <FormControl fullWidth>
+                                <InputLabel id="allowed-categories-label">
+                                    Allowed Categories
+                                </InputLabel>
+                                <Select
+                                    labelId="allowed-categories-label"
+                                    label="Allowed Categories"
+                                    multiple
+                                    name="allowedCategories"
+                                    value={scheme.allowedCategories}
+                                    onChange={handleCategoriesChange}
+                                    renderValue={(selected) =>
+                                        selected.length === 0 ? "All categories eligible" : selected.join(", ")
+                                    }
+                                >
+                                    {CATEGORY_OPTIONS.map((option) => (
+                                        <MenuItem key={option} value={option}>
+                                            <Checkbox checked={scheme.allowedCategories.includes(option)} />
+                                            <ListItemText primary={option} />
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
                         </Grid>
 
                         <Grid item xs={6}>

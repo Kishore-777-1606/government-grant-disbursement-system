@@ -1,4 +1,3 @@
-
 import {
 
 PieChart,
@@ -15,34 +14,27 @@ ResponsiveContainer
 
 } from "recharts";
 
-
-
-function RegionPieChart(){
+import NoData from "./NoData";
 
 
 
-const data=[
+// Consumes RegionUtilizationDTO[] from GET /api/analytics/region-utilization
+// (region, totalAmount), passed down from Analytics.jsx as the `data` prop.
+function RegionPieChart({ data: rawData }){
 
 
-{
-name:"State-1",
-value:80000
-},
+const data = (rawData || []).map((item) => ({
+    name: item.region,
+    value: item.totalAmount
+}));
 
 
-{
-name:"State-2",
-value:50000
-},
 
+if(data.length === 0){
 
-{
-name:"State-3",
-value:30000
+    return <NoData />;
+
 }
-
-
-];
 
 
 

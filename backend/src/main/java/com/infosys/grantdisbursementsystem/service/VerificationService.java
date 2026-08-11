@@ -19,8 +19,15 @@ import java.util.List;
 import java.util.Objects;
 
 
+
 @Service
 public class VerificationService {
+
+
+    // Applications requesting this much or more are always escalated to
+    // District Officer for extra scrutiny, regardless of eligibility score
+    // (Module 2: "high-value cases escalated for additional scrutiny").
+    public static final double HIGH_VALUE_THRESHOLD = 50000.0;
 
 
     private final VerificationRepository verificationRepository;
@@ -49,6 +56,14 @@ public class VerificationService {
 
 
 
+    /**
+     * Creates the FIRST verification-stage record for an application, once it
+     * has passed eligibility scoring. Always inserts a new row (an
+     * application should only reach this once, from ApplicationServiceImpl),
+     * rather than reusing/overwriting an existing record — each stage of the
+     * workflow gets its own permanent row so the audit trail survives later
+     * stage transitions.
+     */
     public Verification createVerification(
             @NonNull Long applicationId,
             String officerRole
@@ -68,10 +83,7 @@ public class VerificationService {
 
 
 
-        Verification verification =
-                verificationRepository
-                        .findByApplication(application)
-                        .orElseGet(Verification::new);
+        Verification verification = new Verification();
 
 
 
@@ -83,7 +95,7 @@ public class VerificationService {
 
 
 
-        double score =
+       double score =
                 application.getEligibilityScore() != null
                 ?
                 application.getEligibilityScore()
@@ -91,64 +103,54 @@ public class VerificationService {
                 0;
 
 
+        // High-value applications get extra scrutiny (Module 2 requirement:
+        // "flagged or high-value cases escalated for additional scrutiny"),
+        // regardless of which score band they'd otherwise fall into.
+        double amount =
+                application.getAppliedAmount() != null
+                ?
+                application.getAppliedAmount().doubleValue()
+                :
+                0;
+
+        boolean highValue = amount >= HIGH_VALUE_THRESHOLD;
+
 
         if(score < 60) {
 
-
             application.setStatus("Rejected");
-
             verification.setVerifiedBy("System");
-
             verification.setVerificationStatus("Rejected");
-
             verification.setRemarks(
                     "Application rejected due to low eligibility score"
             );
 
-
         }
-        else if(score < 80) {
+        else if(score < 80 && !highValue) {
 
-
-            application.setStatus(
-                    "Field Verification Pending"
-            );
-
-            verification.setVerifiedBy(
-                    "Field Officer"
-            );
-
-            verification.setVerificationStatus(
-                    "Pending"
-            );
-
+            application.setStatus("Field Verification Pending");
+            verification.setVerifiedBy("Field Officer");
+            verification.setVerificationStatus("Pending");
             verification.setRemarks(
                     "Waiting for Field Officer Verification"
             );
 
-
         }
         else {
 
-
-            application.setStatus(
-                    "District Verification Pending"
-            );
-
-            verification.setVerifiedBy(
-                    "District Officer"
-            );
-
-            verification.setVerificationStatus(
-                    "Pending"
-            );
-
+            application.setStatus("District Verification Pending");
+            verification.setVerifiedBy("District Officer");
+            verification.setVerificationStatus("Pending");
             verification.setRemarks(
-                    "Waiting for District Officer Verification"
+                    score < 80
+                            ?
+                            "Waiting for District Officer Verification "
+                            + "(escalated: high-value application)"
+                            :
+                            "Waiting for District Officer Verification"
             );
 
         }
-
 
         applicationRepository.save(application);
 
@@ -199,6 +201,14 @@ public class VerificationService {
 
 
 
+    /**
+     * Approves the current verification stage. Approving does NOT reuse the
+     * same row for the next stage — it closes out this record (status
+     * "Approved", with the approver's remarks preserved) and, if there's a
+     * next stage, inserts a brand-new Verification row for it. This keeps a
+     * permanent, un-overwritten history of every stage the application
+     * passed through.
+     */
     public Verification approveVerification(
             @NonNull Long id,
             String remarks
@@ -226,25 +236,49 @@ public class VerificationService {
         if("Field Officer".equalsIgnoreCase(officer)){
 
 
+            // Close out the Field Officer stage — this row now permanently
+            // records that decision.
+            verification.setVerificationStatus(
+                    "Approved"
+            );
+
+            verification.setRemarks(
+                    remarks
+            );
+
+            verificationRepository.save(verification);
+
+
             application.setStatus(
                     "District Verification Pending"
             );
 
 
-            verification.setVerifiedBy(
+            // Open a new stage record for the District Officer instead of
+            // overwriting the Field Officer's row.
+            Verification nextStage = new Verification();
+
+            nextStage.setApplication(application);
+
+            nextStage.setVerificationDate(
+                    LocalDate.now()
+            );
+
+            nextStage.setVerifiedBy(
                     "District Officer"
             );
 
-
-            verification.setVerificationStatus(
+            nextStage.setVerificationStatus(
                     "Pending"
             );
 
-
-            verification.setRemarks(
+            nextStage.setRemarks(
                     "Waiting for District Officer Verification"
             );
 
+            applicationRepository.save(application);
+
+            return verificationRepository.save(nextStage);
 
         }
 
@@ -368,6 +402,12 @@ public class VerificationService {
 
 
 
+    /**
+     * Sends the application back for re-verification. The officer who sent
+     * it back keeps their own row intact (status "Sent Back", with their
+     * remarks) — a new "Field Officer" stage row is created for the
+     * re-verification cycle rather than overwriting the sender's record.
+     */
     public Verification sendForReVerification(
             @NonNull Long id,
             String remarks
@@ -378,20 +418,17 @@ public class VerificationService {
                 getVerificationById(id);
 
 
-
+        // Preserve which officer sent it back and why — don't relabel this
+        // row as "Field Officer" / overwrite their identity.
         verification.setVerificationStatus(
-                "Re-Verification"
+                "Sent Back"
         );
-
-
-        verification.setVerifiedBy(
-                "Field Officer"
-        );
-
 
         verification.setRemarks(
                 remarks
         );
+
+        verificationRepository.save(verification);
 
 
 
@@ -405,12 +442,32 @@ public class VerificationService {
                 "Re-Verification Pending"
         );
 
-
         applicationRepository.save(application);
 
 
+        // Open a fresh Field Officer stage for the re-verification cycle.
+        Verification reVerificationStage = new Verification();
 
-        return verificationRepository.save(verification);
+        reVerificationStage.setApplication(application);
+
+        reVerificationStage.setVerificationDate(
+                LocalDate.now()
+        );
+
+        reVerificationStage.setVerifiedBy(
+                "Field Officer"
+        );
+
+        reVerificationStage.setVerificationStatus(
+                "Pending"
+        );
+
+        reVerificationStage.setRemarks(
+                "Re-verification requested: " + remarks
+        );
+
+
+        return verificationRepository.save(reVerificationStage);
 
     }
 
@@ -425,6 +482,34 @@ public class VerificationService {
 
         return verificationRepository
                 .findByVerificationStatus("Pending");
+
+    }
+
+
+
+
+    /**
+     * Full audit trail for one application — every stage it has ever passed
+     * through, oldest first. This is the payoff of the @ManyToOne redesign:
+     * previously there was only ever one (overwritten) row per application.
+     */
+    public List<Verification> getVerificationHistory(
+            @NonNull Long applicationId
+    ){
+
+        Application application =
+                applicationRepository.findById(
+                        Objects.requireNonNull(applicationId)
+                )
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Application not found with ID: "
+                                + applicationId
+                        )
+                );
+
+        return verificationRepository
+                .findByApplicationOrderByVerificationIdAsc(application);
 
     }
 

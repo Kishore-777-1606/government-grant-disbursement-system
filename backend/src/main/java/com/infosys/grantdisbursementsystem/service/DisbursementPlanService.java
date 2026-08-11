@@ -17,22 +17,22 @@ public class DisbursementPlanService {
 
     private final DisbursementPlanRepository planRepository;
     private final DisbursementInstallmentRepository installmentRepository;
-    private final ComplianceMilestoneRepository milestoneRepository;
     private final ApplicationRepository applicationRepository;
+    private final ComplianceMilestoneService milestoneService;
 
 
 
     public DisbursementPlanService(
             DisbursementPlanRepository planRepository,
             DisbursementInstallmentRepository installmentRepository,
-            ComplianceMilestoneRepository milestoneRepository,
-            ApplicationRepository applicationRepository
+            ApplicationRepository applicationRepository,
+            ComplianceMilestoneService milestoneService
     ) {
 
         this.planRepository = planRepository;
         this.installmentRepository = installmentRepository;
-        this.milestoneRepository = milestoneRepository;
         this.applicationRepository = applicationRepository;
+        this.milestoneService = milestoneService;
 
     }
 
@@ -100,26 +100,15 @@ public class DisbursementPlanService {
 
 
 
+            // Delegates to ComplianceMilestoneService so there is a single,
+            // type-aware due-date policy (Documentation=7d, Ground
+            // Verification=15d, Utilization Proof=30d) instead of the flat
+            // 30-day-per-installment rule that used to be duplicated here.
             ComplianceMilestone milestone =
-                    new ComplianceMilestone();
-
-
-            milestone.setApplication(application);
-
-            milestone.setMilestoneType(
-                    milestoneTypeForInstallment(i)
-            );
-
-            milestone.setStatus("Pending");
-
-            milestone.setDueDate(
-                    LocalDate.now()
-                    .plusDays(30L * i)
-            );
-
-
-            milestone =
-                    milestoneRepository.save(milestone);
+                    milestoneService.createMilestone(
+                            application,
+                            milestoneTypeForInstallment(i)
+                    );
 
 
 
@@ -138,9 +127,11 @@ public class DisbursementPlanService {
                     installmentAmount
             );
 
+            // The scheduled release date follows the milestone's own due
+            // date (fund release is tied to milestone completion — the two
+            // should never show different target dates on the schedule).
             installment.setScheduledDate(
-                    LocalDate.now()
-                    .plusDays(30L * i)
+                    milestone.getDueDate()
             );
 
             installment.setStatus("Scheduled");

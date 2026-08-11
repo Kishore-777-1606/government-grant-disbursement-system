@@ -2,6 +2,9 @@ package com.infosys.grantdisbursementsystem.entity;
 
 import jakarta.persistence.*;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+
 @Entity
 @Table(name = "applications")
 public class Application {
@@ -12,10 +15,16 @@ public class Application {
     private String assignedOfficer;
     private Long beneficiaryId;
     private Long schemeId;
-    private String applicationDate;
+    private LocalDate applicationDate;
     private String status;
     private Double eligibilityScore;
     private String remarks;
+
+    // Amount requested at submission time, and amount finance actually
+    // approved (may differ from the scheme's default amount / applied
+    // amount once finance reviews it).
+    private BigDecimal appliedAmount;
+    private BigDecimal approvedAmount;
 
     public Application() {
     }
@@ -51,11 +60,11 @@ public void setAssignedOfficer(String assignedOfficer) {
         this.schemeId = schemeId;
     }
 
-    public String getApplicationDate() {
+    public LocalDate getApplicationDate() {
         return applicationDate;
     }
 
-    public void setApplicationDate(String applicationDate) {
+    public void setApplicationDate(LocalDate applicationDate) {
         this.applicationDate = applicationDate;
     }
 
@@ -81,5 +90,21 @@ public void setAssignedOfficer(String assignedOfficer) {
 
     public void setRemarks(String remarks) {
         this.remarks = remarks;
+    }
+
+    public BigDecimal getAppliedAmount() {
+        return appliedAmount;
+    }
+
+    public void setAppliedAmount(BigDecimal appliedAmount) {
+        this.appliedAmount = appliedAmount;
+    }
+
+    public BigDecimal getApprovedAmount() {
+        return approvedAmount;
+    }
+
+    public void setApprovedAmount(BigDecimal approvedAmount) {
+        this.approvedAmount = approvedAmount;
     }
 }

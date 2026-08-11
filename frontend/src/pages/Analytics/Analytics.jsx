@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
-
+import DownloadIcon from "@mui/icons-material/Download";
 import {
   Grid,
   Typography,
   Button,
   Box,
   CircularProgress,
+  Menu,
+  MenuItem,
 } from "@mui/material";
 
 import RefreshIcon from "@mui/icons-material/Refresh";
@@ -16,8 +18,6 @@ import {
   Assignment,
   PendingActions,
 } from "@mui/icons-material";
-
-
 import MainLayout from "../../layouts/MainLayout";
 
 import AnimatedDashboardCard from "../../components/AnimatedDashboardCard";
@@ -29,25 +29,22 @@ import CategoryPieChart from "../../components/CategoryPieChart";
 import BudgetExhaustionChart from "../../components/BudgetExhaustionChart";
 import ApprovalTurnaroundChart from "../../components/ApprovalTurnaroundChart";
 import RecentActivities from "../../components/RecentActivities";
-
-
 import {
   getDashboardSummary,
   getFundUtilization,
   getRegionUtilization,
   getCategoryDistribution,
   getBudgetExhaustion,
+  exportFundUtilizationExcel,
+  exportFundUtilizationPdf,
+  exportRegionUtilizationExcel,
+  exportRegionUtilizationPdf,
 } from "../../api/analyticsApi";
-
-
 
 function Analytics() {
 
 
 const [loading,setLoading] = useState(false);
-
-
-
 const [summary,setSummary] = useState({
 
  totalBeneficiaries:0,
@@ -56,27 +53,41 @@ const [summary,setSummary] = useState({
  pendingMilestones:0
 
 });
-
-
-
 const [fundData,setFundData] = useState([]);
 const [regionData,setRegionData] = useState([]);
 const [categoryData,setCategoryData] = useState([]);
 const [budgetData,setBudgetData] = useState([]);
+const [exportMenuAnchor, setExportMenuAnchor] = useState(null);
+const [exporting, setExporting] = useState(false);
 
+const downloadBlob = (blob, filename) => {
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.URL.revokeObjectURL(url);
+};
 
-
-
+const handleExport = async (fetcher, filename) => {
+  setExportMenuAnchor(null);
+  setExporting(true);
+  try {
+    const response = await fetcher();
+    downloadBlob(response.data, filename);
+  } catch (error) {
+    console.error(error);
+    alert("Failed to generate the report. Please try again.");
+  } finally {
+    setExporting(false);
+  }
+};
 
 const loadDashboardData = async()=>{
-
-
 try{
-
-
 setLoading(true);
-
-
 
 const summaryResponse =
 await getDashboardSummary();
@@ -84,18 +95,12 @@ await getDashboardSummary();
 setSummary(
 summaryResponse.data || {}
 );
-
-
-
 const fundResponse =
 await getFundUtilization();
 
 setFundData(
 fundResponse.data || []
 );
-
-
-
 const regionResponse =
 await getRegionUtilization();
 
@@ -111,18 +116,12 @@ await getCategoryDistribution();
 setCategoryData(
 categoryResponse.data || []
 );
-
-
-
 const budgetResponse =
 await getBudgetExhaustion();
 
 setBudgetData(
 budgetResponse.data || []
 );
-
-
-
 }
 
 catch(error){
@@ -143,11 +142,6 @@ setLoading(false);
 
 
 };
-
-
-
-
-
 useEffect(()=>{
 
 
@@ -162,12 +156,6 @@ fetchData();
 
 
 },[]);
-
-
-
-
-
-
 return (
 
 <MainLayout>
@@ -186,8 +174,6 @@ p:3
 }}
 
 >
-
-
 <Typography
 
 variant="h4"
@@ -201,9 +187,6 @@ mb={2}
 Analytics Dashboard
 
 </Typography>
-
-
-
 <Typography mb={3}>
 
 Monitor government grant allocation,
@@ -211,49 +194,66 @@ beneficiary progress, fund utilization
 and approval workflow.
 
 </Typography>
-
-
-
-
-
 <Box
-
-sx={{
-
-display:"flex",
-
-justifyContent:"flex-end",
-
-mb:3
-
-}}
-
+  sx={{
+    display: "flex",
+    justifyContent: "flex-end",
+    gap: 2,
+    mb: 3,
+  }}
 >
+  <Button
+    variant="outlined"
+    startIcon={<DownloadIcon />}
+    disabled={exporting}
+    onClick={(e) => setExportMenuAnchor(e.currentTarget)}
+  >
+    {exporting ? "Exporting..." : "Export Report"}
+  </Button>
 
+  <Menu
+    anchorEl={exportMenuAnchor}
+    open={Boolean(exportMenuAnchor)}
+    onClose={() => setExportMenuAnchor(null)}
+  >
+    <MenuItem
+      onClick={() =>
+        handleExport(exportFundUtilizationExcel, "scheme-wise-fund-utilization.xlsx")
+      }
+    >
+      Scheme-wise Summary (Excel)
+    </MenuItem>
+    <MenuItem
+      onClick={() =>
+        handleExport(exportFundUtilizationPdf, "scheme-wise-fund-utilization.pdf")
+      }
+    >
+      Scheme-wise Summary (PDF)
+    </MenuItem>
+    <MenuItem
+      onClick={() =>
+        handleExport(exportRegionUtilizationExcel, "region-wise-disbursement-summary.xlsx")
+      }
+    >
+      Region-wise Summary (Excel)
+    </MenuItem>
+    <MenuItem
+      onClick={() =>
+        handleExport(exportRegionUtilizationPdf, "region-wise-disbursement-summary.pdf")
+      }
+    >
+      Region-wise Summary (PDF)
+    </MenuItem>
+  </Menu>
 
-<Button
-
-variant="contained"
-
-startIcon={<RefreshIcon/>}
-
-onClick={loadDashboardData}
-
->
-
-Refresh Data
-
-</Button>
-
-
+  <Button
+    variant="contained"
+    startIcon={<RefreshIcon />}
+    onClick={loadDashboardData}
+  >
+    Refresh Data
+  </Button>
 </Box>
-
-
-
-
-
-
-
 <Grid container spacing={3}>
 
 
@@ -294,10 +294,6 @@ gradient="linear-gradient(135deg,#2e7d32,#66bb6a)"
 
 
 </Grid>
-
-
-
-
 <Grid size={{xs:12,md:3}}>
 
 
@@ -315,9 +311,6 @@ gradient="linear-gradient(135deg,#ed6c02,#ffb74d)"
 
 
 </Grid>
-
-
-
 <Grid size={{xs:12,md:3}}>
 
 
@@ -338,11 +331,6 @@ gradient="linear-gradient(135deg,#9c27b0,#ce93d8)"
 
 
 </Grid>
-
-
-
-
-
 {
 loading &&
 
@@ -365,11 +353,6 @@ my:4
 </Box>
 
 }
-
-
-
-
-
 <Grid
 
 container
@@ -402,9 +385,6 @@ mt={2}
 </ChartCard>
 
 </Grid>
-
-
-
 <Grid size={{xs:12,md:6}}>
 
 <ChartCard title="Category-wise Distribution">
@@ -426,10 +406,6 @@ mt={2}
 </ChartCard>
 
 </Grid>
-
-
-
-
 <Grid size={{xs:12,md:6}}>
 
 <ChartCard title="Approval Turnaround">
@@ -439,10 +415,6 @@ mt={2}
 </ChartCard>
 
 </Grid>
-
-
-
-
 <Grid size={{xs:12,md:6}}>
 
 <ChartCard title="Recent Activities">
@@ -467,6 +439,4 @@ mt={2}
 
 
 }
-
-
 export default Analytics;

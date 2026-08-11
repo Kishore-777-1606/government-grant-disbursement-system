@@ -8,10 +8,15 @@ import {
     TextField,
     Grid,
     Snackbar,
-    Alert
+    Alert,
+    MenuItem
 } from "@mui/material";
 
 import { createBeneficiary } from "../../services/beneficiaryService";
+
+// Must match the backend's @Pattern(regexp = "^(General|SC|ST|OBC|EWS)$")
+// on Beneficiary.category exactly, or submission fails with a 400.
+const CATEGORY_OPTIONS =["General", "OBC", "SC", "ST", "EWS"];
 
 const EMPTY_BENEFICIARY = {
     beneficiaryUid: "",
@@ -31,6 +36,8 @@ const EMPTY_BENEFICIARY = {
     bankAccountNumber: "",
     ifscCode: "",
     bankName: "",
+    category: "",
+    annualIncome: "",
     aadhaarVerified: false,
     bankVerified: false,
     isActive: true
@@ -101,13 +108,31 @@ function AddBeneficiaryDialog({ open, handleClose, refreshData }) {
             newErrors.pincode = "Enter a valid 6-digit pincode";
         }
 
-        if (beneficiary.ifscCode && beneficiary.ifscCode.trim() && !IFSC_REGEX.test(beneficiary.ifscCode.trim().toUpperCase())) {
+       if (beneficiary.ifscCode && beneficiary.ifscCode.trim() && !IFSC_REGEX.test(beneficiary.ifscCode.trim().toUpperCase())) {
             newErrors.ifscCode = "Enter a valid IFSC code (e.g. SBIN0001234)";
+        }
+
+        if (!beneficiary.category || !beneficiary.category.trim()) {
+            newErrors.category = "Category is required";
+        }
+
+        if (beneficiary.annualIncome === "" || beneficiary.annualIncome === null || beneficiary.annualIncome === undefined) {
+            newErrors.annualIncome = "Annual income is required";
+        } else if (Number(beneficiary.annualIncome) < 0) {
+            newErrors.annualIncome = "Annual income cannot be negative";
         }
 
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
+    // Optional numeric fields default to "" in form state (a controlled
+    // MUI TextField can't hold null). Sent as-is, an empty string fails
+    // Jackson's BigDecimal/Long binding on the backend with a 400 — so
+    // blank must become null right before the request goes out.
+    const toNullableNumber = (value) =>
+        value === "" || value === null || value === undefined
+            ? null
+            : Number(value);
 
     const handleSubmit = async () => {
 
@@ -121,7 +146,12 @@ function AddBeneficiaryDialog({ open, handleClose, refreshData }) {
 
             await createBeneficiary({
                 ...beneficiary,
-                ifscCode: beneficiary.ifscCode ? beneficiary.ifscCode.toUpperCase() : beneficiary.ifscCode
+                ifscCode: beneficiary.ifscCode ? beneficiary.ifscCode.toUpperCase() : beneficiary.ifscCode,
+                villageId: toNullableNumber(beneficiary.villageId),
+                blockId: toNullableNumber(beneficiary.blockId),
+                districtId: toNullableNumber(beneficiary.districtId),
+                stateId: toNullableNumber(beneficiary.stateId),
+                annualIncome: toNullableNumber(beneficiary.annualIncome)
             });
 
             setSnackbar({ open: true, message: "Beneficiary added successfully", severity: "success" });
@@ -367,6 +397,40 @@ function AddBeneficiaryDialog({ open, handleClose, refreshData }) {
                                 onChange={handleChange}
                                 error={Boolean(errors.ifscCode)}
                                 helperText={errors.ifscCode}
+                            />
+                        </Grid>
+
+                       <Grid item xs={6}>
+                            <TextField
+                                fullWidth
+                                required
+                                select
+                                label="Category"
+                                name="category"
+                                value={beneficiary.category}
+                                onChange={handleChange}
+                                error={Boolean(errors.category)}
+                                helperText={errors.category || "Used to check scheme eligibility criteria"}
+                            >
+                                {CATEGORY_OPTIONS.map((option) => (
+                                    <MenuItem key={option} value={option}>
+                                        {option}
+                                    </MenuItem>
+                                ))}
+                            </TextField>
+                        </Grid>
+
+                        <Grid item xs={6}>
+                            <TextField
+                                fullWidth
+                                required
+                                type="number"
+                                label="Annual Income"
+                                name="annualIncome"
+                                value={beneficiary.annualIncome}
+                                onChange={handleChange}
+                                error={Boolean(errors.annualIncome)}
+                                helperText={errors.annualIncome || "Used to check scheme income-ceiling criteria"}
                             />
                         </Grid>
 

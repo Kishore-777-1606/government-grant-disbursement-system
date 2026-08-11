@@ -1,6 +1,6 @@
 package com.infosys.grantdisbursementsystem.controller;
 
-
+import com.infosys.grantdisbursementsystem.dto.RecentActivityDTO;
 import com.infosys.grantdisbursementsystem.dto.ApplicationSummaryDTO;
 import com.infosys.grantdisbursementsystem.dto.BudgetExhaustionDTO;
 import com.infosys.grantdisbursementsystem.dto.CategoryDistributionDTO;
@@ -11,13 +11,17 @@ import com.infosys.grantdisbursementsystem.dto.MilestoneSummaryDTO;
 import com.infosys.grantdisbursementsystem.dto.RegionUtilizationDTO;
 
 import com.infosys.grantdisbursementsystem.service.AnalyticsService;
+import com.infosys.grantdisbursementsystem.service.ReportExportService;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
-
 
 
 @RestController
@@ -28,8 +32,14 @@ public class AnalyticsController {
 
  private final AnalyticsService analyticsService;
 
-public AnalyticsController(AnalyticsService analyticsService) {
+ private final ReportExportService reportExportService;
+
+public AnalyticsController(
+        AnalyticsService analyticsService,
+        ReportExportService reportExportService
+) {
     this.analyticsService = analyticsService;
+    this.reportExportService = reportExportService;
 }
 
     // ================= DASHBOARD SUMMARY =================
@@ -125,47 +135,95 @@ public AnalyticsController(AnalyticsService analyticsService) {
     @GetMapping("/approval-turnaround")
     public List<Map<String,Object>> getApprovalTurnaround(){
 
-        List<Map<String,Object>> data = new ArrayList<>();
-
-        Map<String,Object> approval = new HashMap<>();
-
-        approval.put("stage", "Verification");
-        approval.put("days", 5);
-
-        data.add(approval);
-
-        return data;
+        return analyticsService.getApprovalTurnaround();
     }
 
 
 
 
     // ================= RECENT ACTIVITIES =================
+// ================= RECENT ACTIVITIES =================
 
-    @GetMapping("/recent-activities")
-    public List<Map<String,Object>> getRecentActivities(){
+@GetMapping("/recent-activities")
+public List<RecentActivityDTO> getRecentActivities() {
 
-        List<Map<String,Object>> activities = new ArrayList<>();
+    return analyticsService.getRecentActivities();
 
-        Map<String,Object> activity = new HashMap<>();
+}
 
-        activity.put(
-                "message",
-                "Application approved"
+
+
+    // ================= EXPORTS (Module 4: downloadable PDF/Excel reports) =================
+
+    @GetMapping("/export/fund-utilization/excel")
+    public ResponseEntity<byte[]> exportFundUtilizationExcel() {
+
+        byte[] file = reportExportService.fundUtilizationToExcel(
+                analyticsService.getFundUtilization()
         );
 
-        activity.put(
-                "date",
-                "2026-08-06"
+        return fileResponse(
+                file,
+                "scheme-wise-fund-utilization.xlsx",
+                MediaType.parseMediaType(
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                )
         );
 
-
-        activities.add(activity);
-
-
-        return activities;
     }
 
+    @GetMapping("/export/fund-utilization/pdf")
+    public ResponseEntity<byte[]> exportFundUtilizationPdf() {
 
+        byte[] file = reportExportService.fundUtilizationToPdf(
+                analyticsService.getFundUtilization()
+        );
+
+        return fileResponse(file, "scheme-wise-fund-utilization.pdf", MediaType.APPLICATION_PDF);
+
+    }
+
+    @GetMapping("/export/region-utilization/excel")
+    public ResponseEntity<byte[]> exportRegionUtilizationExcel() {
+
+        byte[] file = reportExportService.regionUtilizationToExcel(
+                analyticsService.getRegionUtilization()
+        );
+
+        return fileResponse(
+                file,
+                "region-wise-disbursement-summary.xlsx",
+                MediaType.parseMediaType(
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                )
+        );
+
+    }
+
+    @GetMapping("/export/region-utilization/pdf")
+    public ResponseEntity<byte[]> exportRegionUtilizationPdf() {
+
+        byte[] file = reportExportService.regionUtilizationToPdf(
+                analyticsService.getRegionUtilization()
+        );
+
+        return fileResponse(file, "region-wise-disbursement-summary.pdf", MediaType.APPLICATION_PDF);
+
+    }
+
+    private ResponseEntity<byte[]> fileResponse(byte[] file, String filename, MediaType mediaType) {
+
+        HttpHeaders headers = new HttpHeaders();
+
+        headers.setContentDisposition(
+                ContentDisposition.attachment().filename(filename).build()
+        );
+
+        return ResponseEntity.ok()
+                .headers(headers)
+                .contentType(mediaType)
+                .body(file);
+
+    }
 
 }

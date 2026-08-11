@@ -71,6 +71,8 @@ public class SchemeService {
                 "Scheme cannot be null"
         );
 
+        validateCriteriaOrdering(scheme);
+
         return schemeRepository.save(scheme);
 
     }
@@ -144,6 +146,21 @@ public class SchemeService {
         );
 
 
+        // Eligibility criteria (Module 2 requirement: "configurable scheme
+        // criteria") — these are the two fields that actually exist on the
+        // Scheme entity. There is no minAge/maxAge/eligibleCategory/
+        // minGrantAmount/maxGrantAmount/regionalBudgetAllocation on this
+        // entity; earlier code referenced those and did not compile.
+        scheme.setMaxAnnualIncome(
+                schemeDetails.getMaxAnnualIncome()
+        );
+
+
+        scheme.setAllowedCategories(
+                schemeDetails.getAllowedCategories()
+        );
+
+
         scheme.setStartDate(
                 schemeDetails.getStartDate()
         );
@@ -159,6 +176,8 @@ public class SchemeService {
         );
 
 
+        validateCriteriaOrdering(scheme);
+
 
         return schemeRepository.save(scheme);
 
@@ -166,6 +185,31 @@ public class SchemeService {
 
 
 
+
+
+
+
+    /**
+     * Server-side guard on Scheme's date range. The frontend already blocks
+     * start > end in the Add/Edit Scheme dialog, but that's bypassable via
+     * a direct API call — and an inverted date range would make a scheme
+     * appear expired the moment it's created.
+     */
+    private void validateCriteriaOrdering(Scheme scheme) {
+
+        if (scheme.getStartDate() != null
+                &&
+            scheme.getEndDate() != null
+                &&
+            scheme.getStartDate().isAfter(scheme.getEndDate())) {
+
+            throw new IllegalArgumentException(
+                    "startDate cannot be after endDate"
+            );
+
+        }
+
+    }
 
 
 

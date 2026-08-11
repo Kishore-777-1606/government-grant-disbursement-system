@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
     Typography,
     Paper,
@@ -9,13 +9,21 @@ import {
     TableHead,
     TableRow,
     CircularProgress,
-    Button
+    Button,
+    Link,
+    Snackbar,
+    Alert
 } from "@mui/material";
 
 import AddIcon from "@mui/icons-material/Add";
+import UploadFileIcon from "@mui/icons-material/UploadFile";
 
 import MainLayout from "../../layouts/MainLayout";
-import { getAllBeneficiaries } from "../../services/beneficiaryService";
+import {
+    getAllBeneficiaries,
+    uploadBeneficiaryDocument,
+    getBeneficiaryDocumentUrl
+} from "../../services/beneficiaryService";
 import AddBeneficiaryDialog from "../../components/beneficiaries/AddBeneficiaryDialog";
 
 function Beneficiaries() {
@@ -24,6 +32,10 @@ function Beneficiaries() {
     const [loading, setLoading] = useState(true);
 
     const [openDialog, setOpenDialog] = useState(false);
+
+    const [uploadTargetId, setUploadTargetId] = useState(null);
+    const fileInputRef = useRef(null);
+    const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
 
     useEffect(() => {
         loadBeneficiaries();
@@ -48,9 +60,55 @@ function Beneficiaries() {
 
     };
 
+    const handleUploadClick = (id) => {
+        setUploadTargetId(id);
+        fileInputRef.current?.click();
+    };
+
+    const handleFileSelected = async (e) => {
+
+        const file = e.target.files[0];
+
+        if (!file || uploadTargetId === null) {
+            return;
+        }
+
+        try {
+
+            await uploadBeneficiaryDocument(uploadTargetId, file);
+            setSnackbar({ open: true, message: "Document uploaded successfully", severity: "success" });
+            loadBeneficiaries();
+
+        } catch (err) {
+
+            console.error(err);
+
+            const backendMessage =
+                err?.response?.data?.message ||
+                "Failed to upload document";
+
+            setSnackbar({ open: true, message: backendMessage, severity: "error" });
+
+        } finally {
+
+            e.target.value = "";
+            setUploadTargetId(null);
+
+        }
+
+    };
+
     return (
 
         <MainLayout>
+
+            <input
+                type="file"
+                ref={fileInputRef}
+                style={{ display: "none" }}
+                accept=".pdf,.jpg,.jpeg,.png"
+                onChange={handleFileSelected}
+            />
 
             <div
                 style={{
@@ -93,6 +151,7 @@ function Beneficiaries() {
                                 <TableCell>Name</TableCell>
                                 <TableCell>Mobile</TableCell>
                                 <TableCell>Email</TableCell>
+                                <TableCell>Document</TableCell>
 
                             </TableRow>
 
@@ -114,6 +173,42 @@ function Beneficiaries() {
 
                                     <TableCell>{b.email}</TableCell>
 
+                                    <TableCell>
+
+                                        {b.documentPath ? (
+
+                                            <>
+                                                <Link
+                                                    href={getBeneficiaryDocumentUrl(b.id)}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    sx={{ mr: 1 }}
+                                                >
+                                                    {b.documentOriginalName || "View"}
+                                                </Link>
+
+                                                <Button
+                                                    size="small"
+                                                    onClick={() => handleUploadClick(b.id)}
+                                                >
+                                                    Replace
+                                                </Button>
+                                            </>
+
+                                        ) : (
+
+                                            <Button
+                                                size="small"
+                                                startIcon={<UploadFileIcon />}
+                                                onClick={() => handleUploadClick(b.id)}
+                                            >
+                                                Upload
+                                            </Button>
+
+                                        )}
+
+                                    </TableCell>
+
                                 </TableRow>
 
                             ))}
@@ -131,6 +226,20 @@ function Beneficiaries() {
                 handleClose={() => setOpenDialog(false)}
                 refreshData={loadBeneficiaries}
             />
+
+            <Snackbar
+                open={snackbar.open}
+                autoHideDuration={4000}
+                onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
+                anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+            >
+                <Alert
+                    severity={snackbar.severity}
+                    onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
+                >
+                    {snackbar.message}
+                </Alert>
+            </Snackbar>
 
         </MainLayout>
 

@@ -26,7 +26,10 @@ import {
 
 import MainLayout from "../../layouts/MainLayout";
 
-const API_BASE = "http://localhost:8080";
+import { getDashboardSummary, getApplicationSummary } from "../../api/analyticsApi";
+import { getAllApplications } from "../../services/applicationService";
+import { getAllBeneficiaries } from "../../services/beneficiaryService";
+import { getAllSchemes } from "../../services/schemeService";
 
 const statConfig = [
   {
@@ -72,71 +75,39 @@ function Dashboard() {
   useEffect(() => {
     const loadDashboardData = async () => {
       try {
-        // Fetch dashboard summary
-        const dashboardResponse = await fetch(
-          `${API_BASE}/api/analytics/dashboard-summary`
-        );
+        // Dashboard + application summary (via the shared analytics API client)
+        const [dashboardRes, applicationSummaryRes] = await Promise.all([
+          getDashboardSummary(),
+          getApplicationSummary(),
+        ]);
 
-        if (!dashboardResponse.ok) {
-          throw new Error("Failed to fetch dashboard summary");
-        }
-
-        const dashboardData = await dashboardResponse.json();
-
-        // Fetch application summary
-        const applicationSummaryResponse = await fetch(
-          `${API_BASE}/api/analytics/application-summary`
-        );
-
-        if (!applicationSummaryResponse.ok) {
-          throw new Error("Failed to fetch application summary");
-        }
-
-        const applicationSummaryData =
-          await applicationSummaryResponse.json();
+        const dashboardData = dashboardRes.data;
+        const applicationSummaryData = applicationSummaryRes.data;
 
         setStats({
           totalBeneficiaries: dashboardData.totalBeneficiaries ?? 0,
           totalApplications: dashboardData.totalApplications ?? 0,
-          pendingApplications: applicationSummaryData.pending ?? 0,
-          approvedApplications: applicationSummaryData.approved ?? 0,
+          // NOTE: DTO field names are pendingApplications / approvedApplications,
+          // not pending / approved.
+          pendingApplications: applicationSummaryData.pendingApplications ?? 0,
+          approvedApplications: applicationSummaryData.approvedApplications ?? 0,
         });
 
-        // Fetch actual applications
-        const applicationsResponse = await fetch(
-          `${API_BASE}/api/v1/applications`
-        );
-
-        if (!applicationsResponse.ok) {
-          throw new Error("Failed to fetch applications");
-        }
-
-        const applicationsData = await applicationsResponse.json();
-
-        // Fetch beneficiaries and schemes so IDs can be converted to names
-        const beneficiariesResponse = await fetch(
-          `${API_BASE}/api/v1/beneficiaries`
-        );
-
-        const schemesResponse = await fetch(
-          `${API_BASE}/api/v1/schemes`
-        );
-
-        const beneficiariesData = beneficiariesResponse.ok
-          ? await beneficiariesResponse.json()
-          : [];
-
-        const schemesData = schemesResponse.ok
-          ? await schemesResponse.json()
-          : [];
+        // Applications + beneficiaries + schemes, via the real service layer
+        // (these were previously hitting /api/v1/beneficiaries and /api/v1/schemes,
+        // which don't exist — the real routes are /beneficiaries and /api/schemes).
+        const [applicationsData, beneficiariesData, schemesData] =
+          await Promise.all([
+            getAllApplications(),
+            getAllBeneficiaries().catch(() => []),
+            getAllSchemes().catch(() => []),
+          ]);
 
         const beneficiaries = Array.isArray(beneficiariesData)
           ? beneficiariesData
           : [];
 
-        const schemes = Array.isArray(schemesData)
-          ? schemesData
-          : [];
+        const schemes = Array.isArray(schemesData) ? schemesData : [];
 
         const actualApplications = Array.isArray(applicationsData)
           ? applicationsData
@@ -150,29 +121,31 @@ function Dashboard() {
           })
           .slice(0, 3)
           .map((application) => {
+            // Beneficiary/Scheme primary keys are exposed as `id`, not
+            // `beneficiaryId` / `schemeId` (those names are only used on the
+            // Application entity, for the foreign-key reference).
             const beneficiary = beneficiaries.find(
-              (b) =>
-                Number(b.beneficiaryId) ===
-                Number(application.beneficiaryId)
+              (b) => Number(b.id) === Number(application.beneficiaryId)
             );
 
             const scheme = schemes.find(
-              (s) =>
-                Number(s.schemeId) === Number(application.schemeId)
+              (s) => Number(s.id) === Number(application.schemeId)
             );
+
+            const beneficiaryName = beneficiary
+              ? [beneficiary.firstName, beneficiary.lastName]
+                  .filter(Boolean)
+                  .join(" ")
+              : null;
 
             return {
               id: application.applicationId,
               name:
-                beneficiary?.name ??
-                beneficiary?.beneficiaryName ??
+                beneficiaryName ||
                 `Beneficiary #${application.beneficiaryId ?? "N/A"}`,
               scheme:
-                scheme?.schemeName ??
-                scheme?.name ??
-                scheme?.schemeCode ??
-                `Scheme #${application.schemeId ?? "N/A"}`,
-              status: application.status ?? "Pending",
+                scheme?.name ?? `Scheme #${application.schemeId ?? "N/A"}`,
+              status: application.status ?? "Unknown",
             };
           });
 
