@@ -8,6 +8,8 @@ import Applications from "./pages/Applications/Applications";
 import Eligibility from "./pages/Eligibility/Eligibility";
 import Verification from "./pages/Verification/Verification";
 import StatusTracking from "./pages/StatusTracking/StatusTracking";
+import Analytics from "./pages/Analytics/Analytics";
+import Disbursement from "./pages/Disbursement/Disbursement";
 
 function App() {
   return (
@@ -20,7 +22,9 @@ function App() {
       <Route path="/eligibility" element={<Eligibility />} />
       <Route path="/verification" element={<Verification />} />
       <Route path="/finance" element={<FinanceApproval />} />
+      <Route path="/disbursement" element={<Disbursement />} />
       <Route path="/status" element={<StatusTracking />} />
+      <Route path="/analytics" element={<Analytics />} />
     </Routes>
   );
 }

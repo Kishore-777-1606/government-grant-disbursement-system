@@ -90,6 +90,29 @@ public class Beneficiary {
     @Column(name = "bank_name", length = 100)
     private String bankName;
 
+    @NotBlank(message = "Category is required")
+    @Pattern(regexp = "^(General|SC|ST|OBC|EWS)$", message = "Category must be one of General, SC, ST, OBC, EWS")
+    @Column(name = "category", length = 20)
+    private String category;
+
+    @NotNull(message = "Annual income is required")
+    @DecimalMin(value = "0.0", inclusive = true, message = "Annual income cannot be negative")
+    @Column(name = "annual_income")
+    private java.math.BigDecimal annualIncome;
+
+    @Column(name = "disability_status")
+    private Boolean disabilityStatus = false;
+
+    // Identity/eligibility proof document (Module 1: "document upload, and
+    // identity validation"). documentPath is the name the file is actually
+    // stored under on disk (unique, disk-safe); documentOriginalName is what
+    // the user uploaded, kept only for display.
+    @Column(name = "document_path", length = 255)
+    private String documentPath;
+
+    @Column(name = "document_original_name", length = 255)
+    private String documentOriginalName;
+
     @Column(name = "aadhaar_verified")
     private Boolean aadhaarVerified = false;
 

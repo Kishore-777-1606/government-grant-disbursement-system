@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 
 import {
     Typography,
@@ -10,21 +10,35 @@ import {
     TableHead,
     TableRow,
     Button,
-    CircularProgress
+    CircularProgress,
+    Collapse,
+    Box,
+    IconButton,
+    Chip
 } from "@mui/material";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 
 import MainLayout from "../../layouts/MainLayout";
 
 import {
-    getAllVerifications,
+    getPendingVerifications,
+    getVerificationHistory,
     approveVerification,
     rejectVerification
 } from "../../services/verificationService";
 
 function Verification() {
 
+    // Only the currently-actionable stage per application. Historical
+    // (Approved/Rejected/Sent Back) stages are preserved server-side for
+    // audit purposes but aren't shown here as things to act on — expand a
+    // row to see that application's full history instead.
     const [verifications, setVerifications] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [expandedId, setExpandedId] = useState(null);
+    const [history, setHistory] = useState([]);
+    const [historyLoading, setHistoryLoading] = useState(false);
 
     useEffect(() => {
         loadVerifications();
@@ -34,7 +48,7 @@ function Verification() {
 
         try {
 
-            const data = await getAllVerifications();
+            const data = await getPendingVerifications();
             setVerifications(data);
 
         } catch (error) {
@@ -83,6 +97,30 @@ function Verification() {
 
     };
 
+    const toggleHistory = async (verification) => {
+
+        const applicationId = verification.application.applicationId;
+
+        if (expandedId === verification.verificationId) {
+            setExpandedId(null);
+            return;
+        }
+
+        setExpandedId(verification.verificationId);
+        setHistoryLoading(true);
+
+        try {
+            const data = await getVerificationHistory(applicationId);
+            setHistory(data);
+        } catch (err) {
+            console.error(err);
+            setHistory([]);
+        } finally {
+            setHistoryLoading(false);
+        }
+
+    };
+
     return (
 
         <MainLayout>
@@ -105,6 +143,7 @@ function Verification() {
 
                             <TableRow>
 
+                                <TableCell />
                                 <TableCell>ID</TableCell>
                                 <TableCell>Application</TableCell>
                                 <TableCell>Status</TableCell>
@@ -119,7 +158,20 @@ function Verification() {
 
                             {verifications.map((v) => (
 
+                                <Fragment key={v.verificationId}>
+
                                 <TableRow key={v.verificationId}>
+
+                                    <TableCell>
+                                        <IconButton
+                                            size="small"
+                                            onClick={() => toggleHistory(v)}
+                                        >
+                                            {expandedId === v.verificationId
+                                                ? <KeyboardArrowUpIcon />
+                                                : <KeyboardArrowDownIcon />}
+                                        </IconButton>
+                                    </TableCell>
 
                                     <TableCell>
                                         {v.verificationId}
@@ -161,6 +213,57 @@ function Verification() {
                                     </TableCell>
 
                                 </TableRow>
+
+                                <TableRow key={`${v.verificationId}-history`}>
+                                    <TableCell
+                                        style={{ paddingBottom: 0, paddingTop: 0 }}
+                                        colSpan={6}
+                                    >
+                                        <Collapse
+                                            in={expandedId === v.verificationId}
+                                            timeout="auto"
+                                            unmountOnExit
+                                        >
+                                            <Box sx={{ m: 2 }}>
+                                                <Typography variant="subtitle2" gutterBottom>
+                                                    Verification History — Application #{v.application.applicationId}
+                                                </Typography>
+
+                                                {historyLoading ? (
+                                                    <CircularProgress size={20} />
+                                                ) : (
+                                                    <Table size="small">
+                                                        <TableHead>
+                                                            <TableRow>
+                                                                <TableCell>Stage</TableCell>
+                                                                <TableCell>Date</TableCell>
+                                                                <TableCell>Status</TableCell>
+                                                                <TableCell>Remarks</TableCell>
+                                                            </TableRow>
+                                                        </TableHead>
+                                                        <TableBody>
+                                                            {history.map((h) => (
+                                                                <TableRow key={h.verificationId}>
+                                                                    <TableCell>{h.verifiedBy}</TableCell>
+                                                                    <TableCell>{h.verificationDate}</TableCell>
+                                                                    <TableCell>
+                                                                        <Chip
+                                                                            label={h.verificationStatus}
+                                                                            size="small"
+                                                                        />
+                                                                    </TableCell>
+                                                                    <TableCell>{h.remarks}</TableCell>
+                                                                </TableRow>
+                                                            ))}
+                                                        </TableBody>
+                                                    </Table>
+                                                )}
+                                            </Box>
+                                        </Collapse>
+                                    </TableCell>
+                                </TableRow>
+
+                                </Fragment>
 
                             ))}
 

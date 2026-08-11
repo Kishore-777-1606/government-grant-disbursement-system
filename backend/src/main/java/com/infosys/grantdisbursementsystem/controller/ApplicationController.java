@@ -2,42 +2,70 @@ package com.infosys.grantdisbursementsystem.controller;
 
 import com.infosys.grantdisbursementsystem.entity.Application;
 import com.infosys.grantdisbursementsystem.service.ApplicationService;
-import org.springframework.beans.factory.annotation.Autowired;
+
+import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+
 
 @RestController
 @RequestMapping("/api/v1/applications")
 public class ApplicationController {
 
-    @Autowired
-    private ApplicationService service;
+
+    private final ApplicationService service;
+
+
+    public ApplicationController(ApplicationService service){
+        this.service = service;
+    }
+
+
 
     @PostMapping
-    public Application submitApplication(@RequestBody Application application) {
+    public Application submitApplication(
+            @RequestBody Application application) {
+
         return service.submitApplication(application);
     }
 
+
+
     @GetMapping
     public List<Application> getAllApplications() {
+
         return service.getAllApplications();
     }
 
+
+
     @GetMapping("/{id}")
-    public Application getApplicationById(@PathVariable Long id) {
+    public Application getApplicationById(
+            @PathVariable @NonNull Long id) {
+
         return service.getApplicationById(id);
     }
 
+
+
     @PutMapping("/{id}")
-    public Application updateApplication(@PathVariable Long id,
-                                         @RequestBody Application application) {
+    public Application updateApplication(
+            @PathVariable @NonNull Long id,
+            @RequestBody Application application) {
+
         return service.updateApplication(id, application);
     }
 
+
+
     @DeleteMapping("/{id}")
-    public String deleteApplication(@PathVariable Long id) {
+    public String deleteApplication(
+            @PathVariable @NonNull Long id) {
+
         service.deleteApplication(id);
+
         return "Application deleted successfully";
     }
+
 }

@@ -1,4 +1,12 @@
 -- ============================================================
+-- ⚠ LEGACY / NOT USED BY THE RUNNING APPLICATION ⚠
+-- Earliest design pass — table names (country, disbursement_batch,
+-- verification_tracker, etc.) don't match the entities the code actually
+-- uses. See backend/6_actual_application_schema.sql for the real schema.
+-- Kept for historical reference only.
+-- ============================================================
+
+-- ============================================================
 -- MILESTONE 1: Database Design
 -- Project: Beneficiary & Scheme Disbursement System
 -- Technology: Spring Boot + Hibernate + JPA

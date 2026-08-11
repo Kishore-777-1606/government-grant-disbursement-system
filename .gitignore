@@ -11,3 +11,5 @@ frontend/dist/
 *.iml
 .vscode/
 .DS_Store
+# Uploaded beneficiary documents (local disk storage, not source)
+backend/uploads/

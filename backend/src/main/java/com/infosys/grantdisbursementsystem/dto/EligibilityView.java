@@ -1,5 +1,7 @@
 package com.infosys.grantdisbursementsystem.dto;
 
+import java.time.LocalDate;
+
 /**
  * Read-only projection of an application's eligibility outcome.
  * Eligibility is not a separate stored entity - the score and status already
@@ -17,14 +19,14 @@ public class EligibilityView {
     private String schemeName;
     private Double eligibilityScore;
     private String status;
-    private String applicationDate;
+    private LocalDate applicationDate;
 
     public EligibilityView() {
     }
 
     public EligibilityView(Long applicationId, Long beneficiaryId, String beneficiaryName,
                             Long schemeId, String schemeName, Double eligibilityScore,
-                            String status, String applicationDate) {
+                            String status, LocalDate applicationDate) {
         this.applicationId = applicationId;
         this.beneficiaryId = beneficiaryId;
         this.beneficiaryName = beneficiaryName;
@@ -91,11 +93,11 @@ public class EligibilityView {
         this.status = status;
     }
 
-    public String getApplicationDate() {
+    public LocalDate getApplicationDate() {
         return applicationDate;
     }
 
-    public void setApplicationDate(String applicationDate) {
+    public void setApplicationDate(LocalDate applicationDate) {
         this.applicationDate = applicationDate;
     }
 }

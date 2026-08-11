@@ -1,0 +1,28 @@
+import api from "./api";
+
+export const getAllPlans = async () => {
+    const response = await api.get("/api/disbursement-plans");
+    return response.data;
+};
+
+export const getAllInstallments = async () => {
+    const response = await api.get("/api/disbursement-plans/installments/all");
+    return response.data;
+};
+
+export const releaseInstallment = async (installmentId) => {
+    const response = await api.post(
+        `/api/disbursement-plans/release/${installmentId}`
+    );
+    return response.data;
+};
+
+export const completeMilestone = async (milestoneId) => {
+    const response = await api.put(`/api/milestones/${milestoneId}/complete`);
+    return response.data;
+};
+
+export const getMilestoneReminders = async () => {
+    const response = await api.get("/api/milestones/reminders");
+    return response.data;
+};

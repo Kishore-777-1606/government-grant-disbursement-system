@@ -1,0 +1,151 @@
+{
+  "info": {
+    "_postman_id": "b1f7f197-4b53-4e8c-be09-e25a809a7671",
+    "name": "Government Grant Disbursement System - Milestone 3 APIs",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "48384371"
+  },
+  "item": [
+    {
+      "name": "Create Application",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"assignedOfficer\": \"Officer A\",\r\n    \"beneficiaryId\": 7,\r\n    \"schemeId\": 2,\r\n    \"applicationDate\": \"2026-08-01\",\r\n    \"status\": \"District Verification Pending\",\r\n    \"eligibilityScore\": 100.0,\r\n    \"remarks\": \"Initial application\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/v1/applications",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "applications"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Application",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/v1/applications/1",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "applications",
+            "1"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create Disbursement Plan",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"applicationId\": 1,\r\n    \"totalAmount\": 500000,\r\n    \"numberOfInstallments\": 3\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/disbursement-plans",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "disbursement-plans"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Disbursement Plan",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/disbursement-plans/1",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "disbursement-plans",
+            "1"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Installments",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/disbursement-plans/1/installments",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "disbursement-plans",
+            "1",
+            "installments"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Release Installments",
+      "request": {
+        "method": "GET",
+        "header": []
+      },
+      "response": []
+    }
+  ]
+}

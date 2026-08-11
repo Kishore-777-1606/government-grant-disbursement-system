@@ -1,4 +1,11 @@
 -- ============================================================================
+-- ⚠ LEGACY / NOT USED BY THE RUNNING APPLICATION ⚠
+-- Inserts into 1_database_schema_final.sql's table names (beneficiaries,
+-- schemes, verification, etc.), which the app's entities don't read from.
+-- Running this will NOT make data appear in the app. Kept for reference only.
+-- ============================================================================
+
+-- ============================================================================
 -- GOVERNMENT BENEFICIARY DISBURSEMENT SYSTEM
 -- Sample Data Insertion
 --

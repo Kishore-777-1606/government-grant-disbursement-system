@@ -17,6 +17,8 @@ import {
   CheckCircle,
   AccountTree,
   AccountBalanceWallet,
+  Assessment,
+  Payments,
 } from "@mui/icons-material";
 
 import { Link, useLocation } from "react-router-dom";
@@ -29,13 +31,15 @@ const menuItems = [
   { text: "Schemes", icon: <Description />, path: "/schemes" },
   { text: "Applications", icon: <Assignment />, path: "/applications" },
   { text: "Eligibility", icon: <Verified />, path: "/eligibility" },
- { text: "Verification", icon: <CheckCircle />, path: "/verification" },
-{
-  text: "Finance Approval",
-  icon: <AccountBalanceWallet />,
-  path: "/finance",
-},
-{ text: "Status Tracking", icon: <AccountTree />, path: "/status" },
+  { text: "Verification", icon: <CheckCircle />, path: "/verification" },
+  {
+    text: "Finance Approval",
+    icon: <AccountBalanceWallet />,
+    path: "/finance",
+  },
+  { text: "Disbursement", icon: <Payments />, path: "/disbursement" },
+  { text: "Status Tracking", icon: <AccountTree />, path: "/status" },
+  { text: "Analytics", icon: <Assessment />, path: "/analytics" },
 ];
 
 function Sidebar() {

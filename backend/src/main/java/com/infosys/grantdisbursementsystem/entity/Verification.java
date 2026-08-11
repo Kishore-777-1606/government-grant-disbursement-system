@@ -11,7 +11,7 @@ public class Verification {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long verificationId;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "application_id", nullable = false)
     private Application application;
 

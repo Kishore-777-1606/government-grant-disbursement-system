@@ -1,9 +1,9 @@
 package com.infosys.grantdisbursementsystem.controller;
 
+
 import com.infosys.grantdisbursementsystem.entity.Verification;
 import com.infosys.grantdisbursementsystem.service.VerificationService;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,8 +15,16 @@ import java.util.List;
 public class VerificationController {
 
 
-    @Autowired
-    private VerificationService verificationService;
+    private final VerificationService verificationService;
+
+
+    public VerificationController(
+            VerificationService verificationService
+    ) {
+
+        this.verificationService = verificationService;
+
+    }
 
 
 
@@ -24,8 +32,8 @@ public class VerificationController {
     @PostMapping("/create")
     public ResponseEntity<Verification> createVerification(
             @RequestParam Long applicationId,
-            @RequestParam String officerRole) {
-
+            @RequestParam String officerRole
+    ) {
 
         return ResponseEntity.ok(
                 verificationService.createVerification(
@@ -33,8 +41,8 @@ public class VerificationController {
                         officerRole
                 )
         );
-    }
 
+    }
 
 
 
@@ -42,26 +50,26 @@ public class VerificationController {
     @GetMapping
     public ResponseEntity<List<Verification>> getAllVerifications() {
 
-
         return ResponseEntity.ok(
                 verificationService.getAllVerifications()
         );
-    }
 
+    }
 
 
 
     // Get Verification By ID
-    @GetMapping("/{id}")
+    // Only accepts numeric id values
+    @GetMapping("/{id:[0-9]+}")
     public ResponseEntity<Verification> getVerificationById(
-            @PathVariable Long id) {
-
+            @PathVariable Long id
+    ) {
 
         return ResponseEntity.ok(
                 verificationService.getVerificationById(id)
         );
-    }
 
+    }
 
 
 
@@ -69,33 +77,47 @@ public class VerificationController {
     @GetMapping("/pending")
     public ResponseEntity<List<Verification>> getPendingVerifications() {
 
-
         return ResponseEntity.ok(
                 verificationService.getPendingVerifications()
         );
+
     }
 
 
 
+    // Full stage-by-stage audit trail for one application (oldest first).
+    // Backs the "expand row to see history" action on the Verification page.
+    @GetMapping("/application/{applicationId:[0-9]+}/history")
+    public ResponseEntity<List<Verification>> getVerificationHistory(
+            @PathVariable Long applicationId
+    ) {
+
+        return ResponseEntity.ok(
+                verificationService.getVerificationHistory(applicationId)
+        );
+
+    }
+
+
 
     // Approve Verification
-    // FIELD_OFFICER and DISTRICT_OFFICER only
-    @PutMapping("/{id}/approve")
+    @PutMapping("/{id:[0-9]+}/approve")
     public ResponseEntity<Verification> approveVerification(
             @PathVariable Long id,
             @RequestParam String remarks,
-            @RequestParam String role) {
+            @RequestParam String role
+    ) {
 
 
-        if(!role.equalsIgnoreCase("FIELD_OFFICER") &&
-                !role.equalsIgnoreCase("DISTRICT_OFFICER")) {
-
+        if (!"FIELD_OFFICER".equalsIgnoreCase(role)
+                &&
+            !"DISTRICT_OFFICER".equalsIgnoreCase(role)) {
 
             throw new RuntimeException(
                     "Only Field Officer or District Officer can verify"
             );
-        }
 
+        }
 
 
         return ResponseEntity.ok(
@@ -104,30 +126,29 @@ public class VerificationController {
                         remarks
                 )
         );
+
     }
 
 
 
-
-
     // Reject Verification
-    // FIELD_OFFICER and DISTRICT_OFFICER only
-    @PutMapping("/{id}/reject")
+    @PutMapping("/{id:[0-9]+}/reject")
     public ResponseEntity<Verification> rejectVerification(
             @PathVariable Long id,
             @RequestParam String remarks,
-            @RequestParam String role) {
+            @RequestParam String role
+    ) {
 
 
-        if(!role.equalsIgnoreCase("FIELD_OFFICER") &&
-                !role.equalsIgnoreCase("DISTRICT_OFFICER")) {
-
+        if (!"FIELD_OFFICER".equalsIgnoreCase(role)
+                &&
+            !"DISTRICT_OFFICER".equalsIgnoreCase(role)) {
 
             throw new RuntimeException(
                     "Only Field Officer or District Officer can reject"
             );
-        }
 
+        }
 
 
         return ResponseEntity.ok(
@@ -136,17 +157,17 @@ public class VerificationController {
                         remarks
                 )
         );
+
     }
 
 
 
-
-
     // Send For Re-Verification
-    @PutMapping("/{id}/reverify")
+    @PutMapping("/{id:[0-9]+}/reverify")
     public ResponseEntity<Verification> reVerify(
             @PathVariable Long id,
-            @RequestParam String remarks) {
+            @RequestParam String remarks
+    ) {
 
 
         return ResponseEntity.ok(
@@ -155,16 +176,16 @@ public class VerificationController {
                         remarks
                 )
         );
+
     }
 
 
 
-
-
     // Escalation API
-    @PutMapping("/{id}/escalate")
+    @PutMapping("/{id:[0-9]+}/escalate")
     public ResponseEntity<String> escalate(
-            @PathVariable Long id) {
+            @PathVariable Long id
+    ) {
 
 
         verificationService.checkEscalation(id);
@@ -173,6 +194,7 @@ public class VerificationController {
         return ResponseEntity.ok(
                 "Verification escalated successfully"
         );
+
     }
 
 }
