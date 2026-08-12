@@ -1,4 +1,5 @@
 import { Routes, Route } from "react-router-dom";
+
 import FinanceApproval from "./pages/FinanceApproval/FinanceApproval";
 import Login from "./pages/login/Login";
 import Dashboard from "./pages/dashboard/Dashboard";
@@ -11,20 +12,79 @@ import StatusTracking from "./pages/StatusTracking/StatusTracking";
 import Analytics from "./pages/Analytics/Analytics";
 import Disbursement from "./pages/Disbursement/Disbursement";
 
+import ProtectedRoute from "./auth/ProtectedRoute";
+
 function App() {
   return (
     <Routes>
+
+      {/* =========================
+          PUBLIC ROUTES
+         ========================= */}
+
       <Route path="/" element={<Login />} />
-      <Route path="/dashboard" element={<Dashboard />} />
-      <Route path="/beneficiaries" element={<Beneficiaries />} />
-      <Route path="/schemes" element={<Schemes />} />
-      <Route path="/applications" element={<Applications />} />
-      <Route path="/eligibility" element={<Eligibility />} />
-      <Route path="/verification" element={<Verification />} />
-      <Route path="/finance" element={<FinanceApproval />} />
-      <Route path="/disbursement" element={<Disbursement />} />
-      <Route path="/status" element={<StatusTracking />} />
-      <Route path="/analytics" element={<Analytics />} />
+
+      <Route path="/login" element={<Login />} />
+
+
+      {/* =========================
+          PROTECTED ROUTES
+         ========================= */}
+
+      <Route element={<ProtectedRoute />}>
+
+        <Route
+          path="/dashboard"
+          element={<Dashboard />}
+        />
+
+        <Route
+          path="/beneficiaries"
+          element={<Beneficiaries />}
+        />
+
+        <Route
+          path="/schemes"
+          element={<Schemes />}
+        />
+
+        <Route
+          path="/applications"
+          element={<Applications />}
+        />
+
+        <Route
+          path="/eligibility"
+          element={<Eligibility />}
+        />
+
+        <Route
+          path="/verification"
+          element={<Verification />}
+        />
+
+        <Route
+          path="/finance"
+          element={<FinanceApproval />}
+        />
+
+        <Route
+          path="/disbursement"
+          element={<Disbursement />}
+        />
+
+        <Route
+          path="/status"
+          element={<StatusTracking />}
+        />
+
+        <Route
+          path="/analytics"
+          element={<Analytics />}
+        />
+
+      </Route>
+
     </Routes>
   );
 }

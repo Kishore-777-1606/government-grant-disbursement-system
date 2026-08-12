@@ -1,6 +1,5 @@
 package com.infosys.grantdisbursementsystem.service;
 import org.springframework.scheduling.annotation.Scheduled;
-import java.util.Optional;
 import com.infosys.grantdisbursementsystem.entity.Application;
 import com.infosys.grantdisbursementsystem.entity.ComplianceMilestone;
 import com.infosys.grantdisbursementsystem.repository.ComplianceMilestoneRepository;

@@ -6,7 +6,32 @@ import {
   Avatar,
 } from "@mui/material";
 
+import { useAuth } from "../auth/useAuth";
+
 function Navbar() {
+  const {
+    username,
+    role,
+  } = useAuth();
+
+  const displayName =
+    username || "User";
+
+  const displayRole = role
+    ? role
+        .replaceAll("_", " ")
+        .toLowerCase()
+        .replace(/\b\w/g, (letter) =>
+          letter.toUpperCase()
+        )
+    : "";
+
+  /*
+   * Get first letter for Avatar
+   */
+  const avatarLetter =
+    displayName.charAt(0).toUpperCase();
+
   return (
     <AppBar
       position="fixed"
@@ -22,10 +47,16 @@ function Navbar() {
           justifyContent: "space-between",
         }}
       >
-        <Typography variant="h6" fontWeight="bold">
-          Government Grant Disbursement Tracking System
+        {/* Application title */}
+        <Typography
+          variant="h6"
+          fontWeight="bold"
+        >
+          Government Grant Disbursement
+          Tracking System
         </Typography>
 
+        {/* User information */}
         <Box
           sx={{
             display: "flex",
@@ -33,10 +64,37 @@ function Navbar() {
             gap: 2,
           }}
         >
-          <Typography>Welcome, Admin</Typography>
+          <Box
+            sx={{
+              textAlign: "right",
+            }}
+          >
+            <Typography
+              variant="body2"
+              fontWeight="bold"
+            >
+              Welcome, {displayName}
+            </Typography>
 
-          <Avatar sx={{ bgcolor: "#0D47A1" }}>
-            N
+            {displayRole && (
+              <Typography
+                variant="caption"
+                sx={{
+                  opacity: 0.85,
+                }}
+              >
+                {displayRole}
+              </Typography>
+            )}
+          </Box>
+
+          <Avatar
+            sx={{
+              bgcolor: "#0D47A1",
+              fontWeight: "bold",
+            }}
+          >
+            {avatarLetter}
           </Avatar>
         </Box>
       </Toolbar>
