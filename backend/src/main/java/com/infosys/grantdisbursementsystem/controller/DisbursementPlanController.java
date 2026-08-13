@@ -15,6 +15,7 @@ import com.infosys.grantdisbursementsystem.repository.DisbursementPlanRepository
 import com.infosys.grantdisbursementsystem.service.DisbursementPlanService;
 
 import org.springframework.lang.NonNull;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -87,7 +88,10 @@ public class DisbursementPlanController {
 
 
 
-
+// Example @PreAuthorize usage — Kishore, replicate this pattern across the
+    // disbursement/treasury/beneficiary endpoints, swapping roles as appropriate
+    // (e.g. field verification endpoints -> FIELD_OFFICER, ADMIN).
+    @PreAuthorize("hasAnyRole('FINANCE_APPROVER', 'ADMIN')")
     @PostMapping("/release/{installmentId}")
     public DisbursementInstallment releaseInstallment(
             @PathVariable @NonNull Long installmentId

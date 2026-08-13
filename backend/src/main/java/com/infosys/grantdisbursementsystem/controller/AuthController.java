@@ -1,6 +1,7 @@
 package com.infosys.grantdisbursementsystem.controller;
 
 import com.infosys.grantdisbursementsystem.entity.User;
+import com.infosys.grantdisbursementsystem.security.JwtUtil;
 import com.infosys.grantdisbursementsystem.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -15,6 +16,9 @@ public class AuthController {
     @Autowired
     private AuthService authService;
 
+    @Autowired
+    private JwtUtil jwtUtil;
+
     @PostMapping("/login")
     public Map<String, Object> login(@RequestBody Map<String, String> credentials) {
 
@@ -23,7 +27,10 @@ public class AuthController {
 
         User user = authService.login(username, password);
 
+        String token = jwtUtil.generateToken(user.getUsername(), user.getRole().name(), user.getUserId());
+
         Map<String, Object> response = new HashMap<>();
+        response.put("token", token);
         response.put("userId", user.getUserId());
         response.put("username", user.getUsername());
         response.put("fullName", user.getFullName());

@@ -78,3 +78,11 @@ VALUES
 -- created automatically by the app's own workflow (verification approval ->
 -- finance approval -> auto-generated disbursement plan), so hand-seeding them
 -- here would just create data the workflow logic didn't actually produce.
+DELETE FROM users WHERE username IN ('field1','district1','finance1','admin');
+
+-- then paste the INSERT block above
+INSERT INTO users (username, password_hash, full_name, role, is_active, created_at) VALUES
+('field1',   '$2b$10$tMz3r5YdnznC7YHv0G94cuw3MKhonH6kRAQ0wbqSlsiPo8jXdhorG', 'Field Officer Test',    'FIELD_OFFICER',    1, NOW()),
+('district1','$2b$10$tMz3r5YdnznC7YHv0G94cuw3MKhonH6kRAQ0wbqSlsiPo8jXdhorG', 'District Officer Test', 'DISTRICT_OFFICER', 1, NOW()),
+('finance1', '$2b$10$tMz3r5YdnznC7YHv0G94cuw3MKhonH6kRAQ0wbqSlsiPo8jXdhorG', 'Finance Approver Test', 'FINANCE_APPROVER', 1, NOW()),
+('admin',    '$2b$10$tMz3r5YdnznC7YHv0G94cuw3MKhonH6kRAQ0wbqSlsiPo8jXdhorG', 'Admin Test',            'ADMIN',            1, NOW());
