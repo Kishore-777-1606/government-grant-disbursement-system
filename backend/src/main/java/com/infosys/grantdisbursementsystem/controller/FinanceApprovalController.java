@@ -4,11 +4,11 @@ package com.infosys.grantdisbursementsystem.controller;
 import com.infosys.grantdisbursementsystem.entity.FinanceApproval;
 import com.infosys.grantdisbursementsystem.service.FinanceApprovalService;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Objects;
-
 
 
 @RestController
@@ -35,7 +35,7 @@ public class FinanceApprovalController {
 
 
 
-
+@PreAuthorize("hasAnyRole('DISTRICT_OFFICER', 'ADMIN')")
     @PostMapping("/create")
     public FinanceApproval createApproval(
             @RequestParam Long applicationId,
@@ -56,6 +56,7 @@ public class FinanceApprovalController {
 
 
 
+    @PreAuthorize("hasAnyRole('DISTRICT_OFFICER', 'FINANCE_APPROVER', 'ADMIN')")
     @GetMapping
     public List<FinanceApproval> getAllApprovals() {
 
@@ -69,6 +70,7 @@ public class FinanceApprovalController {
 
 
 
+    @PreAuthorize("hasAnyRole('DISTRICT_OFFICER', 'FINANCE_APPROVER', 'ADMIN')")
     @GetMapping("/id/{id}")
     public FinanceApproval getApprovalById(
             @PathVariable Long id
@@ -86,25 +88,12 @@ public class FinanceApprovalController {
 
 
 
-
+    @PreAuthorize("hasAnyRole('FINANCE_APPROVER', 'ADMIN')")
     @PutMapping("/{id}/approve")
     public FinanceApproval approve(
             @PathVariable Long id,
-            @RequestParam String remarks,
-            @RequestParam String role
+            @RequestParam String remarks
     ) {
-
-
-
-        if(!"FINANCE_OFFICER".equalsIgnoreCase(role)) {
-
-            throw new RuntimeException(
-                    "Only Finance Officer can approve payment"
-            );
-
-        }
-
-
 
         return financeApprovalService.approve(
                 Objects.requireNonNull(id),
@@ -119,24 +108,13 @@ public class FinanceApprovalController {
 
 
 
+   @PreAuthorize("hasAnyRole('FINANCE_APPROVER', 'ADMIN')")
+   
     @PutMapping("/{id}/reject")
     public FinanceApproval reject(
             @PathVariable Long id,
-            @RequestParam String remarks,
-            @RequestParam String role
+            @RequestParam String remarks
     ) {
-
-
-
-        if(!"FINANCE_OFFICER".equalsIgnoreCase(role)) {
-
-            throw new RuntimeException(
-                    "Only Finance Officer can reject payment"
-            );
-
-        }
-
-
 
         return financeApprovalService.reject(
                 Objects.requireNonNull(id),
@@ -151,6 +129,7 @@ public class FinanceApprovalController {
 
 
 
+    @PreAuthorize("hasAnyRole('DISTRICT_OFFICER', 'FINANCE_APPROVER', 'ADMIN')")
     @GetMapping("/pending")
     public List<FinanceApproval> getPendingApprovals() {
 
@@ -164,6 +143,7 @@ public class FinanceApprovalController {
 
 
 
+    @PreAuthorize("hasAnyRole('DISTRICT_OFFICER', 'FINANCE_APPROVER', 'ADMIN')")
     @GetMapping("/approved")
     public List<FinanceApproval> getApprovedApprovals() {
 
@@ -177,6 +157,7 @@ public class FinanceApprovalController {
 
 
 
+    @PreAuthorize("hasAnyRole('DISTRICT_OFFICER', 'FINANCE_APPROVER', 'ADMIN')")
     @GetMapping("/rejected")
     public List<FinanceApproval> getRejectedApprovals() {
 

@@ -25,25 +25,30 @@ import { Link, useLocation } from "react-router-dom";
 
 const drawerWidth = 260;
 
+// Mirrors the @PreAuthorize rules on the backend controllers — a role that
+// can't call the underlying APIs shouldn't see the menu item either.
 const menuItems = [
-  { text: "Dashboard", icon: <Dashboard />, path: "/dashboard" },
-  { text: "Beneficiaries", icon: <People />, path: "/beneficiaries" },
-  { text: "Schemes", icon: <Description />, path: "/schemes" },
-  { text: "Applications", icon: <Assignment />, path: "/applications" },
-  { text: "Eligibility", icon: <Verified />, path: "/eligibility" },
-  { text: "Verification", icon: <CheckCircle />, path: "/verification" },
-  {
-    text: "Finance Approval",
-    icon: <AccountBalanceWallet />,
-    path: "/finance",
-  },
-  { text: "Disbursement", icon: <Payments />, path: "/disbursement" },
-  { text: "Status Tracking", icon: <AccountTree />, path: "/status" },
-  { text: "Analytics", icon: <Assessment />, path: "/analytics" },
+  { text: "Dashboard", icon: <Dashboard />, path: "/dashboard", roles: ["FIELD_OFFICER", "DISTRICT_OFFICER", "FINANCE_APPROVER", "ADMIN"] },
+  { text: "Beneficiaries", icon: <People />, path: "/beneficiaries", roles: ["FIELD_OFFICER", "DISTRICT_OFFICER", "FINANCE_APPROVER", "ADMIN"] },
+  { text: "Schemes", icon: <Description />, path: "/schemes", roles: ["FIELD_OFFICER", "DISTRICT_OFFICER", "FINANCE_APPROVER", "ADMIN"] },
+  { text: "Applications", icon: <Assignment />, path: "/applications", roles: ["FIELD_OFFICER", "DISTRICT_OFFICER", "FINANCE_APPROVER", "ADMIN"] },
+  { text: "Eligibility", icon: <Verified />, path: "/eligibility", roles: ["FIELD_OFFICER", "DISTRICT_OFFICER", "FINANCE_APPROVER", "ADMIN"] },
+  { text: "Verification", icon: <CheckCircle />, path: "/verification", roles: ["FIELD_OFFICER", "DISTRICT_OFFICER", "ADMIN"] },
+  { text: "Finance Approval", icon: <AccountBalanceWallet />, path: "/finance", roles: ["DISTRICT_OFFICER", "FINANCE_APPROVER", "ADMIN"] },
+  { text: "Disbursement", icon: <Payments />, path: "/disbursement", roles: ["FIELD_OFFICER", "DISTRICT_OFFICER", "FINANCE_APPROVER", "ADMIN"] },
+  { text: "Status Tracking", icon: <AccountTree />, path: "/status", roles: ["FIELD_OFFICER", "DISTRICT_OFFICER", "FINANCE_APPROVER", "ADMIN"] },
+  { text: "Analytics", icon: <Assessment />, path: "/analytics", roles: ["DISTRICT_OFFICER", "FINANCE_APPROVER", "ADMIN"] },
 ];
 
 function Sidebar() {
   const location = useLocation();
+
+  const stored = localStorage.getItem("user");
+  const currentRole = stored ? JSON.parse(stored)?.role : null;
+
+  const visibleItems = menuItems.filter((item) =>
+    currentRole ? item.roles.includes(currentRole) : false
+  );
 
   return (
     <Drawer
@@ -73,7 +78,7 @@ function Sidebar() {
       </Box>
 
       <List sx={{ px: 2 }}>
-        {menuItems.map((item) => (
+        {visibleItems.map((item) => (
           <ListItemButton
             key={item.text}
             component={Link}

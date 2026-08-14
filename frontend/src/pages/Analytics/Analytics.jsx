@@ -364,7 +364,8 @@ mt={2}
 >
 
 
-<Grid size={{xs:12,md:6}}>
+{/* Fund utilization — the bar chart needs the most horizontal room, so it gets a full row */}
+<Grid size={{xs:12}}>
 
 <ChartCard title="Scheme-wise Fund Utilization">
 
@@ -374,8 +375,8 @@ mt={2}
 
 </Grid>
 
-
-
+{/* The two pie charts are the same shape and same visual weight — pairing them
+    side by side reads as a deliberate set, not a mismatched grid */}
 <Grid size={{xs:12,md:6}}>
 
 <ChartCard title="Region-wise Fund Utilization">
@@ -415,7 +416,10 @@ mt={2}
 </ChartCard>
 
 </Grid>
-<Grid size={{xs:12,md:6}}>
+
+{/* A list doesn't belong in the same square shape as a chart — giving it a
+    full-width row lets it actually read as a feed, not a cramped chart card */}
+<Grid size={{xs:12}}>
 
 <ChartCard title="Recent Activities">
 

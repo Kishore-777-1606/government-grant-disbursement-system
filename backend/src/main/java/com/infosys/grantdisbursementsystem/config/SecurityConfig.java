@@ -32,10 +32,13 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
             .csrf(csrf -> csrf.disable())
+            .cors(cors -> {})
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                // Public — no token needed to hit login
-                .requestMatchers("/api/auth/**").permitAll()
+                // Preflight requests never carry a token — must be allowed through
+                .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
+                // Public — no token needed to hit login or the root health-check page
+                .requestMatchers("/api/auth/**", "/").permitAll()
                 // Everything else just needs a valid token; specific role restrictions
                 // are added per-endpoint via @PreAuthorize (see AuthController for an example).
                 .anyRequest().authenticated()
