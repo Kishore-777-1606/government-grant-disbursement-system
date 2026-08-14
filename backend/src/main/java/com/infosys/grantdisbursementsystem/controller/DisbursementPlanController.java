@@ -53,6 +53,7 @@ public class DisbursementPlanController {
 
 
 
+  @PreAuthorize("hasAnyRole('DISTRICT_OFFICER', 'ADMIN')")
     @PostMapping
     public DisbursementPlan createPlan(
             @RequestBody CreatePlanRequest request
@@ -88,9 +89,6 @@ public class DisbursementPlanController {
 
 
 
-// Example @PreAuthorize usage — Kishore, replicate this pattern across the
-    // disbursement/treasury/beneficiary endpoints, swapping roles as appropriate
-    // (e.g. field verification endpoints -> FIELD_OFFICER, ADMIN).
     @PreAuthorize("hasAnyRole('FINANCE_APPROVER', 'ADMIN')")
     @PostMapping("/release/{installmentId}")
     public DisbursementInstallment releaseInstallment(

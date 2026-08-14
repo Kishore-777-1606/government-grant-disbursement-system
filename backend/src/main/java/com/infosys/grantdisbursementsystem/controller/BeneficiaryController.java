@@ -9,6 +9,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -59,6 +60,7 @@ public class BeneficiaryController {
 
 
 
+  @PreAuthorize("hasAnyRole('FIELD_OFFICER', 'ADMIN')")
     @PostMapping
     public Beneficiary createBeneficiary(
             @Valid @RequestBody Beneficiary beneficiary
@@ -73,6 +75,7 @@ public class BeneficiaryController {
 
 
 
+  @PreAuthorize("hasAnyRole('FIELD_OFFICER', 'ADMIN')")
     @PutMapping("/{id}")
     public Beneficiary updateBeneficiary(
             @PathVariable Long id,
@@ -88,7 +91,7 @@ public class BeneficiaryController {
 
 
 
-
+@PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public String deleteBeneficiary(
             @PathVariable Long id
@@ -104,7 +107,7 @@ public class BeneficiaryController {
 
 
 
-
+@PreAuthorize("hasAnyRole('FIELD_OFFICER', 'ADMIN')")
     @PostMapping("/{id}/document")
     public Beneficiary uploadDocument(
             @PathVariable Long id,

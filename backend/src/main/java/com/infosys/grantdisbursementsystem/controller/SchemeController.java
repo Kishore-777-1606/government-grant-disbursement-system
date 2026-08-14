@@ -4,6 +4,7 @@ package com.infosys.grantdisbursementsystem.controller;
 import com.infosys.grantdisbursementsystem.entity.Scheme;
 import com.infosys.grantdisbursementsystem.service.SchemeService;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -59,7 +60,7 @@ public class SchemeController {
 
 
 
-
+@PreAuthorize("hasAnyRole('DISTRICT_OFFICER', 'ADMIN')")
     @PostMapping
     public Scheme createScheme(
             @RequestBody Scheme scheme
@@ -76,6 +77,7 @@ public class SchemeController {
 
 
 
+  @PreAuthorize("hasAnyRole('DISTRICT_OFFICER', 'ADMIN')")
     @PutMapping("/{id}")
     public Scheme updateScheme(
             @PathVariable Long id,
@@ -94,6 +96,7 @@ public class SchemeController {
 
 
 
+  @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public String deleteScheme(
             @PathVariable Long id

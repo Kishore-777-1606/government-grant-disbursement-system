@@ -12,7 +12,6 @@ export const approveFinance = async (id) => {
         {
             params: {
                 remarks: "Payment Approved",
-                role: "FINANCE_OFFICER"
             }
         }
     );
@@ -27,7 +26,6 @@ export const rejectFinance = async (id) => {
         {
             params: {
                 remarks: "Payment Rejected",
-                role: "FINANCE_OFFICER"
             }
         }
     );

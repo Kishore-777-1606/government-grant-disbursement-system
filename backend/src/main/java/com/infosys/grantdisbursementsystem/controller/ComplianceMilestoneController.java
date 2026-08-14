@@ -4,6 +4,7 @@ package com.infosys.grantdisbursementsystem.controller;
 import com.infosys.grantdisbursementsystem.entity.ComplianceMilestone;
 import com.infosys.grantdisbursementsystem.service.ComplianceMilestoneService;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,15 +24,15 @@ public class ComplianceMilestoneController {
         this.milestoneService = milestoneService;
     }
 
+   @PreAuthorize("hasAnyRole('FIELD_OFFICER', 'DISTRICT_OFFICER', 'ADMIN')")
+    @PutMapping("/{id}/complete")
+public ComplianceMilestone completeMilestone(@PathVariable Long id) {
+
+    return milestoneService.completeMilestone(id);
+}
 
 
-    @GetMapping("/check-overdue")
-    public String checkOverdue() {
-
-        milestoneService.flagOverdueMilestones();
-
-        return "Overdue check completed";
-    }
+  
 
 
 
@@ -40,10 +41,6 @@ public class ComplianceMilestoneController {
 
         return milestoneService.getUpcomingReminders();
     }
-    @PutMapping("/{id}/complete")
-public ComplianceMilestone completeMilestone(@PathVariable Long id) {
 
-    return milestoneService.completeMilestone(id);
-}
 
 }

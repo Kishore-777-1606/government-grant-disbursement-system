@@ -4,6 +4,7 @@ import com.infosys.grantdisbursementsystem.entity.Application;
 import com.infosys.grantdisbursementsystem.service.ApplicationService;
 
 import org.springframework.lang.NonNull;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,6 +24,7 @@ public class ApplicationController {
 
 
 
+  @PreAuthorize("hasAnyRole('FIELD_OFFICER', 'ADMIN')")
     @PostMapping
     public Application submitApplication(
             @RequestBody Application application) {
@@ -49,6 +51,7 @@ public class ApplicationController {
 
 
 
+   @PreAuthorize("hasAnyRole('FIELD_OFFICER', 'DISTRICT_OFFICER', 'ADMIN')")
     @PutMapping("/{id}")
     public Application updateApplication(
             @PathVariable @NonNull Long id,
@@ -59,6 +62,7 @@ public class ApplicationController {
 
 
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public String deleteApplication(
             @PathVariable @NonNull Long id) {

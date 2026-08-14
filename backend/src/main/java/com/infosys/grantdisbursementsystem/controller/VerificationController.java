@@ -3,8 +3,8 @@ package com.infosys.grantdisbursementsystem.controller;
 
 import com.infosys.grantdisbursementsystem.entity.Verification;
 import com.infosys.grantdisbursementsystem.service.VerificationService;
-
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -28,7 +28,8 @@ public class VerificationController {
 
 
 
-    // Create Verification
+  // Create Verification
+    @PreAuthorize("hasAnyRole('FIELD_OFFICER', 'DISTRICT_OFFICER', 'ADMIN')")
     @PostMapping("/create")
     public ResponseEntity<Verification> createVerification(
             @RequestParam Long applicationId,
@@ -100,7 +101,10 @@ public class VerificationController {
 
 
 
-    // Approve Verification
+   // Approve Verification
+    // @PreAuthorize now enforces this using the verified token role; the "role"
+    // request param is legacy and kept only so the existing frontend call doesn't break.
+    @PreAuthorize("hasAnyRole('FIELD_OFFICER', 'DISTRICT_OFFICER', 'ADMIN')")
     @PutMapping("/{id:[0-9]+}/approve")
     public ResponseEntity<Verification> approveVerification(
             @PathVariable Long id,
@@ -131,7 +135,8 @@ public class VerificationController {
 
 
 
-    // Reject Verification
+// Reject Verification
+    @PreAuthorize("hasAnyRole('FIELD_OFFICER', 'DISTRICT_OFFICER', 'ADMIN')")
     @PutMapping("/{id:[0-9]+}/reject")
     public ResponseEntity<Verification> rejectVerification(
             @PathVariable Long id,
@@ -161,8 +166,8 @@ public class VerificationController {
     }
 
 
-
-    // Send For Re-Verification
+// Send For Re-Verification
+    @PreAuthorize("hasAnyRole('FIELD_OFFICER', 'DISTRICT_OFFICER', 'ADMIN')")
     @PutMapping("/{id:[0-9]+}/reverify")
     public ResponseEntity<Verification> reVerify(
             @PathVariable Long id,
@@ -181,7 +186,8 @@ public class VerificationController {
 
 
 
-    // Escalation API
+   // Escalation API
+    @PreAuthorize("hasAnyRole('DISTRICT_OFFICER', 'ADMIN')")
     @PutMapping("/{id:[0-9]+}/escalate")
     public ResponseEntity<String> escalate(
             @PathVariable Long id

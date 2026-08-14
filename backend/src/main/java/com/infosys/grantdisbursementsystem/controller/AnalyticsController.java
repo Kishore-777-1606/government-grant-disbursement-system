@@ -16,6 +16,7 @@ import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -66,6 +67,7 @@ public AnalyticsController(
 
     // ================= DISBURSEMENT SUMMARY =================
 
+    @PreAuthorize("hasAnyRole('DISTRICT_OFFICER', 'FINANCE_APPROVER', 'ADMIN')")
     @GetMapping("/disbursement-summary")
     public DisbursementSummaryDTO getDisbursementSummary(){
 
@@ -88,6 +90,7 @@ public AnalyticsController(
 
     // ================= FUND UTILIZATION =================
 
+    @PreAuthorize("hasAnyRole('DISTRICT_OFFICER', 'FINANCE_APPROVER', 'ADMIN')")
     @GetMapping("/fund-utilization")
     public List<FundUtilizationDTO> getFundUtilization(){
 
@@ -99,6 +102,7 @@ public AnalyticsController(
 
     // ================= REGION UTILIZATION =================
 
+    @PreAuthorize("hasAnyRole('DISTRICT_OFFICER', 'FINANCE_APPROVER', 'ADMIN')")
     @GetMapping("/region-utilization")
     public List<RegionUtilizationDTO> getRegionUtilization(){
 
@@ -110,6 +114,7 @@ public AnalyticsController(
 
     // ================= CATEGORY DISTRIBUTION =================
 
+    @PreAuthorize("hasAnyRole('DISTRICT_OFFICER', 'FINANCE_APPROVER', 'ADMIN')")
     @GetMapping("/category-distribution")
     public List<CategoryDistributionDTO> getCategoryDistribution(){
 
@@ -121,6 +126,7 @@ public AnalyticsController(
 
     // ================= BUDGET EXHAUSTION =================
 
+    @PreAuthorize("hasAnyRole('DISTRICT_OFFICER', 'FINANCE_APPROVER', 'ADMIN')")
     @GetMapping("/budget-exhaustion")
     public List<BudgetExhaustionDTO> getBudgetExhaustion(){
 
@@ -132,6 +138,7 @@ public AnalyticsController(
 
     // ================= APPROVAL TURNAROUND =================
 
+    @PreAuthorize("hasAnyRole('DISTRICT_OFFICER', 'FINANCE_APPROVER', 'ADMIN')")
     @GetMapping("/approval-turnaround")
     public List<Map<String,Object>> getApprovalTurnaround(){
 
@@ -154,7 +161,7 @@ public List<RecentActivityDTO> getRecentActivities() {
 
 
     // ================= EXPORTS (Module 4: downloadable PDF/Excel reports) =================
-
+@PreAuthorize("hasAnyRole('DISTRICT_OFFICER', 'FINANCE_APPROVER', 'ADMIN')")
     @GetMapping("/export/fund-utilization/excel")
     public ResponseEntity<byte[]> exportFundUtilizationExcel() {
 
@@ -171,7 +178,7 @@ public List<RecentActivityDTO> getRecentActivities() {
         );
 
     }
-
+@PreAuthorize("hasAnyRole('DISTRICT_OFFICER', 'FINANCE_APPROVER', 'ADMIN')")
     @GetMapping("/export/fund-utilization/pdf")
     public ResponseEntity<byte[]> exportFundUtilizationPdf() {
 
@@ -183,6 +190,7 @@ public List<RecentActivityDTO> getRecentActivities() {
 
     }
 
+    @PreAuthorize("hasAnyRole('DISTRICT_OFFICER', 'FINANCE_APPROVER', 'ADMIN')")
     @GetMapping("/export/region-utilization/excel")
     public ResponseEntity<byte[]> exportRegionUtilizationExcel() {
 
@@ -200,6 +208,7 @@ public List<RecentActivityDTO> getRecentActivities() {
 
     }
 
+   @PreAuthorize("hasAnyRole('DISTRICT_OFFICER', 'FINANCE_APPROVER', 'ADMIN')")
     @GetMapping("/export/region-utilization/pdf")
     public ResponseEntity<byte[]> exportRegionUtilizationPdf() {
 

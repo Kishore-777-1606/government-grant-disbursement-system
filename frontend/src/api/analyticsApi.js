@@ -1,76 +1,51 @@
-import axios from "axios";
-
-
-const API = axios.create({
-
-    baseURL:"http://localhost:8080/api"
-
-});
-
+import api from "../services/api";
 
 // Dashboard
-
 export const getDashboardSummary = () =>
-    API.get("/analytics/dashboard-summary");
-
+    api.get("/api/analytics/dashboard-summary");
 
 // Charts
-
 export const getFundUtilization = () =>
-    API.get("/analytics/fund-utilization");
-
+    api.get("/api/analytics/fund-utilization");
 
 export const getRegionUtilization = () =>
-    API.get("/analytics/region-utilization");
-
+    api.get("/api/analytics/region-utilization");
 
 export const getCategoryDistribution = () =>
-    API.get("/analytics/category-distribution");
-
+    api.get("/api/analytics/category-distribution");
 
 export const getBudgetExhaustion = () =>
-    API.get("/analytics/budget-exhaustion");
-
+    api.get("/api/analytics/budget-exhaustion");
 
 // Other summaries
-
 export const getMilestoneSummary = () =>
-    API.get("/analytics/milestone-summary");
-
+    api.get("/api/analytics/milestone-summary");
 
 export const getApplicationSummary = () =>
-    API.get("/analytics/application-summary");
-
+    api.get("/api/analytics/application-summary");
 
 export const getDisbursementSummary = () =>
-    API.get("/analytics/disbursement-summary");
-
+    api.get("/api/analytics/disbursement-summary");
 
 // Approval
-
 export const getApprovalTurnaround = () =>
-    API.get("/analytics/approval-turnaround");
-
+    api.get("/api/analytics/approval-turnaround");
 
 // Activities
-
 export const getRecentActivities = () =>
-    API.get("/analytics/recent-activities");
-
+    api.get("/api/analytics/recent-activities");
 
 // Exports (Module 4: downloadable PDF/Excel reports)
-
 export const exportFundUtilizationExcel = () =>
-    API.get("/analytics/export/fund-utilization/excel", { responseType: "blob" });
+    api.get("/api/analytics/export/fund-utilization/excel", { responseType: "blob" });
 
 export const exportFundUtilizationPdf = () =>
-    API.get("/analytics/export/fund-utilization/pdf", { responseType: "blob" });
+    api.get("/api/analytics/export/fund-utilization/pdf", { responseType: "blob" });
 
 export const exportRegionUtilizationExcel = () =>
-    API.get("/analytics/export/region-utilization/excel", { responseType: "blob" });
+    api.get("/api/analytics/export/region-utilization/excel", { responseType: "blob" });
 
 export const exportRegionUtilizationPdf = () =>
-    API.get("/analytics/export/region-utilization/pdf", { responseType: "blob" });
+    api.get("/api/analytics/export/region-utilization/pdf", { responseType: "blob" });
 
-
-export default API;
+export default api;
