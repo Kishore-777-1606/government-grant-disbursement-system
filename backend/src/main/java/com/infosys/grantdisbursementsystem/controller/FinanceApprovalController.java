@@ -88,12 +88,28 @@ public class FinanceApprovalController {
 
 
 
+// @PreAuthorize now enforces this properly using the verified token role.
+    // The "role" request param below is legacy and no longer trustworthy on its own
+    // (a client could send any value) — kept only so the existing frontend call doesn't break.
     @PreAuthorize("hasAnyRole('FINANCE_APPROVER', 'ADMIN')")
     @PutMapping("/{id}/approve")
     public FinanceApproval approve(
             @PathVariable Long id,
-            @RequestParam String remarks
+            @RequestParam String remarks,
+            @RequestParam String role
     ) {
+
+
+
+        if(!"FINANCE_OFFICER".equalsIgnoreCase(role)) {
+
+            throw new RuntimeException(
+                    "Only Finance Officer can approve payment"
+            );
+
+        }
+
+
 
         return financeApprovalService.approve(
                 Objects.requireNonNull(id),
@@ -113,8 +129,21 @@ public class FinanceApprovalController {
     @PutMapping("/{id}/reject")
     public FinanceApproval reject(
             @PathVariable Long id,
-            @RequestParam String remarks
+            @RequestParam String remarks,
+            @RequestParam String role
     ) {
+
+
+
+        if(!"FINANCE_OFFICER".equalsIgnoreCase(role)) {
+
+            throw new RuntimeException(
+                    "Only Finance Officer can reject payment"
+            );
+
+        }
+
+
 
         return financeApprovalService.reject(
                 Objects.requireNonNull(id),

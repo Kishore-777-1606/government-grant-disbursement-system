@@ -36,6 +36,7 @@ public ComplianceMilestone completeMilestone(@PathVariable Long id) {
 
 
 
+    @PreAuthorize("hasAnyRole('FIELD_OFFICER', 'DISTRICT_OFFICER', 'ADMIN')")
     @GetMapping("/reminders")
     public List<ComplianceMilestone> getReminders(){
 

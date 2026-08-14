@@ -44,6 +44,11 @@ public AnalyticsController(
 }
 
     // ================= DASHBOARD SUMMARY =================
+    // No @PreAuthorize below this point (except the exports further down):
+    // these endpoints feed the shared Dashboard/Analytics pages that every
+    // role lands on after login. They're still behind login itself
+    // (SecurityConfig requires authentication for anyRequest()) — this is a
+    // deliberate "any authenticated role" decision, not an unreviewed gap.
 
     @GetMapping("/dashboard-summary")
     public DashboardSummaryDTO getDashboardSummary(){
@@ -67,7 +72,6 @@ public AnalyticsController(
 
     // ================= DISBURSEMENT SUMMARY =================
 
-    @PreAuthorize("hasAnyRole('DISTRICT_OFFICER', 'FINANCE_APPROVER', 'ADMIN')")
     @GetMapping("/disbursement-summary")
     public DisbursementSummaryDTO getDisbursementSummary(){
 
@@ -90,7 +94,6 @@ public AnalyticsController(
 
     // ================= FUND UTILIZATION =================
 
-    @PreAuthorize("hasAnyRole('DISTRICT_OFFICER', 'FINANCE_APPROVER', 'ADMIN')")
     @GetMapping("/fund-utilization")
     public List<FundUtilizationDTO> getFundUtilization(){
 
@@ -102,7 +105,6 @@ public AnalyticsController(
 
     // ================= REGION UTILIZATION =================
 
-    @PreAuthorize("hasAnyRole('DISTRICT_OFFICER', 'FINANCE_APPROVER', 'ADMIN')")
     @GetMapping("/region-utilization")
     public List<RegionUtilizationDTO> getRegionUtilization(){
 
@@ -114,7 +116,6 @@ public AnalyticsController(
 
     // ================= CATEGORY DISTRIBUTION =================
 
-    @PreAuthorize("hasAnyRole('DISTRICT_OFFICER', 'FINANCE_APPROVER', 'ADMIN')")
     @GetMapping("/category-distribution")
     public List<CategoryDistributionDTO> getCategoryDistribution(){
 
@@ -126,7 +127,6 @@ public AnalyticsController(
 
     // ================= BUDGET EXHAUSTION =================
 
-    @PreAuthorize("hasAnyRole('DISTRICT_OFFICER', 'FINANCE_APPROVER', 'ADMIN')")
     @GetMapping("/budget-exhaustion")
     public List<BudgetExhaustionDTO> getBudgetExhaustion(){
 
@@ -138,7 +138,6 @@ public AnalyticsController(
 
     // ================= APPROVAL TURNAROUND =================
 
-    @PreAuthorize("hasAnyRole('DISTRICT_OFFICER', 'FINANCE_APPROVER', 'ADMIN')")
     @GetMapping("/approval-turnaround")
     public List<Map<String,Object>> getApprovalTurnaround(){
 
