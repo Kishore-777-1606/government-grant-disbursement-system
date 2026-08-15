@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { updateBeneficiaryVerification } from "../../services/beneficiaryService";
 import {
     Typography,
     Paper,
@@ -12,7 +13,9 @@ import {
     Button,
     Link,
     Snackbar,
-    Alert
+    Alert,
+    Checkbox,
+    FormControlLabel
 } from "@mui/material";
 
 import AddIcon from "@mui/icons-material/Add";
@@ -35,7 +38,12 @@ function Beneficiaries() {
 
     const [uploadTargetId, setUploadTargetId] = useState(null);
     const fileInputRef = useRef(null);
-    const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
+
+    const [snackbar, setSnackbar] = useState({
+        open: false,
+        message: "",
+        severity: "success"
+    });
 
     useEffect(() => {
         loadBeneficiaries();
@@ -76,7 +84,13 @@ function Beneficiaries() {
         try {
 
             await uploadBeneficiaryDocument(uploadTargetId, file);
-            setSnackbar({ open: true, message: "Document uploaded successfully", severity: "success" });
+
+            setSnackbar({
+                open: true,
+                message: "Document uploaded successfully",
+                severity: "success"
+            });
+
             loadBeneficiaries();
 
         } catch (err) {
@@ -87,12 +101,53 @@ function Beneficiaries() {
                 err?.response?.data?.message ||
                 "Failed to upload document";
 
-            setSnackbar({ open: true, message: backendMessage, severity: "error" });
+            setSnackbar({
+                open: true,
+                message: backendMessage,
+                severity: "error"
+            });
 
         } finally {
 
             e.target.value = "";
             setUploadTargetId(null);
+
+        }
+
+    };
+
+    const handleVerificationToggle = async (
+        id,
+        field,
+        newAadhaar,
+        newBank
+    ) => {
+
+        try {
+
+            await updateBeneficiaryVerification(
+                id,
+                newAadhaar,
+                newBank
+            );
+
+            setSnackbar({
+                open: true,
+                message: "Verification status updated",
+                severity: "success"
+            });
+
+            loadBeneficiaries();
+
+        } catch (err) {
+
+            console.error(err);
+
+            setSnackbar({
+                open: true,
+                message: "Failed to update verification",
+                severity: "error"
+            });
 
         }
 
@@ -151,6 +206,7 @@ function Beneficiaries() {
                                 <TableCell>Name</TableCell>
                                 <TableCell>Mobile</TableCell>
                                 <TableCell>Email</TableCell>
+                                <TableCell>Verification</TableCell>
                                 <TableCell>Document</TableCell>
 
                             </TableRow>
@@ -175,21 +231,70 @@ function Beneficiaries() {
 
                                     <TableCell>
 
+                                        <FormControlLabel
+                                            control={
+                                                <Checkbox
+                                                    size="small"
+                                                    checked={Boolean(
+                                                        b.aadhaarVerified
+                                                    )}
+                                                    onChange={() =>
+                                                        handleVerificationToggle(
+                                                            b.id,
+                                                            "aadhaarVerified",
+                                                            !b.aadhaarVerified,
+                                                            b.bankVerified
+                                                        )
+                                                    }
+                                                />
+                                            }
+                                            label="Aadhaar"
+                                        />
+
+                                        <FormControlLabel
+                                            control={
+                                                <Checkbox
+                                                    size="small"
+                                                    checked={Boolean(
+                                                        b.bankVerified
+                                                    )}
+                                                    onChange={() =>
+                                                        handleVerificationToggle(
+                                                            b.id,
+                                                            "bankVerified",
+                                                            b.aadhaarVerified,
+                                                            !b.bankVerified
+                                                        )
+                                                    }
+                                                />
+                                            }
+                                            label="Bank"
+                                        />
+
+                                    </TableCell>
+
+                                    <TableCell>
+
                                         {b.documentPath ? (
 
                                             <>
                                                 <Link
-                                                    href={getBeneficiaryDocumentUrl(b.id)}
+                                                    href={getBeneficiaryDocumentUrl(
+                                                        b.id
+                                                    )}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
                                                     sx={{ mr: 1 }}
                                                 >
-                                                    {b.documentOriginalName || "View"}
+                                                    {b.documentOriginalName ||
+                                                        "View"}
                                                 </Link>
 
                                                 <Button
                                                     size="small"
-                                                    onClick={() => handleUploadClick(b.id)}
+                                                    onClick={() =>
+                                                        handleUploadClick(b.id)
+                                                    }
                                                 >
                                                     Replace
                                                 </Button>
@@ -199,8 +304,12 @@ function Beneficiaries() {
 
                                             <Button
                                                 size="small"
-                                                startIcon={<UploadFileIcon />}
-                                                onClick={() => handleUploadClick(b.id)}
+                                                startIcon={
+                                                    <UploadFileIcon />
+                                                }
+                                                onClick={() =>
+                                                    handleUploadClick(b.id)
+                                                }
                                             >
                                                 Upload
                                             </Button>
@@ -230,12 +339,25 @@ function Beneficiaries() {
             <Snackbar
                 open={snackbar.open}
                 autoHideDuration={4000}
-                onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
-                anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+                onClose={() =>
+                    setSnackbar((prev) => ({
+                        ...prev,
+                        open: false
+                    }))
+                }
+                anchorOrigin={{
+                    vertical: "bottom",
+                    horizontal: "center"
+                }}
             >
                 <Alert
                     severity={snackbar.severity}
-                    onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
+                    onClose={() =>
+                        setSnackbar((prev) => ({
+                            ...prev,
+                            open: false
+                        }))
+                    }
                 >
                     {snackbar.message}
                 </Alert>

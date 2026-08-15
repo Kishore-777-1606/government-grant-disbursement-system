@@ -9,14 +9,16 @@ import {
     Grid,
     Snackbar,
     Alert,
-    MenuItem
+    MenuItem,
+    Checkbox,
+    FormControlLabel
 } from "@mui/material";
 
 import { createBeneficiary } from "../../services/beneficiaryService";
 
 // Must match the backend's @Pattern(regexp = "^(General|SC|ST|OBC|EWS)$")
 // on Beneficiary.category exactly, or submission fails with a 400.
-const CATEGORY_OPTIONS =["General", "OBC", "SC", "ST", "EWS"];
+const CATEGORY_OPTIONS = ["General", "OBC", "SC", "ST", "EWS"];
 
 const EMPTY_BENEFICIARY = {
     beneficiaryUid: "",
@@ -40,6 +42,7 @@ const EMPTY_BENEFICIARY = {
     annualIncome: "",
     aadhaarVerified: false,
     bankVerified: false,
+    disabilityStatus: false,
     isActive: true
 };
 
@@ -53,15 +56,33 @@ function AddBeneficiaryDialog({ open, handleClose, refreshData }) {
     const [beneficiary, setBeneficiary] = useState(EMPTY_BENEFICIARY);
     const [errors, setErrors] = useState({});
     const [submitting, setSubmitting] = useState(false);
-    const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
+    const [snackbar, setSnackbar] = useState({
+        open: false,
+        message: "",
+        severity: "success"
+    });
 
     const handleChange = (e) => {
         const { name, value } = e.target;
+
         setBeneficiary({
             ...beneficiary,
             [name]: value
         });
-        setErrors((prev) => ({ ...prev, [name]: undefined }));
+
+        setErrors((prev) => ({
+            ...prev,
+            [name]: undefined
+        }));
+    };
+
+    const handleCheckboxChange = (e) => {
+        const { name, checked } = e.target;
+
+        setBeneficiary({
+            ...beneficiary,
+            [name]: checked
+        });
     };
 
     const validate = () => {
@@ -108,7 +129,11 @@ function AddBeneficiaryDialog({ open, handleClose, refreshData }) {
             newErrors.pincode = "Enter a valid 6-digit pincode";
         }
 
-       if (beneficiary.ifscCode && beneficiary.ifscCode.trim() && !IFSC_REGEX.test(beneficiary.ifscCode.trim().toUpperCase())) {
+        if (
+            beneficiary.ifscCode &&
+            beneficiary.ifscCode.trim() &&
+            !IFSC_REGEX.test(beneficiary.ifscCode.trim().toUpperCase())
+        ) {
             newErrors.ifscCode = "Enter a valid IFSC code (e.g. SBIN0001234)";
         }
 
@@ -116,7 +141,11 @@ function AddBeneficiaryDialog({ open, handleClose, refreshData }) {
             newErrors.category = "Category is required";
         }
 
-        if (beneficiary.annualIncome === "" || beneficiary.annualIncome === null || beneficiary.annualIncome === undefined) {
+        if (
+            beneficiary.annualIncome === "" ||
+            beneficiary.annualIncome === null ||
+            beneficiary.annualIncome === undefined
+        ) {
             newErrors.annualIncome = "Annual income is required";
         } else if (Number(beneficiary.annualIncome) < 0) {
             newErrors.annualIncome = "Annual income cannot be negative";
@@ -125,6 +154,7 @@ function AddBeneficiaryDialog({ open, handleClose, refreshData }) {
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
+
     // Optional numeric fields default to "" in form state (a controlled
     // MUI TextField can't hold null). Sent as-is, an empty string fails
     // Jackson's BigDecimal/Long binding on the backend with a 400 — so
@@ -146,7 +176,9 @@ function AddBeneficiaryDialog({ open, handleClose, refreshData }) {
 
             await createBeneficiary({
                 ...beneficiary,
-                ifscCode: beneficiary.ifscCode ? beneficiary.ifscCode.toUpperCase() : beneficiary.ifscCode,
+                ifscCode: beneficiary.ifscCode
+                    ? beneficiary.ifscCode.toUpperCase()
+                    : beneficiary.ifscCode,
                 villageId: toNullableNumber(beneficiary.villageId),
                 blockId: toNullableNumber(beneficiary.blockId),
                 districtId: toNullableNumber(beneficiary.districtId),
@@ -154,7 +186,12 @@ function AddBeneficiaryDialog({ open, handleClose, refreshData }) {
                 annualIncome: toNullableNumber(beneficiary.annualIncome)
             });
 
-            setSnackbar({ open: true, message: "Beneficiary added successfully", severity: "success" });
+            setSnackbar({
+                open: true,
+                message: "Beneficiary added successfully",
+                severity: "success"
+            });
+
             refreshData();
             setBeneficiary(EMPTY_BENEFICIARY);
             setErrors({});
@@ -170,7 +207,11 @@ function AddBeneficiaryDialog({ open, handleClose, refreshData }) {
                     Object.values(error.response.data.fieldErrors).join(", ")) ||
                 "Failed to create beneficiary";
 
-            setSnackbar({ open: true, message: backendMessage, severity: "error" });
+            setSnackbar({
+                open: true,
+                message: backendMessage,
+                severity: "error"
+            });
 
         } finally {
             setSubmitting(false);
@@ -187,6 +228,7 @@ function AddBeneficiaryDialog({ open, handleClose, refreshData }) {
     return (
 
         <>
+
             <Dialog
                 open={open}
                 onClose={handleCancel}
@@ -400,7 +442,7 @@ function AddBeneficiaryDialog({ open, handleClose, refreshData }) {
                             />
                         </Grid>
 
-                       <Grid item xs={6}>
+                        <Grid item xs={6}>
                             <TextField
                                 fullWidth
                                 required
@@ -410,7 +452,10 @@ function AddBeneficiaryDialog({ open, handleClose, refreshData }) {
                                 value={beneficiary.category}
                                 onChange={handleChange}
                                 error={Boolean(errors.category)}
-                                helperText={errors.category || "Used to check scheme eligibility criteria"}
+                                helperText={
+                                    errors.category ||
+                                    "Used to check scheme eligibility criteria"
+                                }
                             >
                                 {CATEGORY_OPTIONS.map((option) => (
                                     <MenuItem key={option} value={option}>
@@ -430,7 +475,49 @@ function AddBeneficiaryDialog({ open, handleClose, refreshData }) {
                                 value={beneficiary.annualIncome}
                                 onChange={handleChange}
                                 error={Boolean(errors.annualIncome)}
-                                helperText={errors.annualIncome || "Used to check scheme income-ceiling criteria"}
+                                helperText={
+                                    errors.annualIncome ||
+                                    "Used to check scheme income-ceiling criteria"
+                                }
+                            />
+                        </Grid>
+
+                        <Grid item xs={4}>
+                            <FormControlLabel
+                                control={
+                                    <Checkbox
+                                        name="aadhaarVerified"
+                                        checked={beneficiary.aadhaarVerified}
+                                        onChange={handleCheckboxChange}
+                                    />
+                                }
+                                label="Aadhaar Verified"
+                            />
+                        </Grid>
+
+                        <Grid item xs={4}>
+                            <FormControlLabel
+                                control={
+                                    <Checkbox
+                                        name="bankVerified"
+                                        checked={beneficiary.bankVerified}
+                                        onChange={handleCheckboxChange}
+                                    />
+                                }
+                                label="Bank Verified"
+                            />
+                        </Grid>
+
+                        <Grid item xs={4}>
+                            <FormControlLabel
+                                control={
+                                    <Checkbox
+                                        name="disabilityStatus"
+                                        checked={beneficiary.disabilityStatus}
+                                        onChange={handleCheckboxChange}
+                                    />
+                                }
+                                label="Person with Disability"
                             />
                         </Grid>
 
@@ -440,7 +527,10 @@ function AddBeneficiaryDialog({ open, handleClose, refreshData }) {
 
                 <DialogActions>
 
-                    <Button onClick={handleCancel} disabled={submitting}>
+                    <Button
+                        onClick={handleCancel}
+                        disabled={submitting}
+                    >
                         Cancel
                     </Button>
 
@@ -459,16 +549,30 @@ function AddBeneficiaryDialog({ open, handleClose, refreshData }) {
             <Snackbar
                 open={snackbar.open}
                 autoHideDuration={4000}
-                onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
-                anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+                onClose={() =>
+                    setSnackbar((prev) => ({
+                        ...prev,
+                        open: false
+                    }))
+                }
+                anchorOrigin={{
+                    vertical: "bottom",
+                    horizontal: "center"
+                }}
             >
                 <Alert
                     severity={snackbar.severity}
-                    onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
+                    onClose={() =>
+                        setSnackbar((prev) => ({
+                            ...prev,
+                            open: false
+                        }))
+                    }
                 >
                     {snackbar.message}
                 </Alert>
             </Snackbar>
+
         </>
 
     );

@@ -22,10 +22,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
-
 @Service
 public class BeneficiaryService {
-
 
     private static final Set<String> ALLOWED_CONTENT_TYPES = Set.of(
             "application/pdf",
@@ -33,23 +31,16 @@ public class BeneficiaryService {
             "image/png"
     );
 
-
     private final BeneficiaryRepository beneficiaryRepository;
 
     @Value("${app.upload-dir}")
     private String uploadDir;
 
-
     public BeneficiaryService(
             BeneficiaryRepository beneficiaryRepository
     ) {
-
         this.beneficiaryRepository = beneficiaryRepository;
-
     }
-
-
-
 
     public List<Beneficiary> getAllBeneficiaries() {
 
@@ -57,12 +48,7 @@ public class BeneficiaryService {
 
     }
 
-
-
-
-
     public Beneficiary getBeneficiaryById(Long id) {
-
 
         return beneficiaryRepository.findById(
                 Objects.requireNonNull(id)
@@ -75,11 +61,6 @@ public class BeneficiaryService {
 
     }
 
-
-
-
-
-
     public Beneficiary saveBeneficiary(
             Beneficiary beneficiary
     ) {
@@ -90,17 +71,10 @@ public class BeneficiaryService {
 
     }
 
-
-
-
-
-
-
     public Beneficiary updateBeneficiary(
             Long id,
             Beneficiary beneficiaryDetails
     ) {
-
 
         Beneficiary beneficiary =
                 beneficiaryRepository.findById(
@@ -111,8 +85,6 @@ public class BeneficiaryService {
                                 "Beneficiary not found with ID: " + id
                         )
                 );
-
-
 
         beneficiary.setBeneficiaryUid(
                 beneficiaryDetails.getBeneficiaryUid()
@@ -194,28 +166,37 @@ public class BeneficiaryService {
                 beneficiaryDetails.getIsActive()
         );
 
-
-
         return beneficiaryRepository.save(
                 beneficiary
         );
 
     }
 
+    // NEW: Update Aadhaar and bank verification status
+    public Beneficiary updateVerificationStatus(
+            Long id,
+            Boolean aadhaarVerified,
+            Boolean bankVerified
+    ) {
 
+        Beneficiary beneficiary = getBeneficiaryById(id);
 
+        if (aadhaarVerified != null) {
+            beneficiary.setAadhaarVerified(aadhaarVerified);
+        }
 
+        if (bankVerified != null) {
+            beneficiary.setBankVerified(bankVerified);
+        }
 
-
-
+        return beneficiaryRepository.save(beneficiary);
+    }
 
     public void deleteBeneficiary(Long id) {
 
-
         Long beneficiaryId = Objects.requireNonNull(id);
 
-
-        if(!beneficiaryRepository.existsById(
+        if (!beneficiaryRepository.existsById(
                 beneficiaryId
         )) {
 
@@ -225,15 +206,11 @@ public class BeneficiaryService {
 
         }
 
-
         beneficiaryRepository.deleteById(
                 beneficiaryId
         );
 
     }
-
-
-
 
     /**
      * Saves an uploaded identity/eligibility proof document to disk and
@@ -250,7 +227,6 @@ public class BeneficiaryService {
                 Objects.requireNonNull(id)
         );
 
-
         if (file == null || file.isEmpty()) {
 
             throw new IllegalArgumentException(
@@ -258,7 +234,6 @@ public class BeneficiaryService {
             );
 
         }
-
 
         if (!ALLOWED_CONTENT_TYPES.contains(file.getContentType())) {
 
@@ -268,13 +243,11 @@ public class BeneficiaryService {
 
         }
 
-
         try {
 
             Path uploadPath = Paths.get(uploadDir);
 
             Files.createDirectories(uploadPath);
-
 
             String originalName = Objects.requireNonNullElse(
                     file.getOriginalFilename(),
@@ -302,7 +275,6 @@ public class BeneficiaryService {
                     StandardCopyOption.REPLACE_EXISTING
             );
 
-
             // Remove the previous file, if any, now that the new one is
             // safely written — avoids leaving orphaned files behind on disk.
             if (beneficiary.getDocumentPath() != null) {
@@ -313,13 +285,10 @@ public class BeneficiaryService {
 
             }
 
-
             beneficiary.setDocumentPath(storedFileName);
             beneficiary.setDocumentOriginalName(originalName);
 
-
             return beneficiaryRepository.save(beneficiary);
-
 
         } catch (IOException e) {
 
@@ -332,9 +301,6 @@ public class BeneficiaryService {
 
     }
 
-
-
-
     /**
      * Loads a beneficiary's stored document from disk for download/viewing.
      */
@@ -344,7 +310,6 @@ public class BeneficiaryService {
                 Objects.requireNonNull(id)
         );
 
-
         if (beneficiary.getDocumentPath() == null) {
 
             throw new ResourceNotFoundException(
@@ -352,7 +317,6 @@ public class BeneficiaryService {
             );
 
         }
-
 
         try {
 
@@ -371,7 +335,6 @@ public class BeneficiaryService {
             }
 
             return resource;
-
 
         } catch (MalformedURLException e) {
 

@@ -24,6 +24,13 @@ export const uploadBeneficiaryDocument = async (id, file) => {
     );
     return response.data;
 };
+export const updateBeneficiaryVerification = async (id, aadhaarVerified, bankVerified) => {
+    const response = await api.put(`/beneficiaries/${id}/verification`, {
+        aadhaarVerified,
+        bankVerified
+    });
+    return response.data;
+};
 
 // Direct link to view/download a beneficiary's uploaded document.
 // Used as an <a href> target, not fetched via axios, so the browser
