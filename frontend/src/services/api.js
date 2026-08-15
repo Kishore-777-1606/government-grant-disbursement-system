@@ -7,7 +7,6 @@ const api = axios.create({
     },
 });
 
-// Attach the JWT token (if we have one) to every outgoing request.
 api.interceptors.request.use((config) => {
     const stored = localStorage.getItem("user");
     if (stored) {
@@ -18,5 +17,19 @@ api.interceptors.request.use((config) => {
     }
     return config;
 });
+
+// If the token is missing/expired/invalid, the backend returns 401.
+// Clear the stale session and send the user back to login instead of
+// leaving them on a page where every API call silently fails.
+api.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        if (error.response?.status === 401) {
+            localStorage.removeItem("user");
+            window.location.href = "/";
+        }
+        return Promise.reject(error);
+    }
+);
 
 export default api;
