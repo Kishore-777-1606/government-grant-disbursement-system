@@ -9,22 +9,17 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-
 @RestController
 @RequestMapping("/api/v1/applications")
 public class ApplicationController {
 
-
     private final ApplicationService service;
 
-
-    public ApplicationController(ApplicationService service){
+    public ApplicationController(ApplicationService service) {
         this.service = service;
     }
 
-
-
-  @PreAuthorize("hasAnyRole('FIELD_OFFICER', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('FIELD_OFFICER', 'ADMIN')")
     @PostMapping
     public Application submitApplication(
             @RequestBody Application application) {
@@ -32,16 +27,16 @@ public class ApplicationController {
         return service.submitApplication(application);
     }
 
-
-
+    // Intentionally open to any authenticated role — viewing applications/plans
+    // doesn't require elevated permissions, only writes do.
     @GetMapping
     public List<Application> getAllApplications() {
 
         return service.getAllApplications();
     }
 
-
-
+    // Intentionally open to any authenticated role — viewing applications/plans
+    // doesn't require elevated permissions, only writes do.
     @GetMapping("/{id}")
     public Application getApplicationById(
             @PathVariable @NonNull Long id) {
@@ -49,9 +44,7 @@ public class ApplicationController {
         return service.getApplicationById(id);
     }
 
-
-
-   @PreAuthorize("hasAnyRole('FIELD_OFFICER', 'DISTRICT_OFFICER', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('FIELD_OFFICER', 'DISTRICT_OFFICER', 'ADMIN')")
     @PutMapping("/{id}")
     public Application updateApplication(
             @PathVariable @NonNull Long id,
@@ -59,8 +52,6 @@ public class ApplicationController {
 
         return service.updateApplication(id, application);
     }
-
-
 
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
@@ -71,5 +62,4 @@ public class ApplicationController {
 
         return "Application deleted successfully";
     }
-
 }

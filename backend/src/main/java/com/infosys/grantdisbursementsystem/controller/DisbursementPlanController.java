@@ -1,6 +1,5 @@
 package com.infosys.grantdisbursementsystem.controller;
 
-
 import com.infosys.grantdisbursementsystem.dto.CreatePlanRequest;
 import com.infosys.grantdisbursementsystem.entity.Application;
 import com.infosys.grantdisbursementsystem.entity.DisbursementInstallment;
@@ -33,9 +32,6 @@ public class DisbursementPlanController {
 
     private final DisbursementInstallmentRepository installmentRepository;
 
-
-
-
     public DisbursementPlanController(
             DisbursementPlanRepository planRepository,
             DisbursementPlanService planService,
@@ -50,16 +46,13 @@ public class DisbursementPlanController {
 
     }
 
-
-
-
-  @PreAuthorize("hasAnyRole('DISTRICT_OFFICER', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('DISTRICT_OFFICER', 'ADMIN')")
     @PostMapping
     public DisbursementPlan createPlan(
             @RequestBody CreatePlanRequest request
     ) {
 
-        if(request.getApplicationId() == null){
+        if (request.getApplicationId() == null) {
 
             throw new IllegalArgumentException(
                     "Application ID cannot be null"
@@ -87,8 +80,6 @@ public class DisbursementPlanController {
 
     }
 
-
-
     @PreAuthorize("hasAnyRole('FINANCE_APPROVER', 'ADMIN')")
     @PostMapping("/release/{installmentId}")
     public DisbursementInstallment releaseInstallment(
@@ -101,10 +92,8 @@ public class DisbursementPlanController {
 
     }
 
-
-
-
-    // Get All Plans (list view for the Disbursement page)
+    // Intentionally open to any authenticated role — viewing applications/plans
+    // doesn't require elevated permissions, only writes do.
     @GetMapping
     public List<DisbursementPlan> getAllPlans() {
 
@@ -112,11 +101,9 @@ public class DisbursementPlanController {
 
     }
 
-
-
-
-    // Get All Installments across every plan (flat table for the Disbursement page,
-    // so a finance/field user can see and act on every pending release in one place)
+    // Intentionally open to any authenticated role — viewing applications/plans
+    // doesn't require elevated permissions, only writes do.
+    // This provides a read-only view of all installments.
     @GetMapping("/installments/all")
     public List<DisbursementInstallment> getAllInstallments() {
 
@@ -124,9 +111,8 @@ public class DisbursementPlanController {
 
     }
 
-
-
-
+    // Intentionally open to any authenticated role — viewing applications/plans
+    // doesn't require elevated permissions, only writes do.
     @GetMapping("/{planId:[0-9]+}/installments")
     public List<DisbursementInstallment> getInstallments(
             @PathVariable @NonNull Long planId
@@ -139,9 +125,8 @@ public class DisbursementPlanController {
 
     }
 
-
-
-
+    // Intentionally open to any authenticated role — viewing applications/plans
+    // doesn't require elevated permissions, only writes do.
     @GetMapping("/{id:[0-9]+}")
     public DisbursementPlan getPlan(
             @PathVariable @NonNull Long id
@@ -157,6 +142,5 @@ public class DisbursementPlanController {
         );
 
     }
-
 
 }
