@@ -25,6 +25,17 @@ public class GlobalExceptionHandler {
 
         return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
     }
+    @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
+public ResponseEntity<ErrorResponse> handleAccessDenied(org.springframework.security.access.AccessDeniedException ex) {
+
+    ErrorResponse error = new ErrorResponse(
+            LocalDateTime.now(),
+            HttpStatus.FORBIDDEN.value(),
+            "You do not have permission to perform this action"
+    );
+
+    return new ResponseEntity<>(error, HttpStatus.FORBIDDEN);
+}
 
     // Handles @Valid failures on @RequestBody DTOs/entities (e.g. Beneficiary, Scheme)
     @ExceptionHandler(MethodArgumentNotValidException.class)
