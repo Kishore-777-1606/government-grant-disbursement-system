@@ -45,6 +45,13 @@ function Beneficiaries() {
         severity: "success"
     });
 
+    // Get current user's role
+    const stored = localStorage.getItem("user");
+    const currentRole = stored ? JSON.parse(stored)?.role : null;
+
+    // Only FIELD_OFFICER and ADMIN can create beneficiaries
+    const canCreate = ["FIELD_OFFICER", "ADMIN"].includes(currentRole);
+
     useEffect(() => {
         loadBeneficiaries();
     }, []);
@@ -178,13 +185,15 @@ function Beneficiaries() {
                     Beneficiaries
                 </Typography>
 
-                <Button
-                    variant="contained"
-                    startIcon={<AddIcon />}
-                    onClick={() => setOpenDialog(true)}
-                >
-                    Add Beneficiary
-                </Button>
+                {canCreate && (
+                    <Button
+                        variant="contained"
+                        startIcon={<AddIcon />}
+                        onClick={() => setOpenDialog(true)}
+                    >
+                        Add Beneficiary
+                    </Button>
+                )}
 
             </div>
 

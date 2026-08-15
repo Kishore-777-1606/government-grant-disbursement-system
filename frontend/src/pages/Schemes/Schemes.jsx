@@ -32,7 +32,18 @@ function Schemes() {
     const [openDialog, setOpenDialog] = useState(false);
     const [schemeToEdit, setSchemeToEdit] = useState(null);
 
-    const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
+    const [snackbar, setSnackbar] = useState({
+        open: false,
+        message: "",
+        severity: "success"
+    });
+
+    // Get current user's role from localStorage
+    const stored = localStorage.getItem("user");
+    const currentRole = stored ? JSON.parse(stored)?.role : null;
+
+    const canCreateEdit = ["DISTRICT_OFFICER", "ADMIN"].includes(currentRole);
+    const canDelete = currentRole === "ADMIN";
 
     useEffect(() => {
         loadSchemes();
@@ -48,7 +59,12 @@ function Schemes() {
         } catch (err) {
 
             console.error(err);
-            setSnackbar({ open: true, message: "Failed to load schemes", severity: "error" });
+
+            setSnackbar({
+                open: true,
+                message: "Failed to load schemes",
+                severity: "error"
+            });
 
         } finally {
 
@@ -77,14 +93,28 @@ function Schemes() {
         try {
 
             await deleteScheme(scheme.id);
-            setSnackbar({ open: true, message: "Scheme deleted successfully", severity: "success" });
+
+            setSnackbar({
+                open: true,
+                message: "Scheme deleted successfully",
+                severity: "success"
+            });
+
             loadSchemes();
 
         } catch (err) {
 
             console.error(err);
-            const message = err?.response?.data?.message || "Failed to delete scheme";
-            setSnackbar({ open: true, message, severity: "error" });
+
+            const message =
+                err?.response?.data?.message ||
+                "Failed to delete scheme";
+
+            setSnackbar({
+                open: true,
+                message,
+                severity: "error"
+            });
 
         }
 
@@ -105,13 +135,15 @@ function Schemes() {
                     Government Schemes
                 </Typography>
 
-                <Button
-                    variant="contained"
-                    startIcon={<AddIcon />}
-                    onClick={handleAddClick}
-                >
-                    Add Scheme
-                </Button>
+                {canCreateEdit && (
+                    <Button
+                        variant="contained"
+                        startIcon={<AddIcon />}
+                        onClick={handleAddClick}
+                    >
+                        Add Scheme
+                    </Button>
+                )}
 
             </Box>
 
@@ -148,9 +180,14 @@ function Schemes() {
 
                                 schemes.map((scheme) => (
 
-                                    <TableRow key={scheme.id} hover>
+                                    <TableRow
+                                        key={scheme.id}
+                                        hover
+                                    >
 
-                                        <TableCell>{scheme.id}</TableCell>
+                                        <TableCell>
+                                            {scheme.id}
+                                        </TableCell>
 
                                         <TableCell>
                                             {scheme.schemeCode}
@@ -173,23 +210,36 @@ function Schemes() {
                                         </TableCell>
 
                                         <TableCell>
-                                            {scheme.isActive ? "Active" : "Inactive"}
+                                            {scheme.isActive
+                                                ? "Active"
+                                                : "Inactive"}
                                         </TableCell>
 
                                         <TableCell>
-                                            <IconButton
-                                                size="small"
-                                                onClick={() => handleEditClick(scheme)}
-                                            >
-                                                <EditIcon fontSize="small" />
-                                            </IconButton>
-                                            <IconButton
-                                                size="small"
-                                                color="error"
-                                                onClick={() => handleDeleteClick(scheme)}
-                                            >
-                                                <DeleteIcon fontSize="small" />
-                                            </IconButton>
+
+                                            {canCreateEdit && (
+                                                <IconButton
+                                                    size="small"
+                                                    onClick={() =>
+                                                        handleEditClick(scheme)
+                                                    }
+                                                >
+                                                    <EditIcon fontSize="small" />
+                                                </IconButton>
+                                            )}
+
+                                            {canDelete && (
+                                                <IconButton
+                                                    size="small"
+                                                    color="error"
+                                                    onClick={() =>
+                                                        handleDeleteClick(scheme)
+                                                    }
+                                                >
+                                                    <DeleteIcon fontSize="small" />
+                                                </IconButton>
+                                            )}
+
                                         </TableCell>
 
                                     </TableRow>
@@ -229,12 +279,25 @@ function Schemes() {
             <Snackbar
                 open={snackbar.open}
                 autoHideDuration={4000}
-                onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
-                anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+                onClose={() =>
+                    setSnackbar((prev) => ({
+                        ...prev,
+                        open: false
+                    }))
+                }
+                anchorOrigin={{
+                    vertical: "bottom",
+                    horizontal: "center"
+                }}
             >
                 <Alert
                     severity={snackbar.severity}
-                    onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
+                    onClose={() =>
+                        setSnackbar((prev) => ({
+                            ...prev,
+                            open: false
+                        }))
+                    }
                 >
                     {snackbar.message}
                 </Alert>
