@@ -102,27 +102,15 @@ public class VerificationController {
 
 
    // Approve Verification
-    // @PreAuthorize now enforces this using the verified token role; the "role"
-    // request param is legacy and kept only so the existing frontend call doesn't break.
+    // Real stage-authority enforcement now lives in VerificationService,
+    // checked against the caller's actual authenticated role — not a
+    // client-supplied param, which could never be trusted for this anyway.
     @PreAuthorize("hasAnyRole('FIELD_OFFICER', 'DISTRICT_OFFICER', 'ADMIN')")
     @PutMapping("/{id:[0-9]+}/approve")
     public ResponseEntity<Verification> approveVerification(
             @PathVariable Long id,
-            @RequestParam String remarks,
-            @RequestParam String role
+            @RequestParam String remarks
     ) {
-
-
-        if (!"FIELD_OFFICER".equalsIgnoreCase(role)
-                &&
-            !"DISTRICT_OFFICER".equalsIgnoreCase(role)) {
-
-            throw new RuntimeException(
-                    "Only Field Officer or District Officer can verify"
-            );
-
-        }
-
 
         return ResponseEntity.ok(
                 verificationService.approveVerification(
@@ -140,21 +128,8 @@ public class VerificationController {
     @PutMapping("/{id:[0-9]+}/reject")
     public ResponseEntity<Verification> rejectVerification(
             @PathVariable Long id,
-            @RequestParam String remarks,
-            @RequestParam String role
+            @RequestParam String remarks
     ) {
-
-
-        if (!"FIELD_OFFICER".equalsIgnoreCase(role)
-                &&
-            !"DISTRICT_OFFICER".equalsIgnoreCase(role)) {
-
-            throw new RuntimeException(
-                    "Only Field Officer or District Officer can reject"
-            );
-
-        }
-
 
         return ResponseEntity.ok(
                 verificationService.rejectVerification(

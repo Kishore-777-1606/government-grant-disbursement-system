@@ -284,26 +284,51 @@ public class ApplicationServiceImpl implements ApplicationService {
         Objects.requireNonNull(application,
                 "Application cannot be null");
 
+        Application existing =
+                repository.findById(
+                        Objects.requireNonNull(id)
+                )
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Application not found with ID: "
+                                + id
+                        )
+                );
 
-
-        if(!repository.existsById(
-                Objects.requireNonNull(id)
-        )){
-
-            throw new ResourceNotFoundException(
-                    "Application not found with ID: "
-                    + id
-            );
-
+        // Merge field-by-field instead of saving the incoming body as-is —
+        // a blind save() would null out any field the caller's payload
+        // happened to omit. status and eligibilityScore are intentionally
+        // NOT copied here: they're computed by the eligibility/verification
+        // workflow, not client-editable.
+        if (application.getBeneficiaryId() != null) {
+            existing.setBeneficiaryId(application.getBeneficiaryId());
         }
 
+        if (application.getSchemeId() != null) {
+            existing.setSchemeId(application.getSchemeId());
+        }
 
+        if (application.getApplicationDate() != null) {
+            existing.setApplicationDate(application.getApplicationDate());
+        }
 
-        application.setApplicationId(id);
+        if (application.getAssignedOfficer() != null) {
+            existing.setAssignedOfficer(application.getAssignedOfficer());
+        }
 
+        if (application.getRemarks() != null) {
+            existing.setRemarks(application.getRemarks());
+        }
 
+        if (application.getAppliedAmount() != null) {
+            existing.setAppliedAmount(application.getAppliedAmount());
+        }
 
-        return repository.save(application);
+        if (application.getApprovedAmount() != null) {
+            existing.setApprovedAmount(application.getApprovedAmount());
+        }
+
+        return repository.save(existing);
 
     }
 

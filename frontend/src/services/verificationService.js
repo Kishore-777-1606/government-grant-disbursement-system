@@ -20,30 +20,24 @@ export const getVerificationHistory = async (applicationId) => {
     return response.data;
 };
 
-export const approveVerification = async (id, role, remarks = "Verified Successfully") => {
+export const approveVerification = async (id, remarks = "Verified Successfully") => {
     const response = await api.put(
         `/verifications/${id}/approve`,
         null,
         {
-            params: {
-                remarks,
-                role
-            }
+            params: { remarks }
         }
     );
 
     return response.data;
 };
 
-export const rejectVerification = async (id, role, remarks = "Rejected") => {
+export const rejectVerification = async (id, remarks = "Rejected") => {
     const response = await api.put(
         `/verifications/${id}/reject`,
         null,
         {
-            params: {
-                remarks,
-                role
-            }
+            params: { remarks }
         }
     );
 

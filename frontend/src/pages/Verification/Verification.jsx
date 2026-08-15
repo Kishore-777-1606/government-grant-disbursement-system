@@ -63,20 +63,29 @@ function Verification() {
 
     };
 
-    // The verification's "verifiedBy" field tells us which officer stage it
-    // is currently waiting on, so the correct role is sent to the backend
-    // instead of always assuming Field Officer.
-    const roleForVerification = (verification) => {
+    // Which officer stage a row is waiting on, read from the record.
+    const stageForVerification = (verification) => {
         if (verification.verifiedBy && verification.verifiedBy.toLowerCase().includes("district")) {
             return "DISTRICT_OFFICER";
         }
         return "FIELD_OFFICER";
     };
 
+    // The ACTUAL logged-in user's role — not derived from the row. Only
+    // Admin, or the officer whose stage this row is currently at, should
+    // see action buttons for it. The backend enforces this too either way,
+    // but showing buttons the click would just get rejected is bad UX and
+    // invites exactly the kind of stage-skipping this used to allow.
+    const stored = localStorage.getItem("user");
+    const currentRole = stored ? JSON.parse(stored)?.role : null;
+
+    const canActOn = (verification) =>
+        currentRole === "ADMIN" || currentRole === stageForVerification(verification);
+
     const approve = async (verification) => {
 
         try {
-            await approveVerification(verification.verificationId, roleForVerification(verification));
+            await approveVerification(verification.verificationId);
             loadVerifications();
         } catch (err) {
             console.error(err);
@@ -88,7 +97,7 @@ function Verification() {
     const reject = async (verification) => {
 
         try {
-            await rejectVerification(verification.verificationId, roleForVerification(verification));
+            await rejectVerification(verification.verificationId);
             loadVerifications();
         } catch (err) {
             console.error(err);
@@ -191,24 +200,34 @@ function Verification() {
 
                                     <TableCell>
 
-                                        <Button
-                                            variant="contained"
-                                            color="success"
-                                            size="small"
-                                            sx={{ mr: 1 }}
-                                            onClick={() => approve(v)}
-                                        >
-                                            Approve
-                                        </Button>
+                                        {canActOn(v) ? (
+                                            <>
+                                                <Button
+                                                    variant="contained"
+                                                    color="success"
+                                                    size="small"
+                                                    sx={{ mr: 1 }}
+                                                    onClick={() => approve(v)}
+                                                >
+                                                    Approve
+                                                </Button>
 
-                                        <Button
-                                            variant="contained"
-                                            color="error"
-                                            size="small"
-                                            onClick={() => reject(v)}
-                                        >
-                                            Reject
-                                        </Button>
+                                                <Button
+                                                    variant="contained"
+                                                    color="error"
+                                                    size="small"
+                                                    onClick={() => reject(v)}
+                                                >
+                                                    Reject
+                                                </Button>
+                                            </>
+                                        ) : (
+                                            <Chip
+                                                label={`Waiting on ${v.verifiedBy}`}
+                                                size="small"
+                                                variant="outlined"
+                                            />
+                                        )}
 
                                     </TableCell>
 

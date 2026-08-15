@@ -180,3 +180,40 @@ CREATE TABLE disbursement_installments (
     CONSTRAINT fk_installments_plan FOREIGN KEY (plan_id) REFERENCES disbursement_plans(plan_id),
     CONSTRAINT fk_installments_milestone FOREIGN KEY (milestone_id) REFERENCES compliance_milestones(milestone_id)
 ) ENGINE=InnoDB COMMENT='Individual scheduled/released installments within a disbursement plan';
+
+
+-- ----------------------------------------------------------------------------
+-- Table: users   (entity: User)
+-- Was missing from this file even though sample_data.sql inserts into it —
+-- only worked before because ddl-auto=update let Hibernate create it
+-- silently. Added so this file is actually usable standalone (ddl-auto=validate
+-- or a fresh manual deploy).
+-- ----------------------------------------------------------------------------
+CREATE TABLE users (
+    user_id              BIGINT          NOT NULL AUTO_INCREMENT,
+    username             VARCHAR(50)     NOT NULL,
+    password_hash        VARCHAR(255)    NOT NULL,
+    full_name            VARCHAR(150)    NOT NULL,
+    role                 VARCHAR(30)     NOT NULL,
+    is_active            BOOLEAN         NOT NULL DEFAULT TRUE,
+    created_at           TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (user_id),
+    CONSTRAINT uq_users_username UNIQUE (username),
+    CONSTRAINT chk_users_role CHECK (role IN ('FIELD_OFFICER','DISTRICT_OFFICER','FINANCE_APPROVER','ADMIN'))
+) ENGINE=InnoDB COMMENT='System user accounts, one row per staff login';
+
+
+-- ----------------------------------------------------------------------------
+-- Table: audit_log   (entity: AuditLog)
+-- ----------------------------------------------------------------------------
+CREATE TABLE audit_log (
+    log_id               BIGINT          NOT NULL AUTO_INCREMENT,
+    action_type          VARCHAR(100)    NULL,
+    performed_by         VARCHAR(100)    NULL,
+    entity_affected      VARCHAR(100)    NULL,
+    details              TEXT            NULL,
+    timestamp            TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (log_id)
+) ENGINE=InnoDB COMMENT='Compliance audit trail — one row per logged action';

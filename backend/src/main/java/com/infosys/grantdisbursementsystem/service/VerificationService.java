@@ -12,6 +12,9 @@ import com.infosys.grantdisbursementsystem.repository.FinanceApprovalRepository;
 import com.infosys.grantdisbursementsystem.repository.VerificationRepository;
 
 import org.springframework.lang.NonNull;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -202,6 +205,52 @@ public class VerificationService {
 
 
     /**
+     * Confirms the currently authenticated caller is actually allowed to act
+     * on THIS verification's current stage — not just "some officer role",
+     * which @PreAuthorize alone can't distinguish. ADMIN can always act.
+     * A Field Officer cannot approve a row that's waiting on the District
+     * Officer stage, and vice versa, no matter what a client-supplied
+     * request param claims.
+     */
+    private void assertCallerCanActOnStage(Verification verification) {
+
+        Authentication auth =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        boolean isAdmin =
+                auth != null && auth.getAuthorities().stream()
+                        .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
+        if (isAdmin) {
+            return;
+        }
+
+        String stage = verification.getVerifiedBy();
+
+        String requiredAuthority =
+                "District Officer".equalsIgnoreCase(stage)
+                        ? "ROLE_DISTRICT_OFFICER"
+                        : "ROLE_FIELD_OFFICER";
+
+        boolean hasRequiredAuthority =
+                auth != null && auth.getAuthorities().stream()
+                        .anyMatch(a -> a.getAuthority().equals(requiredAuthority));
+
+        if (!hasRequiredAuthority) {
+
+            throw new AccessDeniedException(
+                    "You are not authorized to act on this verification's "
+                    + "current stage (" + stage + ")"
+            );
+
+        }
+
+    }
+
+
+
+
+    /**
      * Approves the current verification stage. Approving does NOT reuse the
      * same row for the next stage — it closes out this record (status
      * "Approved", with the approver's remarks preserved) and, if there's a
@@ -217,6 +266,8 @@ public class VerificationService {
 
         Verification verification =
                 getVerificationById(id);
+
+        assertCallerCanActOnStage(verification);
 
 
 
@@ -363,6 +414,8 @@ public class VerificationService {
         Verification verification =
                 getVerificationById(id);
 
+        assertCallerCanActOnStage(verification);
+
 
 
         verification.setVerificationStatus(
@@ -416,6 +469,8 @@ public class VerificationService {
 
         Verification verification =
                 getVerificationById(id);
+
+        assertCallerCanActOnStage(verification);
 
 
         // Preserve which officer sent it back and why — don't relabel this

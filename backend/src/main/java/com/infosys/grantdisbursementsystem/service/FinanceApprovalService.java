@@ -83,13 +83,36 @@ public class FinanceApprovalService {
                         )
                 );
 
-        if(financeApprovalRepository
-                .findByApplication(application)
-                .isPresent()) {
+        // FinanceApproval is @OneToOne with a UNIQUE constraint on
+        // application_id (see schema.sql) — we can never insert a second
+        // row for the same application, even after a rejection. So a prior
+        // REJECTED row is reset back to Pending and reused instead of
+        // inserted fresh; anything still Pending/Approved blocks a new
+        // request as before.
+        var existingOpt =
+                financeApprovalRepository.findByApplication(application);
 
-            throw new IllegalStateException(
-                    "Finance approval already exists for this application."
-            );
+        if (existingOpt.isPresent()) {
+
+            FinanceApproval existing = existingOpt.get();
+
+            if (!"Rejected".equalsIgnoreCase(existing.getApprovalStatus())) {
+
+                throw new IllegalStateException(
+                        "Finance approval already exists for this application."
+                );
+
+            }
+
+            existing.setApprovedBy(financeOfficer);
+            existing.setApprovalStatus("Pending");
+            existing.setApprovalDate(LocalDate.now());
+            existing.setRemarks("Waiting for Finance Approval (resubmitted)");
+
+            application.setStatus("Finance Approval Pending");
+            applicationRepository.save(application);
+
+            return financeApprovalRepository.save(existing);
 
         }
 
