@@ -1,6 +1,5 @@
 package com.infosys.grantdisbursementsystem.service;
 
-
 import com.infosys.grantdisbursementsystem.entity.Application;
 import com.infosys.grantdisbursementsystem.entity.FinanceApproval;
 import com.infosys.grantdisbursementsystem.entity.Scheme;
@@ -17,12 +16,8 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 
-
-
 @Service
 public class FinanceApprovalService {
-
-
 
     private final FinanceApprovalRepository financeApprovalRepository;
 
@@ -34,20 +29,21 @@ public class FinanceApprovalService {
 
     private final DisbursementPlanService disbursementPlanService;
 
+    // Audit Log Service
+    private final AuditLogService auditLogService;
+
     // Default number of staged installments a newly-approved grant is split into.
     // Matches the 3 milestone types (Documentation, Ground Verification, Utilization Proof)
     // defined in DisbursementPlanService.
     private static final int DEFAULT_INSTALLMENTS = 3;
-
-
-
 
     public FinanceApprovalService(
             FinanceApprovalRepository financeApprovalRepository,
             ApplicationRepository applicationRepository,
             SchemeRepository schemeRepository,
             DisbursementPlanRepository disbursementPlanRepository,
-            DisbursementPlanService disbursementPlanService
+            DisbursementPlanService disbursementPlanService,
+            AuditLogService auditLogService
     ) {
 
         this.financeApprovalRepository = financeApprovalRepository;
@@ -60,10 +56,8 @@ public class FinanceApprovalService {
 
         this.disbursementPlanService = disbursementPlanService;
 
+        this.auditLogService = auditLogService;
     }
-
-
-
 
     // Create Finance Approval
 
@@ -74,14 +68,14 @@ public class FinanceApprovalService {
 
         Application application =
                 applicationRepository.findById(
-                        Objects.requireNonNull(applicationId)
-                )
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Application not found with ID: "
-                                + applicationId
+                                Objects.requireNonNull(applicationId)
                         )
-                );
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "Application not found with ID: "
+                                                + applicationId
+                                )
+                        );
 
         // FinanceApproval is @OneToOne with a UNIQUE constraint on
         // application_id (see schema.sql) — we can never insert a second
@@ -138,22 +132,14 @@ public class FinanceApprovalService {
         applicationRepository.save(application);
 
         return financeApprovalRepository.save(approval);
-
     }
-
-
-
 
     // Get All Approvals
 
     public List<FinanceApproval> getAllApprovals() {
 
         return financeApprovalRepository.findAll();
-
     }
-
-
-
 
     // Get Approval By ID
 
@@ -162,19 +148,15 @@ public class FinanceApprovalService {
     ) {
 
         return financeApprovalRepository.findById(
-                Objects.requireNonNull(id)
-        )
-        .orElseThrow(() ->
-                new ResourceNotFoundException(
-                        "Finance approval not found with ID: "
-                        + id
+                        Objects.requireNonNull(id)
                 )
-        );
-
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Finance approval not found with ID: "
+                                        + id
+                        )
+                );
     }
-
-
-
 
     // Approve Finance
 
@@ -185,6 +167,10 @@ public class FinanceApprovalService {
 
         FinanceApproval approval =
                 getApprovalById(id);
+
+        // Store old status before changing it
+        String oldStatus =
+                approval.getApprovalStatus();
 
         approval.setApprovalStatus(
                 "Approved"
@@ -207,10 +193,19 @@ public class FinanceApprovalService {
 
         applicationRepository.save(application);
 
-
         FinanceApproval saved =
                 financeApprovalRepository.save(approval);
 
+        // =========================
+        // AUDIT LOG - APPROVE
+        // =========================
+        auditLogService.log(
+                "APPROVE",
+                "FINANCE_APPROVAL",
+                id,
+                oldStatus,
+                "Approved"
+        );
 
         // Auto-trigger staged disbursement now that finance has signed off.
         // Grant amount: prefer what finance actually approved, then what
@@ -234,12 +229,11 @@ public class FinanceApprovalService {
 
                 Scheme scheme =
                         schemeRepository.findById(application.getSchemeId())
-                        .orElse(null);
+                                .orElse(null);
 
                 if (scheme != null) {
                     grantAmount = scheme.getAmount();
                 }
-
             }
 
             // Record what was actually approved, so it's visible on the
@@ -256,18 +250,11 @@ public class FinanceApprovalService {
                         grantAmount.doubleValue(),
                         DEFAULT_INSTALLMENTS
                 );
-
             }
-
         }
 
-
         return saved;
-
     }
-
-
-
 
     // Reject Finance
 
@@ -278,6 +265,10 @@ public class FinanceApprovalService {
 
         FinanceApproval approval =
                 getApprovalById(id);
+
+        // Store old status before changing it
+        String oldStatus =
+                approval.getApprovalStatus();
 
         approval.setApprovalStatus(
                 "Rejected"
@@ -300,12 +291,22 @@ public class FinanceApprovalService {
 
         applicationRepository.save(application);
 
-        return financeApprovalRepository.save(approval);
+        FinanceApproval saved =
+                financeApprovalRepository.save(approval);
 
+        // =========================
+        // AUDIT LOG - REJECT
+        // =========================
+        auditLogService.log(
+                "REJECT",
+                "FINANCE_APPROVAL",
+                id,
+                oldStatus,
+                "Rejected"
+        );
+
+        return saved;
     }
-
-
-
 
     // Pending Approvals
 
@@ -313,11 +314,7 @@ public class FinanceApprovalService {
 
         return financeApprovalRepository
                 .findByApprovalStatus("Pending");
-
     }
-
-
-
 
     // Approved Approvals
 
@@ -325,11 +322,7 @@ public class FinanceApprovalService {
 
         return financeApprovalRepository
                 .findByApprovalStatus("Approved");
-
     }
-
-
-
 
     // Rejected Approvals
 
@@ -337,8 +330,5 @@ public class FinanceApprovalService {
 
         return financeApprovalRepository
                 .findByApprovalStatus("Rejected");
-
     }
-
-
 }

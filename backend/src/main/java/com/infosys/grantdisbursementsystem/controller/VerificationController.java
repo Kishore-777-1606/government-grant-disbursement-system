@@ -1,7 +1,7 @@
 package com.infosys.grantdisbursementsystem.controller;
 
-
 import com.infosys.grantdisbursementsystem.entity.Verification;
+import com.infosys.grantdisbursementsystem.service.AuditLogService;
 import com.infosys.grantdisbursementsystem.service.VerificationService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -9,43 +9,43 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-
 @RestController
 @RequestMapping("/verifications")
 public class VerificationController {
 
-
     private final VerificationService verificationService;
-
+    private final AuditLogService auditLogService;
 
     public VerificationController(
-            VerificationService verificationService
+            VerificationService verificationService,
+            AuditLogService auditLogService
     ) {
-
         this.verificationService = verificationService;
-
+        this.auditLogService = auditLogService;
     }
 
-
-
-  // Create Verification
+    // Create Verification
     @PreAuthorize("hasAnyRole('FIELD_OFFICER', 'DISTRICT_OFFICER', 'ADMIN')")
     @PostMapping("/create")
     public ResponseEntity<Verification> createVerification(
-            @RequestParam Long applicationId,
-            @RequestParam String officerRole
+            @RequestParam Long applicationId
     ) {
 
-        return ResponseEntity.ok(
-                verificationService.createVerification(
-                        applicationId,
-                        officerRole
-                )
+        Verification verification = verificationService.createVerification(
+                applicationId,
+                null
         );
 
+        auditLogService.log(
+                "CREATE",
+                "VERIFICATION",
+                verification.getVerificationId(),
+                null,
+                "Verification created for application: " + applicationId
+        );
+
+        return ResponseEntity.ok(verification);
     }
-
-
 
     // Get All Verifications
     @GetMapping
@@ -54,13 +54,9 @@ public class VerificationController {
         return ResponseEntity.ok(
                 verificationService.getAllVerifications()
         );
-
     }
 
-
-
     // Get Verification By ID
-    // Only accepts numeric id values
     @GetMapping("/{id:[0-9]+}")
     public ResponseEntity<Verification> getVerificationById(
             @PathVariable Long id
@@ -69,10 +65,7 @@ public class VerificationController {
         return ResponseEntity.ok(
                 verificationService.getVerificationById(id)
         );
-
     }
-
-
 
     // Get Pending Verifications
     @GetMapping("/pending")
@@ -81,13 +74,9 @@ public class VerificationController {
         return ResponseEntity.ok(
                 verificationService.getPendingVerifications()
         );
-
     }
 
-
-
-    // Full stage-by-stage audit trail for one application (oldest first).
-    // Backs the "expand row to see history" action on the Verification page.
+    // Full stage-by-stage audit trail for one application
     @GetMapping("/application/{applicationId:[0-9]+}/history")
     public ResponseEntity<List<Verification>> getVerificationHistory(
             @PathVariable Long applicationId
@@ -96,13 +85,10 @@ public class VerificationController {
         return ResponseEntity.ok(
                 verificationService.getVerificationHistory(applicationId)
         );
-
     }
 
-
-
-   // Approve Verification
-    // Real stage-authority enforcement now lives in VerificationService,
+    // Approve Verification
+    // Real stage-authority enforcement lives in VerificationService,
     // checked against the caller's actual authenticated role — not a
     // client-supplied param, which could never be trusted for this anyway.
     @PreAuthorize("hasAnyRole('FIELD_OFFICER', 'DISTRICT_OFFICER', 'ADMIN')")
@@ -112,18 +98,23 @@ public class VerificationController {
             @RequestParam String remarks
     ) {
 
-        return ResponseEntity.ok(
-                verificationService.approveVerification(
-                        id,
-                        remarks
-                )
+        Verification verification = verificationService.approveVerification(
+                id,
+                remarks
         );
 
+        auditLogService.log(
+                "APPROVE",
+                "VERIFICATION",
+                id,
+                "PENDING",
+                "APPROVED"
+        );
+
+        return ResponseEntity.ok(verification);
     }
 
-
-
-// Reject Verification
+    // Reject Verification
     @PreAuthorize("hasAnyRole('FIELD_OFFICER', 'DISTRICT_OFFICER', 'ADMIN')")
     @PutMapping("/{id:[0-9]+}/reject")
     public ResponseEntity<Verification> rejectVerification(
@@ -131,17 +122,23 @@ public class VerificationController {
             @RequestParam String remarks
     ) {
 
-        return ResponseEntity.ok(
-                verificationService.rejectVerification(
-                        id,
-                        remarks
-                )
+        Verification verification = verificationService.rejectVerification(
+                id,
+                remarks
         );
 
+        auditLogService.log(
+                "REJECT",
+                "VERIFICATION",
+                id,
+                "PENDING",
+                "REJECTED"
+        );
+
+        return ResponseEntity.ok(verification);
     }
 
-
-// Send For Re-Verification
+    // Send For Re-Verification
     @PreAuthorize("hasAnyRole('FIELD_OFFICER', 'DISTRICT_OFFICER', 'ADMIN')")
     @PutMapping("/{id:[0-9]+}/reverify")
     public ResponseEntity<Verification> reVerify(
@@ -149,33 +146,42 @@ public class VerificationController {
             @RequestParam String remarks
     ) {
 
-
-        return ResponseEntity.ok(
+        Verification verification =
                 verificationService.sendForReVerification(
                         id,
                         remarks
-                )
+                );
+
+        auditLogService.log(
+                "REVERIFY",
+                "VERIFICATION",
+                id,
+                "REJECTED",
+                "REVERIFICATION_REQUESTED"
         );
 
+        return ResponseEntity.ok(verification);
     }
 
-
-
-   // Escalation API
+    // Escalation API
     @PreAuthorize("hasAnyRole('DISTRICT_OFFICER', 'ADMIN')")
     @PutMapping("/{id:[0-9]+}/escalate")
     public ResponseEntity<String> escalate(
             @PathVariable Long id
     ) {
 
-
         verificationService.checkEscalation(id);
 
+        auditLogService.log(
+                "ESCALATE",
+                "VERIFICATION",
+                id,
+                null,
+                "ESCALATED"
+        );
 
         return ResponseEntity.ok(
                 "Verification escalated successfully"
         );
-
     }
-
 }
