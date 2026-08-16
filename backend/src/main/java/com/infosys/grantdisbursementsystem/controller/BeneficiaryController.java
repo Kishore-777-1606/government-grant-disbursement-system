@@ -36,6 +36,7 @@ public class BeneficiaryController {
 
 
 
+    @PreAuthorize("hasAnyRole('FIELD_OFFICER', 'DISTRICT_OFFICER', 'ADMIN')")
     @GetMapping
     public List<Beneficiary> getAllBeneficiaries() {
 
@@ -46,6 +47,7 @@ public class BeneficiaryController {
 
 
 
+    @PreAuthorize("hasAnyRole('FIELD_OFFICER', 'DISTRICT_OFFICER', 'ADMIN')")
     @GetMapping("/{id}")
     public Beneficiary getBeneficiaryById(
             @PathVariable Long id
@@ -124,6 +126,7 @@ public class BeneficiaryController {
 
 
 
+    @PreAuthorize("hasAnyRole('FIELD_OFFICER', 'DISTRICT_OFFICER', 'ADMIN')")
     @GetMapping("/{id}/document")
     public ResponseEntity<Resource> downloadDocument(
             @PathVariable Long id

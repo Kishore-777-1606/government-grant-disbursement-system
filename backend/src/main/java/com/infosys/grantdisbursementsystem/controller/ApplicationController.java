@@ -34,6 +34,7 @@ public class ApplicationController {
 
 
 
+    @PreAuthorize("hasAnyRole('FIELD_OFFICER', 'DISTRICT_OFFICER', 'ADMIN')")
     @GetMapping
     public List<Application> getAllApplications() {
 
@@ -42,6 +43,7 @@ public class ApplicationController {
 
 
 
+    @PreAuthorize("hasAnyRole('FIELD_OFFICER', 'DISTRICT_OFFICER', 'ADMIN')")
     @GetMapping("/{id}")
     public Application getApplicationById(
             @PathVariable @NonNull Long id) {
