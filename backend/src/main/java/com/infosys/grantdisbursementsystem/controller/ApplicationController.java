@@ -19,7 +19,7 @@ public class ApplicationController {
         this.service = service;
     }
 
-    @PreAuthorize("hasAnyRole('FIELD_OFFICER', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('FIELD_OFFICER', 'FINANCE_APPROVER','ADMIN')")
     @PostMapping
     public Application submitApplication(
             @RequestBody Application application) {
@@ -27,7 +27,7 @@ public class ApplicationController {
         return service.submitApplication(application);
     }
 
-    @PreAuthorize("hasAnyRole('FIELD_OFFICER', 'DISTRICT_OFFICER', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('FIELD_OFFICER', 'DISTRICT_OFFICER','FINANCE_APPROVER', 'ADMIN')")
     @GetMapping
     public List<Application> getAllApplications() {
 

@@ -11,6 +11,7 @@ import StatusTracking from "./pages/StatusTracking/StatusTracking";
 import Analytics from "./pages/Analytics/Analytics";
 import Disbursement from "./pages/Disbursement/Disbursement";
 import ProtectedRoute from "./routes/ProtectedRoute";
+import AuditLog from "./pages/AuditLog/AuditLog";
 
 function App() {
   return (
@@ -93,6 +94,14 @@ function App() {
         element={
           <ProtectedRoute>
             <Analytics />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/audit-log"
+        element={
+          <ProtectedRoute>
+            <AuditLog />
           </ProtectedRoute>
         }
       />

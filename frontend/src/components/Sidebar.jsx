@@ -19,6 +19,7 @@ import {
   AccountBalanceWallet,
   Assessment,
   Payments,
+  History,
 } from "@mui/icons-material";
 
 import { Link, useLocation } from "react-router-dom";
@@ -33,11 +34,13 @@ const menuItems = [
   { text: "Schemes", icon: <Description />, path: "/schemes", roles: ["FIELD_OFFICER", "DISTRICT_OFFICER", "FINANCE_APPROVER", "ADMIN"] },
   { text: "Applications", icon: <Assignment />, path: "/applications", roles: ["FIELD_OFFICER", "DISTRICT_OFFICER", "FINANCE_APPROVER", "ADMIN"] },
   { text: "Eligibility", icon: <Verified />, path: "/eligibility", roles: ["FIELD_OFFICER", "DISTRICT_OFFICER", "FINANCE_APPROVER", "ADMIN"] },
-  { text: "Verification", icon: <CheckCircle />, path: "/verification", roles: ["FIELD_OFFICER", "DISTRICT_OFFICER", "ADMIN"] },
+  { text: "Verification", icon: <CheckCircle />, path: "/verification", roles: ["FIELD_OFFICER", "DISTRICT_OFFICER", "FINANCE_APPROVER", "ADMIN"] },
   { text: "Finance Approval", icon: <AccountBalanceWallet />, path: "/finance", roles: ["DISTRICT_OFFICER", "FINANCE_APPROVER", "ADMIN"] },
   { text: "Disbursement", icon: <Payments />, path: "/disbursement", roles: ["FIELD_OFFICER", "DISTRICT_OFFICER", "FINANCE_APPROVER", "ADMIN"] },
   { text: "Status Tracking", icon: <AccountTree />, path: "/status", roles: ["FIELD_OFFICER", "DISTRICT_OFFICER", "FINANCE_APPROVER", "ADMIN"] },
   { text: "Analytics", icon: <Assessment />, path: "/analytics", roles: ["DISTRICT_OFFICER", "FINANCE_APPROVER", "ADMIN"] },
+  { text: "Audit Log", icon: <History />, path: "/audit-log", roles: ["ADMIN", "DISTRICT_OFFICER"] },
+
 ];
 
 function Sidebar() {

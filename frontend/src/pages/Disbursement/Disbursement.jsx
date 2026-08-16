@@ -21,6 +21,8 @@ import {
     getAllInstallments,
     releaseInstallment,
     completeMilestone,
+    markMilestoneInProgress,
+    markMilestoneNonCompliant,
     getMilestoneReminders
 } from "../../services/disbursementService";
 
@@ -35,7 +37,11 @@ function statusColor(status) {
             return "success";
 
         case "overdue":
+        case "non-compliant":
             return "error";
+
+        case "in progress":
+            return "info";
 
         case "scheduled":
         case "pending":
@@ -47,6 +53,20 @@ function statusColor(status) {
 }
 
 function Disbursement() {
+
+    const stored = localStorage.getItem("user");
+    const currentRole = stored ? JSON.parse(stored)?.role : null;
+
+    // Mirrors the backend's @PreAuthorize on ComplianceMilestoneController
+    // exactly — a role that can't call the endpoint shouldn't see the button.
+    const canMarkComplete =
+        ["FIELD_OFFICER", "DISTRICT_OFFICER", "ADMIN"].includes(currentRole);
+
+    const canMarkInProgress =
+        ["FIELD_OFFICER", "DISTRICT_OFFICER", "ADMIN"].includes(currentRole);
+
+    const canMarkNonCompliant =
+        ["DISTRICT_OFFICER", "ADMIN"].includes(currentRole);
 
     const [installments, setInstallments] = useState([]);
     const [reminders, setReminders] = useState([]);
@@ -99,6 +119,53 @@ function Disbursement() {
 
     };
 
+    const handleInProgress = async (milestoneId) => {
+
+        try {
+
+            await markMilestoneInProgress(milestoneId);
+            loadData();
+
+        } catch (err) {
+
+            console.error(err);
+            alert(
+                err?.response?.data?.message ||
+                "Could not mark this milestone in progress."
+            );
+
+        }
+
+    };
+
+    const handleNonCompliant = async (milestoneId) => {
+
+        const reason = window.prompt(
+            "Reason for marking this milestone non-compliant (optional):"
+        );
+
+        // User clicked Cancel — abort, don't submit anything.
+        if (reason === null) {
+            return;
+        }
+
+        try {
+
+            await markMilestoneNonCompliant(milestoneId, reason.trim() || undefined);
+            loadData();
+
+        } catch (err) {
+
+            console.error(err);
+            alert(
+                err?.response?.data?.message ||
+                "Could not mark this milestone non-compliant."
+            );
+
+        }
+
+    };
+
     const handleRelease = async (installmentId) => {
 
         try {
@@ -111,7 +178,7 @@ function Disbursement() {
             console.error(err);
             alert(
                 err?.response?.data?.message ||
-                "Milestone not yet completed — cannot release this installment."
+                "Could not release this installment. Please try again."
             );
 
         }
@@ -166,10 +233,14 @@ function Disbursement() {
                             {installments.map((inst) => {
 
                                 const milestone = inst.milestone;
-                                const milestoneDone =
-                                    milestone &&
-                                    milestone.status &&
-                                    milestone.status.toLowerCase() === "completed";
+                                const milestoneStatus =
+                                    milestone?.status?.toLowerCase() || "";
+
+                                const isCompleted = milestoneStatus === "completed";
+                                const isNonCompliant = milestoneStatus === "non-compliant";
+                                const isInProgress = milestoneStatus === "in progress";
+
+                                const milestoneDone = isCompleted;
                                 const alreadyReleased =
                                     inst.status &&
                                     inst.status.toLowerCase() === "released";
@@ -220,9 +291,27 @@ function Disbursement() {
 
                                         <TableCell>
 
-                                            <Box display="flex" gap={1}>
+                                            <Box display="flex" gap={1} flexWrap="wrap">
 
-                                                {!milestoneDone && milestone && (
+                                                {milestone && canMarkInProgress &&
+                                                    !isCompleted && !isNonCompliant && !isInProgress && (
+
+                                                    <Button
+                                                        variant="outlined"
+                                                        size="small"
+                                                        onClick={() =>
+                                                            handleInProgress(
+                                                                milestone.milestoneId
+                                                            )
+                                                        }
+                                                    >
+                                                        Mark In Progress
+                                                    </Button>
+
+                                                )}
+
+                                                {milestone && canMarkComplete &&
+                                                    !milestoneDone && !isNonCompliant && (
 
                                                     <Button
                                                         variant="outlined"
@@ -234,6 +323,24 @@ function Disbursement() {
                                                         }
                                                     >
                                                         Mark Milestone Complete
+                                                    </Button>
+
+                                                )}
+
+                                                {milestone && canMarkNonCompliant &&
+                                                    !isCompleted && !isNonCompliant && (
+
+                                                    <Button
+                                                        variant="outlined"
+                                                        color="error"
+                                                        size="small"
+                                                        onClick={() =>
+                                                            handleNonCompliant(
+                                                                milestone.milestoneId
+                                                            )
+                                                        }
+                                                    >
+                                                        Mark Non-Compliant
                                                     </Button>
 
                                                 )}

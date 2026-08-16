@@ -28,13 +28,13 @@ public class BeneficiaryController {
         this.beneficiaryService = beneficiaryService;
     }
 
-    @PreAuthorize("hasAnyRole('FIELD_OFFICER', 'DISTRICT_OFFICER', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('FIELD_OFFICER', 'DISTRICT_OFFICER','FINANCE_APPROVER', 'ADMIN')")
     @GetMapping
     public List<Beneficiary> getAllBeneficiaries() {
         return beneficiaryService.getAllBeneficiaries();
     }
 
-    @PreAuthorize("hasAnyRole('FIELD_OFFICER', 'DISTRICT_OFFICER', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('FIELD_OFFICER', 'DISTRICT_OFFICER', 'FINANCE_APPROVER','ADMIN')")
     @GetMapping("/{id}")
     public Beneficiary getBeneficiaryById(
             @PathVariable Long id
