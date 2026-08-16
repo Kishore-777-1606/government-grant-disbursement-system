@@ -26,3 +26,7 @@ export const getMilestoneReminders = async () => {
     const response = await api.get("/api/milestones/reminders");
     return response.data;
 };
+export const createPlan = async (planData) => {
+    const response = await api.post("/api/disbursement-plans", planData);
+    return response.data;
+};
