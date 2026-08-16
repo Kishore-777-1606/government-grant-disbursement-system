@@ -28,15 +28,13 @@ public class BeneficiaryController {
         this.beneficiaryService = beneficiaryService;
     }
 
-    // Intentionally open to any authenticated role — viewing beneficiaries
-    // doesn't require elevated permissions, only writes do.
+    @PreAuthorize("hasAnyRole('FIELD_OFFICER', 'DISTRICT_OFFICER', 'ADMIN')")
     @GetMapping
     public List<Beneficiary> getAllBeneficiaries() {
         return beneficiaryService.getAllBeneficiaries();
     }
 
-    // Intentionally open to any authenticated role — viewing beneficiaries
-    // doesn't require elevated permissions, only writes do.
+    @PreAuthorize("hasAnyRole('FIELD_OFFICER', 'DISTRICT_OFFICER', 'ADMIN')")
     @GetMapping("/{id}")
     public Beneficiary getBeneficiaryById(
             @PathVariable Long id
@@ -105,7 +103,7 @@ public class BeneficiaryController {
         );
     }
 
-    @PreAuthorize("hasAnyRole('FIELD_OFFICER', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('FIELD_OFFICER', 'DISTRICT_OFFICER', 'ADMIN')")
     @GetMapping("/{id}/document")
     public ResponseEntity<Resource> downloadDocument(
             @PathVariable Long id

@@ -92,8 +92,8 @@ public class DisbursementPlanController {
 
     }
 
-    // Intentionally open to any authenticated role — viewing applications/plans
-    // doesn't require elevated permissions, only writes do.
+    // Get All Plans (list view for the Disbursement page)
+    @PreAuthorize("hasAnyRole('DISTRICT_OFFICER', 'FINANCE_APPROVER', 'ADMIN')")
     @GetMapping
     public List<DisbursementPlan> getAllPlans() {
 
@@ -101,9 +101,9 @@ public class DisbursementPlanController {
 
     }
 
-    // Intentionally open to any authenticated role — viewing applications/plans
-    // doesn't require elevated permissions, only writes do.
-    // This provides a read-only view of all installments.
+    // Get All Installments across every plan (flat table for the Disbursement page,
+    // so a finance/field user can see and act on every pending release in one place)
+    @PreAuthorize("hasAnyRole('FIELD_OFFICER', 'DISTRICT_OFFICER', 'FINANCE_APPROVER', 'ADMIN')")
     @GetMapping("/installments/all")
     public List<DisbursementInstallment> getAllInstallments() {
 
@@ -111,8 +111,7 @@ public class DisbursementPlanController {
 
     }
 
-    // Intentionally open to any authenticated role — viewing applications/plans
-    // doesn't require elevated permissions, only writes do.
+    @PreAuthorize("hasAnyRole('DISTRICT_OFFICER', 'FINANCE_APPROVER', 'ADMIN')")
     @GetMapping("/{planId:[0-9]+}/installments")
     public List<DisbursementInstallment> getInstallments(
             @PathVariable @NonNull Long planId
@@ -125,8 +124,7 @@ public class DisbursementPlanController {
 
     }
 
-    // Intentionally open to any authenticated role — viewing applications/plans
-    // doesn't require elevated permissions, only writes do.
+    @PreAuthorize("hasAnyRole('DISTRICT_OFFICER', 'FINANCE_APPROVER', 'ADMIN')")
     @GetMapping("/{id:[0-9]+}")
     public DisbursementPlan getPlan(
             @PathVariable @NonNull Long id

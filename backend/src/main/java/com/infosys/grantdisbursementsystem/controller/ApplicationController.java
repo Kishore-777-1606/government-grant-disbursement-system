@@ -27,16 +27,14 @@ public class ApplicationController {
         return service.submitApplication(application);
     }
 
-    // Intentionally open to any authenticated role — viewing applications/plans
-    // doesn't require elevated permissions, only writes do.
+    @PreAuthorize("hasAnyRole('FIELD_OFFICER', 'DISTRICT_OFFICER', 'ADMIN')")
     @GetMapping
     public List<Application> getAllApplications() {
 
         return service.getAllApplications();
     }
 
-    // Intentionally open to any authenticated role — viewing applications/plans
-    // doesn't require elevated permissions, only writes do.
+    @PreAuthorize("hasAnyRole('FIELD_OFFICER', 'DISTRICT_OFFICER', 'ADMIN')")
     @GetMapping("/{id}")
     public Application getApplicationById(
             @PathVariable @NonNull Long id) {

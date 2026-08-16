@@ -20,35 +20,47 @@ import java.util.Objects;
 @Service
 public class VerificationService {
 
+<<<<<<< HEAD
     // Applications requesting this much or more are always escalated
     // to District Officer for extra scrutiny.
+=======
+>>>>>>> origin/kishore/milestone4-security-integrations
     public static final double HIGH_VALUE_THRESHOLD = 50000.0;
 
     private final VerificationRepository verificationRepository;
-
     private final ApplicationRepository applicationRepository;
-
     private final FinanceApprovalRepository financeApprovalRepository;
 
+<<<<<<< HEAD
     // Audit Log Service
     private final AuditLogService auditLogService;
 
+=======
+>>>>>>> origin/kishore/milestone4-security-integrations
     public VerificationService(
             VerificationRepository verificationRepository,
             ApplicationRepository applicationRepository,
             FinanceApprovalRepository financeApprovalRepository,
             AuditLogService auditLogService
     ) {
-
         this.verificationRepository = verificationRepository;
         this.applicationRepository = applicationRepository;
         this.financeApprovalRepository = financeApprovalRepository;
+<<<<<<< HEAD
         this.auditLogService = auditLogService;
     }
 
     /**
      * Creates the FIRST verification-stage record for an application.
      */
+=======
+    }
+
+    // ============================================================
+    // CREATE VERIFICATION
+    // ============================================================
+
+>>>>>>> origin/kishore/milestone4-security-integrations
     public Verification createVerification(
             @NonNull Long applicationId,
             String officerRole
@@ -97,8 +109,12 @@ public class VerificationService {
                     "Application rejected due to low eligibility score"
             );
 
+<<<<<<< HEAD
         }
         else if (score < 80 && !highValue) {
+=======
+        } else if (score < 80 && !highValue) {
+>>>>>>> origin/kishore/milestone4-security-integrations
 
             application.setStatus("Field Verification Pending");
 
@@ -110,8 +126,7 @@ public class VerificationService {
                     "Waiting for Field Officer Verification"
             );
 
-        }
-        else {
+        } else {
 
             application.setStatus("District Verification Pending");
 
@@ -121,16 +136,23 @@ public class VerificationService {
 
             verification.setRemarks(
                     score < 80
+<<<<<<< HEAD
                             ?
                             "Waiting for District Officer Verification "
                                     + "(escalated: high-value application)"
                             :
                             "Waiting for District Officer Verification"
+=======
+                            ? "Waiting for District Officer Verification "
+                              + "(escalated: high-value application)"
+                            : "Waiting for District Officer Verification"
+>>>>>>> origin/kishore/milestone4-security-integrations
             );
         }
 
         applicationRepository.save(application);
 
+<<<<<<< HEAD
         Verification savedVerification =
                 verificationRepository.save(verification);
 
@@ -148,11 +170,27 @@ public class VerificationService {
         return savedVerification;
     }
 
+=======
+        return verificationRepository.save(verification);
+    }
+
+    // ============================================================
+    // GET ALL
+    // ============================================================
+
+>>>>>>> origin/kishore/milestone4-security-integrations
     public List<Verification> getAllVerifications() {
 
         return verificationRepository.findAll();
     }
 
+<<<<<<< HEAD
+=======
+    // ============================================================
+    // GET BY ID
+    // ============================================================
+
+>>>>>>> origin/kishore/milestone4-security-integrations
     public Verification getVerificationById(
             @NonNull Long id
     ) {
@@ -168,6 +206,7 @@ public class VerificationService {
                 );
     }
 
+<<<<<<< HEAD
     /**
      * Confirms the currently authenticated caller is actually allowed to act
      * on THIS verification's current stage — not just "some officer role",
@@ -219,6 +258,12 @@ public class VerificationService {
      * permanent, un-overwritten history of every stage the application
      * passed through.
      */
+=======
+    // ============================================================
+    // APPROVE
+    // ============================================================
+
+>>>>>>> origin/kishore/milestone4-security-integrations
     public Verification approveVerification(
             @NonNull Long id,
             String remarks
@@ -227,8 +272,11 @@ public class VerificationService {
         Verification verification =
                 getVerificationById(id);
 
+<<<<<<< HEAD
         assertCallerCanActOnStage(verification);
 
+=======
+>>>>>>> origin/kishore/milestone4-security-integrations
         Application application =
                 Objects.requireNonNull(
                         verification.getApplication()
@@ -237,6 +285,7 @@ public class VerificationService {
         String officer =
                 verification.getVerifiedBy();
 
+<<<<<<< HEAD
         // Store old status before changing it
         String oldStatus =
                 verification.getVerificationStatus();
@@ -244,6 +293,10 @@ public class VerificationService {
         if ("Field Officer".equalsIgnoreCase(officer)) {
 
             // Close Field Officer stage
+=======
+        if ("Field Officer".equalsIgnoreCase(officer)) {
+
+>>>>>>> origin/kishore/milestone4-security-integrations
             verification.setVerificationStatus(
                     "Approved"
             );
@@ -252,6 +305,7 @@ public class VerificationService {
                     remarks
             );
 
+<<<<<<< HEAD
             verificationRepository.save(verification);
 
             // =========================
@@ -263,17 +317,30 @@ public class VerificationService {
                     id,
                     oldStatus,
                     "Approved"
+=======
+            verificationRepository.save(
+                    verification
+>>>>>>> origin/kishore/milestone4-security-integrations
             );
 
             application.setStatus(
                     "District Verification Pending"
             );
 
+<<<<<<< HEAD
             // Create District Officer stage
             Verification nextStage =
                     new Verification();
 
             nextStage.setApplication(application);
+=======
+            Verification nextStage =
+                    new Verification();
+
+            nextStage.setApplication(
+                    application
+            );
+>>>>>>> origin/kishore/milestone4-security-integrations
 
             nextStage.setVerificationDate(
                     LocalDate.now()
@@ -291,12 +358,22 @@ public class VerificationService {
                     "Waiting for District Officer Verification"
             );
 
-            applicationRepository.save(application);
+            applicationRepository.save(
+                    application
+            );
 
+<<<<<<< HEAD
             return verificationRepository.save(nextStage);
         }
 
         else if ("District Officer".equalsIgnoreCase(officer)) {
+=======
+            return verificationRepository.save(
+                    nextStage
+            );
+
+        } else if ("District Officer".equalsIgnoreCase(officer)) {
+>>>>>>> origin/kishore/milestone4-security-integrations
 
             application.setStatus(
                     "Finance Approval Pending"
@@ -317,7 +394,13 @@ public class VerificationService {
                 FinanceApproval approval =
                         new FinanceApproval();
 
+<<<<<<< HEAD
                 approval.setApplication(application);
+=======
+                approval.setApplication(
+                        application
+                );
+>>>>>>> origin/kishore/milestone4-security-integrations
 
                 approval.setApprovedBy(
                         "Finance Officer"
@@ -335,6 +418,7 @@ public class VerificationService {
                         "Waiting for Finance Approval"
                 );
 
+<<<<<<< HEAD
                 financeApprovalRepository.save(approval);
             }
         }
@@ -358,6 +442,27 @@ public class VerificationService {
         return savedVerification;
     }
 
+=======
+                financeApprovalRepository.save(
+                        approval
+                );
+            }
+        }
+
+        applicationRepository.save(
+                application
+        );
+
+        return verificationRepository.save(
+                verification
+        );
+    }
+
+    // ============================================================
+    // REJECT
+    // ============================================================
+
+>>>>>>> origin/kishore/milestone4-security-integrations
     public Verification rejectVerification(
             @NonNull Long id,
             String remarks
@@ -366,12 +471,15 @@ public class VerificationService {
         Verification verification =
                 getVerificationById(id);
 
+<<<<<<< HEAD
         assertCallerCanActOnStage(verification);
 
         // Store old status
         String oldStatus =
                 verification.getVerificationStatus();
 
+=======
+>>>>>>> origin/kishore/milestone4-security-integrations
         verification.setVerificationStatus(
                 "Rejected"
         );
@@ -389,6 +497,7 @@ public class VerificationService {
                 "Rejected"
         );
 
+<<<<<<< HEAD
         applicationRepository.save(application);
 
         Verification savedVerification =
@@ -411,6 +520,21 @@ public class VerificationService {
     /**
      * Sends the application back for re-verification.
      */
+=======
+        applicationRepository.save(
+                application
+        );
+
+        return verificationRepository.save(
+                verification
+        );
+    }
+
+    // ============================================================
+    // RE-VERIFICATION
+    // ============================================================
+
+>>>>>>> origin/kishore/milestone4-security-integrations
     public Verification sendForReVerification(
             @NonNull Long id,
             String remarks
@@ -419,6 +543,7 @@ public class VerificationService {
         Verification verification =
                 getVerificationById(id);
 
+<<<<<<< HEAD
         assertCallerCanActOnStage(verification);
 
         // Store old status
@@ -426,6 +551,8 @@ public class VerificationService {
                 verification.getVerificationStatus();
 
         // Preserve current verification row
+=======
+>>>>>>> origin/kishore/milestone4-security-integrations
         verification.setVerificationStatus(
                 "Sent Back"
         );
@@ -434,6 +561,7 @@ public class VerificationService {
                 remarks
         );
 
+<<<<<<< HEAD
         verificationRepository.save(verification);
 
         // =========================
@@ -445,6 +573,10 @@ public class VerificationService {
                 id,
                 oldStatus,
                 "Sent Back"
+=======
+        verificationRepository.save(
+                verification
+>>>>>>> origin/kishore/milestone4-security-integrations
         );
 
         Application application =
@@ -456,9 +588,14 @@ public class VerificationService {
                 "Re-Verification Pending"
         );
 
-        applicationRepository.save(application);
+        applicationRepository.save(
+                application
+        );
 
+<<<<<<< HEAD
         // Create fresh Field Officer stage
+=======
+>>>>>>> origin/kishore/milestone4-security-integrations
         Verification reVerificationStage =
                 new Verification();
 
@@ -479,7 +616,8 @@ public class VerificationService {
         );
 
         reVerificationStage.setRemarks(
-                "Re-verification requested: " + remarks
+                "Re-verification requested: "
+                        + remarks
         );
 
         return verificationRepository.save(
@@ -487,6 +625,7 @@ public class VerificationService {
         );
     }
 
+<<<<<<< HEAD
     public List<Verification> getPendingVerifications() {
 
         return verificationRepository
@@ -496,13 +635,37 @@ public class VerificationService {
     /**
      * Full audit trail for one application.
      */
+=======
+    // ============================================================
+    // GET PENDING
+    // ============================================================
+
+    public List<Verification> getPendingVerifications() {
+
+        return verificationRepository
+                .findByVerificationStatus(
+                        "Pending"
+                );
+    }
+
+    // ============================================================
+    // GET HISTORY
+    // ============================================================
+
+>>>>>>> origin/kishore/milestone4-security-integrations
     public List<Verification> getVerificationHistory(
             @NonNull Long applicationId
     ) {
 
         Application application =
                 applicationRepository.findById(
+<<<<<<< HEAD
                                 Objects.requireNonNull(applicationId)
+=======
+                                Objects.requireNonNull(
+                                        applicationId
+                                )
+>>>>>>> origin/kishore/milestone4-security-integrations
                         )
                         .orElseThrow(() ->
                                 new ResourceNotFoundException(
@@ -517,18 +680,31 @@ public class VerificationService {
                 );
     }
 
+<<<<<<< HEAD
     /**
      * If a verification has sat in its current stage for more than 3 days,
      * escalate it: record the delay, AND actually open a new stage at
      * District Officer level so the application is genuinely rerouted, not
      * just annotated.
      */
+=======
+    // ============================================================
+    // ESCALATION
+    // ============================================================
+
+>>>>>>> origin/kishore/milestone4-security-integrations
     public void checkEscalation(
             @NonNull Long verificationId
     ) {
 
         Verification verification =
+<<<<<<< HEAD
                 getVerificationById(verificationId);
+=======
+                getVerificationById(
+                        verificationId
+                );
+>>>>>>> origin/kishore/milestone4-security-integrations
 
         LocalDate today =
                 LocalDate.now();
@@ -536,12 +712,15 @@ public class VerificationService {
         if (verification.getVerificationDate()
                 .plusDays(3)
                 .isBefore(today)) {
+<<<<<<< HEAD
 
             String oldRemarks =
                     verification.getRemarks();
 
             String newRemarks =
                     "Escalated to higher officer due to delay";
+=======
+>>>>>>> origin/kishore/milestone4-security-integrations
 
             verification.setRemarks(
                     newRemarks
@@ -550,6 +729,7 @@ public class VerificationService {
             verificationRepository.save(
                     verification
             );
+<<<<<<< HEAD
 
             // =========================
             // AUDIT LOG - ESCALATE
@@ -596,6 +776,8 @@ public class VerificationService {
             applicationRepository.save(application);
 
             verificationRepository.save(escalated);
+=======
+>>>>>>> origin/kishore/milestone4-security-integrations
         }
     }
 }

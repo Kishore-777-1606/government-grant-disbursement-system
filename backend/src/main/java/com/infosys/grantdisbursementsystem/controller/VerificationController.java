@@ -3,6 +3,7 @@ package com.infosys.grantdisbursementsystem.controller;
 import com.infosys.grantdisbursementsystem.entity.Verification;
 import com.infosys.grantdisbursementsystem.service.AuditLogService;
 import com.infosys.grantdisbursementsystem.service.VerificationService;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -48,6 +49,7 @@ public class VerificationController {
     }
 
     // Get All Verifications
+    @PreAuthorize("hasAnyRole('FIELD_OFFICER', 'DISTRICT_OFFICER', 'FINANCE_APPROVER', 'ADMIN')")
     @GetMapping
     public ResponseEntity<List<Verification>> getAllVerifications() {
 
@@ -57,6 +59,7 @@ public class VerificationController {
     }
 
     // Get Verification By ID
+    @PreAuthorize("hasAnyRole('FIELD_OFFICER', 'DISTRICT_OFFICER', 'FINANCE_APPROVER', 'ADMIN')")
     @GetMapping("/{id:[0-9]+}")
     public ResponseEntity<Verification> getVerificationById(
             @PathVariable Long id
@@ -68,6 +71,7 @@ public class VerificationController {
     }
 
     // Get Pending Verifications
+    @PreAuthorize("hasAnyRole('FIELD_OFFICER', 'DISTRICT_OFFICER', 'FINANCE_APPROVER', 'ADMIN')")
     @GetMapping("/pending")
     public ResponseEntity<List<Verification>> getPendingVerifications() {
 
@@ -77,6 +81,7 @@ public class VerificationController {
     }
 
     // Full stage-by-stage audit trail for one application
+    @PreAuthorize("hasAnyRole('FIELD_OFFICER', 'DISTRICT_OFFICER', 'FINANCE_APPROVER', 'ADMIN')")
     @GetMapping("/application/{applicationId:[0-9]+}/history")
     public ResponseEntity<List<Verification>> getVerificationHistory(
             @PathVariable Long applicationId

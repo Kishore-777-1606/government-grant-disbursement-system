@@ -50,6 +50,7 @@ public AnalyticsController(
     // (SecurityConfig requires authentication for anyRequest()) — this is a
     // deliberate "any authenticated role" decision, not an unreviewed gap.
 
+    @PreAuthorize("hasAnyRole('DISTRICT_OFFICER', 'FINANCE_APPROVER', 'ADMIN')")
     @GetMapping("/dashboard-summary")
     public DashboardSummaryDTO getDashboardSummary(){
 
@@ -61,6 +62,7 @@ public AnalyticsController(
 
     // ================= APPLICATION SUMMARY =================
 
+    @PreAuthorize("hasAnyRole('DISTRICT_OFFICER', 'FINANCE_APPROVER', 'ADMIN')")
     @GetMapping("/application-summary")
     public ApplicationSummaryDTO getApplicationSummary(){
 
@@ -84,6 +86,7 @@ public AnalyticsController(
 
     // ================= MILESTONE SUMMARY =================
 
+    @PreAuthorize("hasAnyRole('DISTRICT_OFFICER', 'FINANCE_APPROVER', 'ADMIN')")
     @GetMapping("/milestone-summary")
     public MilestoneSummaryDTO getMilestoneSummary(){
 
@@ -156,7 +159,8 @@ public AnalyticsController(
     // ================= RECENT ACTIVITIES =================
 // ================= RECENT ACTIVITIES =================
 
-@GetMapping("/recent-activities")
+    @PreAuthorize("hasAnyRole('DISTRICT_OFFICER', 'FINANCE_APPROVER', 'ADMIN')")
+    @GetMapping("/recent-activities")
 public List<RecentActivityDTO> getRecentActivities() {
 
     return analyticsService.getRecentActivities();

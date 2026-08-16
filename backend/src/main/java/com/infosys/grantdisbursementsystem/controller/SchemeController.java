@@ -34,6 +34,7 @@ public class SchemeController {
 
 
 
+    @PreAuthorize("hasAnyRole('FIELD_OFFICER', 'DISTRICT_OFFICER', 'FINANCE_APPROVER', 'ADMIN')")
     @GetMapping
     public List<Scheme> getAllSchemes() {
 
@@ -45,6 +46,7 @@ public class SchemeController {
 
 
 
+    @PreAuthorize("hasAnyRole('FIELD_OFFICER', 'DISTRICT_OFFICER', 'FINANCE_APPROVER', 'ADMIN')")
     @GetMapping("/{id}")
     public Scheme getSchemeById(
             @PathVariable Long id

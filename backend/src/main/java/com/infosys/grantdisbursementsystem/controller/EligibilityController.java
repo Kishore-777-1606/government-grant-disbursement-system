@@ -32,12 +32,7 @@ public class EligibilityController {
     }
 
 
-
-
-
-
-
-    @PreAuthorize("hasAnyRole('FIELD_OFFICER', 'DISTRICT_OFFICER', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('FIELD_OFFICER', 'DISTRICT_OFFICER', 'FINANCE_APPROVER', 'ADMIN')")
     @GetMapping
     public List<EligibilityView> getAllEligibilityRecords() {
 
@@ -46,12 +41,7 @@ public class EligibilityController {
     }
 
 
-
-
-
-
-
-    @PreAuthorize("hasAnyRole('FIELD_OFFICER', 'DISTRICT_OFFICER', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('FIELD_OFFICER', 'DISTRICT_OFFICER', 'FINANCE_APPROVER', 'ADMIN')")
     @GetMapping("/{applicationId}")
     public EligibilityView getEligibilityByApplicationId(
             @PathVariable Long applicationId
