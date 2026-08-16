@@ -28,6 +28,24 @@ public class ComplianceMilestoneController {
     }
 
     @PreAuthorize("hasAnyRole('FIELD_OFFICER', 'DISTRICT_OFFICER', 'ADMIN')")
+    @PutMapping("/{id}/in-progress")
+    public ComplianceMilestone markInProgress(@PathVariable Long id) {
+
+        return milestoneService.markInProgress(id);
+    }
+
+    // Marking something non-compliant is a review judgement, not routine
+    // fieldwork — restricted the same way escalation is elsewhere.
+    @PreAuthorize("hasAnyRole('DISTRICT_OFFICER', 'ADMIN')")
+    @PutMapping("/{id}/non-compliant")
+    public ComplianceMilestone markNonCompliant(
+            @PathVariable Long id,
+            @RequestParam(required = false) String reason) {
+
+        return milestoneService.markNonCompliant(id, reason);
+    }
+
+    @PreAuthorize("hasAnyRole('FIELD_OFFICER', 'DISTRICT_OFFICER', 'ADMIN')")
     @GetMapping("/reminders")
     public List<ComplianceMilestone> getReminders() {
 

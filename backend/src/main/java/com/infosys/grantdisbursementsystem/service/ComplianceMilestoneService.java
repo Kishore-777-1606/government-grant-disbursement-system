@@ -169,4 +169,96 @@ public class ComplianceMilestoneService {
 
         return savedMilestone;
     }
+    /**
+     * Marks a milestone as actively being worked on — e.g. the beneficiary/officer
+     * has started the required action but hasn't yet submitted proof for review.
+     * Only valid from "Pending"; a milestone that's already Overdue, Completed, or
+     * Non-Compliant shouldn't be silently reset to In Progress.
+     */
+    public ComplianceMilestone markInProgress(Long milestoneId) {
+
+        ComplianceMilestone milestone =
+                milestoneRepository.findById(milestoneId)
+                        .orElseThrow(() ->
+                                new RuntimeException(
+                                        "Milestone not found"
+                                )
+                        );
+
+        if (!"Pending".equalsIgnoreCase(milestone.getStatus())) {
+
+            throw new IllegalStateException(
+                    "Only a Pending milestone can be marked In Progress (current status: "
+                            + milestone.getStatus() + ")"
+            );
+        }
+
+        String oldStatus = milestone.getStatus();
+
+        milestone.setStatus("In Progress");
+
+        milestone.setRemarks(
+                "Work started on milestone"
+        );
+
+        ComplianceMilestone savedMilestone =
+                milestoneRepository.save(milestone);
+
+        auditLogService.log(
+                "MARK_IN_PROGRESS",
+                "COMPLIANCE_MILESTONE",
+                milestoneId,
+                oldStatus,
+                "In Progress"
+        );
+
+        return savedMilestone;
+    }
+
+    /**
+     * Marks a milestone as non-compliant — used when the responsible officer
+     * reviews the submitted proof/action and finds it does NOT satisfy the
+     * milestone's requirement. This is a quality/compliance judgement, distinct
+     * from "Overdue" which is purely time-based.
+     */
+    public ComplianceMilestone markNonCompliant(Long milestoneId, String reason) {
+
+        ComplianceMilestone milestone =
+                milestoneRepository.findById(milestoneId)
+                        .orElseThrow(() ->
+                                new RuntimeException(
+                                        "Milestone not found"
+                                )
+                        );
+
+        if ("Completed".equalsIgnoreCase(milestone.getStatus())) {
+
+            throw new IllegalStateException(
+                    "A completed milestone cannot be marked non-compliant"
+            );
+        }
+
+        String oldStatus = milestone.getStatus();
+
+        milestone.setStatus("Non-Compliant");
+
+        milestone.setRemarks(
+                (reason == null || reason.isBlank())
+                        ? "Marked non-compliant"
+                        : reason
+        );
+
+        ComplianceMilestone savedMilestone =
+                milestoneRepository.save(milestone);
+
+        auditLogService.log(
+                "MARK_NON_COMPLIANT",
+                "COMPLIANCE_MILESTONE",
+                milestoneId,
+                oldStatus,
+                "Non-Compliant"
+        );
+
+        return savedMilestone;
+    }
 }
