@@ -1,6 +1,8 @@
 package com.infosys.grantdisbursementsystem.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
+
 import java.time.LocalDate;
 
 @Entity
@@ -13,6 +15,12 @@ public class FinanceApproval {
 
     @OneToOne
     @JoinColumn(name = "application_id", nullable = false)
+    @JsonIgnoreProperties({
+        "financeApproval",
+        "beneficiary",
+        "scheme",
+        "disbursementPlan"
+    })
     private Application application;
 
     @Column(nullable = false)
@@ -30,9 +38,14 @@ public class FinanceApproval {
     public FinanceApproval() {
     }
 
-    public FinanceApproval(Long approvalId, Application application,
-                           String approvalStatus, String approvedBy,
-                           LocalDate approvalDate, String remarks) {
+    public FinanceApproval(
+            Long approvalId,
+            Application application,
+            String approvalStatus,
+            String approvedBy,
+            LocalDate approvalDate,
+            String remarks) {
+
         this.approvalId = approvalId;
         this.application = application;
         this.approvalStatus = approvalStatus;

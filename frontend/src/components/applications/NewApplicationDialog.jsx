@@ -7,7 +7,7 @@ import {
     DialogActions,
     Button,
     TextField,
-    Grid,
+    Box,
     Snackbar,
     Alert
 } from "@mui/material";
@@ -28,35 +28,53 @@ function NewApplicationDialog({ open, handleClose, refreshData }) {
     const [application, setApplication] = useState(EMPTY_APPLICATION);
     const [errors, setErrors] = useState({});
     const [submitting, setSubmitting] = useState(false);
-    const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
+    const [snackbar, setSnackbar] = useState({
+        open: false,
+        message: "",
+        severity: "success"
+    });
 
     const handleChange = (e) => {
+        const { name, value } = e.target;
 
-        setApplication({
-            ...application,
-            [e.target.name]: e.target.value
-        });
-        setErrors((prev) => ({ ...prev, [e.target.name]: undefined }));
+        setApplication((prev) => ({
+            ...prev,
+            [name]: value
+        }));
 
+        setErrors((prev) => ({
+            ...prev,
+            [name]: undefined
+        }));
     };
 
     const validate = () => {
 
         const newErrors = {};
 
-        if (!application.beneficiaryId || Number(application.beneficiaryId) <= 0) {
-            newErrors.beneficiaryId = "A valid Beneficiary ID is required";
+        if (
+            !application.beneficiaryId ||
+            Number(application.beneficiaryId) <= 0
+        ) {
+            newErrors.beneficiaryId =
+                "A valid Beneficiary ID is required";
         }
 
-        if (!application.schemeId || Number(application.schemeId) <= 0) {
-            newErrors.schemeId = "A valid Scheme ID is required";
+        if (
+            !application.schemeId ||
+            Number(application.schemeId) <= 0
+        ) {
+            newErrors.schemeId =
+                "A valid Scheme ID is required";
         }
 
         if (!application.applicationDate) {
-            newErrors.applicationDate = "Application date is required";
+            newErrors.applicationDate =
+                "Application date is required";
         }
 
         setErrors(newErrors);
+
         return Object.keys(newErrors).length === 0;
     };
 
@@ -76,10 +94,23 @@ function NewApplicationDialog({ open, handleClose, refreshData }) {
                 schemeId: Number(application.schemeId)
             });
 
-            setSnackbar({ open: true, message: "Application submitted successfully", severity: "success" });
-            refreshData();
-            setApplication(EMPTY_APPLICATION);
+            setSnackbar({
+                open: true,
+                message: "Application submitted successfully",
+                severity: "success"
+            });
+
+            await refreshData();
+
+            setApplication({
+                ...EMPTY_APPLICATION,
+                applicationDate: new Date()
+                    .toISOString()
+                    .split("T")[0]
+            });
+
             setErrors({});
+
             handleClose();
 
         } catch (err) {
@@ -89,25 +120,39 @@ function NewApplicationDialog({ open, handleClose, refreshData }) {
             const backendMessage =
                 err?.response?.data?.message ||
                 (err?.response?.data?.fieldErrors &&
-                    Object.values(err.response.data.fieldErrors).join(", ")) ||
+                    Object.values(
+                        err.response.data.fieldErrors
+                    ).join(", ")) ||
                 "Failed to submit application";
 
-            setSnackbar({ open: true, message: backendMessage, severity: "error" });
+            setSnackbar({
+                open: true,
+                message: backendMessage,
+                severity: "error"
+            });
 
         } finally {
-            setSubmitting(false);
-        }
 
+            setSubmitting(false);
+
+        }
     };
 
     const handleCancel = () => {
-        setApplication(EMPTY_APPLICATION);
+
+        setApplication({
+            ...EMPTY_APPLICATION,
+            applicationDate: new Date()
+                .toISOString()
+                .split("T")[0]
+        });
+
         setErrors({});
+
         handleClose();
     };
 
     return (
-
         <>
             <Dialog
                 open={open}
@@ -122,64 +167,64 @@ function NewApplicationDialog({ open, handleClose, refreshData }) {
 
                 <DialogContent>
 
-                    <Grid container spacing={2} sx={{ mt: 1 }}>
+                    <Box
+                        sx={{
+                            display: "grid",
+                            gridTemplateColumns: "1fr",
+                            gap: 2,
+                            mt: 1
+                        }}
+                    >
 
-                        <Grid item xs={12}>
+                        <TextField
+                            fullWidth
+                            required
+                            type="number"
+                            label="Beneficiary ID"
+                            name="beneficiaryId"
+                            value={application.beneficiaryId}
+                            onChange={handleChange}
+                            error={Boolean(errors.beneficiaryId)}
+                            helperText={errors.beneficiaryId}
+                        />
 
-                            <TextField
-                                fullWidth
-                                required
-                                type="number"
-                                label="Beneficiary ID"
-                                name="beneficiaryId"
-                                value={application.beneficiaryId}
-                                onChange={handleChange}
-                                error={Boolean(errors.beneficiaryId)}
-                                helperText={errors.beneficiaryId}
-                            />
+                        <TextField
+                            fullWidth
+                            required
+                            type="number"
+                            label="Scheme ID"
+                            name="schemeId"
+                            value={application.schemeId}
+                            onChange={handleChange}
+                            error={Boolean(errors.schemeId)}
+                            helperText={errors.schemeId}
+                        />
 
-                        </Grid>
+                        <TextField
+                            fullWidth
+                            required
+                            type="date"
+                            label="Application Date"
+                            name="applicationDate"
+                            value={application.applicationDate}
+                            InputLabelProps={{
+                                shrink: true
+                            }}
+                            onChange={handleChange}
+                            error={Boolean(errors.applicationDate)}
+                            helperText={errors.applicationDate}
+                        />
 
-                        <Grid item xs={12}>
-
-                            <TextField
-                                fullWidth
-                                required
-                                type="number"
-                                label="Scheme ID"
-                                name="schemeId"
-                                value={application.schemeId}
-                                onChange={handleChange}
-                                error={Boolean(errors.schemeId)}
-                                helperText={errors.schemeId}
-                            />
-
-                        </Grid>
-
-                        <Grid item xs={12}>
-
-                            <TextField
-                                fullWidth
-                                required
-                                type="date"
-                                label="Application Date"
-                                name="applicationDate"
-                                value={application.applicationDate}
-                                InputLabelProps={{ shrink: true }}
-                                onChange={handleChange}
-                                error={Boolean(errors.applicationDate)}
-                                helperText={errors.applicationDate}
-                            />
-
-                        </Grid>
-
-                    </Grid>
+                    </Box>
 
                 </DialogContent>
 
                 <DialogActions>
 
-                    <Button onClick={handleCancel} disabled={submitting}>
+                    <Button
+                        onClick={handleCancel}
+                        disabled={submitting}
+                    >
                         Cancel
                     </Button>
 
@@ -188,7 +233,9 @@ function NewApplicationDialog({ open, handleClose, refreshData }) {
                         onClick={handleSubmit}
                         disabled={submitting}
                     >
-                        {submitting ? "Submitting..." : "Submit"}
+                        {submitting
+                            ? "Submitting..."
+                            : "Submit"}
                     </Button>
 
                 </DialogActions>
@@ -198,20 +245,33 @@ function NewApplicationDialog({ open, handleClose, refreshData }) {
             <Snackbar
                 open={snackbar.open}
                 autoHideDuration={4000}
-                onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
-                anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+                onClose={() =>
+                    setSnackbar((prev) => ({
+                        ...prev,
+                        open: false
+                    }))
+                }
+                anchorOrigin={{
+                    vertical: "bottom",
+                    horizontal: "center"
+                }}
             >
+
                 <Alert
                     severity={snackbar.severity}
-                    onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
+                    onClose={() =>
+                        setSnackbar((prev) => ({
+                            ...prev,
+                            open: false
+                        }))
+                    }
                 >
                     {snackbar.message}
                 </Alert>
+
             </Snackbar>
         </>
-
     );
-
 }
 
 export default NewApplicationDialog;

@@ -1,6 +1,5 @@
 package com.infosys.grantdisbursementsystem.controller;
 
-
 import com.infosys.grantdisbursementsystem.dto.CreatePlanRequest;
 import com.infosys.grantdisbursementsystem.entity.Application;
 import com.infosys.grantdisbursementsystem.entity.DisbursementInstallment;
@@ -15,10 +14,10 @@ import com.infosys.grantdisbursementsystem.repository.DisbursementPlanRepository
 import com.infosys.grantdisbursementsystem.service.DisbursementPlanService;
 
 import org.springframework.lang.NonNull;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/disbursement-plans")
@@ -32,48 +31,38 @@ public class DisbursementPlanController {
 
     private final DisbursementInstallmentRepository installmentRepository;
 
-
-
-
     public DisbursementPlanController(
             DisbursementPlanRepository planRepository,
             DisbursementPlanService planService,
             ApplicationRepository applicationRepository,
-            DisbursementInstallmentRepository installmentRepository
-    ) {
+            DisbursementInstallmentRepository installmentRepository) {
 
         this.planRepository = planRepository;
         this.planService = planService;
         this.applicationRepository = applicationRepository;
         this.installmentRepository = installmentRepository;
-
     }
-
-
-
 
     @PostMapping
     public DisbursementPlan createPlan(
-            @RequestBody CreatePlanRequest request
-    ) {
+            @RequestBody CreatePlanRequest request) {
 
-        if(request.getApplicationId() == null){
+        if (request == null ||
+                request.getApplicationId() == null) {
 
             throw new IllegalArgumentException(
                     "Application ID cannot be null"
             );
-
         }
 
         Application application =
                 applicationRepository.findById(
-                        Objects.requireNonNull(
-                                request.getApplicationId()
-                        )
+                        request.getApplicationId()
                 )
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
-                                "Application not found"
+                                "Application not found with ID: "
+                                        + request.getApplicationId()
                         )
                 );
 
@@ -82,79 +71,55 @@ public class DisbursementPlanController {
                 request.getTotalAmount(),
                 request.getNumberOfInstallments()
         );
-
     }
 
-
-
-
+    @PreAuthorize(
+            "hasAnyRole('FINANCE_APPROVER', 'ADMIN')"
+    )
     @PostMapping("/release/{installmentId}")
     public DisbursementInstallment releaseInstallment(
-            @PathVariable @NonNull Long installmentId
-    ) {
+            @PathVariable @NonNull Long installmentId) {
 
-        return planService.releaseInstallmentIfMilestoneComplete(
-                installmentId
-        );
-
+        return planService
+                .releaseInstallmentIfMilestoneComplete(
+                        installmentId
+                );
     }
 
-
-
-
-    // Get All Plans (list view for the Disbursement page)
     @GetMapping
     public List<DisbursementPlan> getAllPlans() {
 
         return planRepository.findAll();
-
     }
 
-
-
-
-    // Get All Installments across every plan (flat table for the Disbursement page,
-    // so a finance/field user can see and act on every pending release in one place)
     @GetMapping("/installments/all")
-    public List<DisbursementInstallment> getAllInstallments() {
+    public List<DisbursementInstallment>
+    getAllInstallments() {
 
         return installmentRepository.findAll();
-
     }
 
-
-
-
     @GetMapping("/{planId:[0-9]+}/installments")
-    public List<DisbursementInstallment> getInstallments(
-            @PathVariable @NonNull Long planId
-    ) {
+    public List<DisbursementInstallment>
+    getInstallments(
+            @PathVariable @NonNull Long planId) {
 
         return installmentRepository
                 .findByDisbursementPlanPlanId(
                         planId
                 );
-
     }
-
-
-
 
     @GetMapping("/{id:[0-9]+}")
     public DisbursementPlan getPlan(
-            @PathVariable @NonNull Long id
-    ) {
+            @PathVariable @NonNull Long id) {
 
-        return planRepository.findById(
-                id
-        )
-        .orElseThrow(() ->
-                new ResourceNotFoundException(
-                        "Plan not found"
-                )
-        );
-
+        return planRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Plan not found with ID: "
+                                        + id
+                        )
+                );
     }
-
-
 }

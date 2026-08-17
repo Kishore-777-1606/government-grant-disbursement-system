@@ -19,10 +19,7 @@ import {
   LockOutlined,
 } from "@mui/icons-material";
 
-import {
-  useLocation,
-  useNavigate,
-} from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 import { useAuth } from "../../auth/useAuth";
 
@@ -35,28 +32,21 @@ function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
-  const [showPassword, setShowPassword] =
-    useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const [error, setError] = useState("");
-
   const [loading, setLoading] = useState(false);
 
-  const from =
-    location.state?.from?.pathname ||
-    "/dashboard";
+  const from = location.state?.from?.pathname || "/dashboard";
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-
     setError("");
 
     const trimmedUsername = username.trim();
 
     if (!trimmedUsername) {
-      setError(
-        "Please enter your username or email."
-      );
+      setError("Please enter your username.");
       return;
     }
 
@@ -68,10 +58,7 @@ function Login() {
     try {
       setLoading(true);
 
-      await login(
-        trimmedUsername,
-        password
-      );
+      await login(trimmedUsername, password);
 
       navigate(from, {
         replace: true,
@@ -79,10 +66,12 @@ function Login() {
     } catch (err) {
       console.error("Login failed:", err);
 
-      setError(
+      const message =
+        err?.response?.data?.message ||
         err?.message ||
-          "Login failed. Please check your credentials."
-      );
+        "Login failed. Please check your credentials.";
+
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -140,14 +129,11 @@ function Login() {
             variant="h4"
             fontWeight="bold"
             gutterBottom
-            sx={{
-              textAlign: "center",
-            }}
+            sx={{ textAlign: "center" }}
           >
             Welcome Back
           </Typography>
 
-          {/* Subtitle */}
           <Typography
             variant="body2"
             color="text.secondary"
@@ -160,7 +146,7 @@ function Login() {
             Disbursement System
           </Typography>
 
-          {/* Error Message */}
+          {/* Error */}
           {error && (
             <Alert
               severity="error"
@@ -177,10 +163,9 @@ function Login() {
             onSubmit={handleSubmit}
             noValidate
           >
-            {/* Username */}
             <TextField
               fullWidth
-              label="Username or Email"
+              label="Username"
               value={username}
               onChange={(event) =>
                 setUsername(event.target.value)
@@ -191,15 +176,10 @@ function Login() {
               autoFocus
             />
 
-            {/* Password */}
             <TextField
               fullWidth
               label="Password"
-              type={
-                showPassword
-                  ? "text"
-                  : "password"
-              }
+              type={showPassword ? "text" : "password"}
               value={password}
               onChange={(event) =>
                 setPassword(event.target.value)
@@ -207,39 +187,35 @@ function Login() {
               margin="normal"
               autoComplete="current-password"
               disabled={loading}
-              slotProps={{
-                input: {
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <IconButton
-                        type="button"
-                        onClick={() =>
-                          setShowPassword(
-                            (previous) =>
-                              !previous
-                          )
-                        }
-                        edge="end"
-                        disabled={loading}
-                        aria-label={
-                          showPassword
-                            ? "Hide password"
-                            : "Show password"
-                        }
-                      >
-                        {showPassword ? (
-                          <VisibilityOff />
-                        ) : (
-                          <Visibility />
-                        )}
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                },
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      type="button"
+                      onClick={() =>
+                        setShowPassword(
+                          (previous) => !previous
+                        )
+                      }
+                      edge="end"
+                      disabled={loading}
+                      aria-label={
+                        showPassword
+                          ? "Hide password"
+                          : "Show password"
+                      }
+                    >
+                      {showPassword ? (
+                        <VisibilityOff />
+                      ) : (
+                        <Visibility />
+                      )}
+                    </IconButton>
+                  </InputAdornment>
+                ),
               }}
             />
 
-            {/* Login Button */}
             <Button
               type="submit"
               fullWidth
@@ -267,6 +243,17 @@ function Login() {
               )}
             </Button>
           </Box>
+
+          <Typography
+            variant="caption"
+            color="text.secondary"
+            display="block"
+            textAlign="center"
+            sx={{ mt: 4 }}
+          >
+            Authorized personnel only. All activity is logged
+            and monitored.
+          </Typography>
         </Paper>
       </Container>
     </Box>

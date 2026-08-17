@@ -12,7 +12,7 @@ import java.util.Objects;
 
 
 @RestController
-@RequestMapping("/finance")
+@RequestMapping("/api/finance")
 public class FinanceApprovalController {
 
 

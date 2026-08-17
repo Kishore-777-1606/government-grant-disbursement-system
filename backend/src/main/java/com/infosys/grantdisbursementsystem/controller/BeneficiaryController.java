@@ -17,7 +17,7 @@ import java.util.Objects;
 
 
 @RestController
-@RequestMapping("/beneficiaries")
+@RequestMapping("/api/beneficiaries")
 public class BeneficiaryController {
 
 

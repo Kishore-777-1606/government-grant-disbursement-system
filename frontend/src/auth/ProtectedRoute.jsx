@@ -25,8 +25,7 @@ const ProtectedRoute = ({ allowedRoles = [] }) => {
     );
   }
 
-  // User is logged in but does not have
-  // permission for this route
+  // User is logged in but does not have permission
   if (
     allowedRoles.length > 0 &&
     !allowedRoles.includes(role)

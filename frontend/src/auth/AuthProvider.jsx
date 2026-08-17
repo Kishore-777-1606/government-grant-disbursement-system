@@ -30,12 +30,6 @@ const clearStoredAuth = () => {
 };
 
 export function AuthProvider({ children }) {
-  /*
-   * Restore authentication directly during
-   * initial state creation.
-   *
-   * This avoids setState() inside useEffect.
-   */
   const [token, setToken] = useState(() =>
     getStoredValue(TOKEN_KEY)
   );
@@ -48,9 +42,6 @@ export function AuthProvider({ children }) {
     getStoredValue(USERNAME_KEY)
   );
 
-  /*
-   * Login
-   */
   const login = useCallback(
     async (usernameValue, password) => {
       const response = await loginUser(
@@ -58,51 +49,32 @@ export function AuthProvider({ children }) {
         password
       );
 
-      /*
-       * Support different possible backend
-       * token property names.
-       */
       const receivedToken =
         response?.token ||
         response?.accessToken ||
         response?.jwt;
 
-      /*
-       * Support role directly or inside user.
-       */
       const receivedRole =
         response?.role ||
         response?.user?.role;
 
-      /*
-       * Support username directly or inside user.
-       */
       const receivedUsername =
         response?.username ||
         response?.user?.username ||
         usernameValue;
 
-      /*
-       * Validate token.
-       */
       if (!receivedToken) {
         throw new Error(
           "Login response does not contain a token."
         );
       }
 
-      /*
-       * Validate role.
-       */
       if (!receivedRole) {
         throw new Error(
           "Login response does not contain a user role."
         );
       }
 
-      /*
-       * Store authentication information.
-       */
       try {
         sessionStorage.setItem(
           TOKEN_KEY,
@@ -127,9 +99,6 @@ export function AuthProvider({ children }) {
         );
       }
 
-      /*
-       * Update React state.
-       */
       setToken(receivedToken);
       setRole(receivedRole);
       setUsername(receivedUsername);
@@ -139,9 +108,6 @@ export function AuthProvider({ children }) {
     []
   );
 
-  /*
-   * Logout
-   */
   const logout = useCallback(() => {
     clearStoredAuth();
 
@@ -150,16 +116,10 @@ export function AuthProvider({ children }) {
     setUsername(null);
   }, []);
 
-  /*
-   * Authentication status.
-   */
   const isAuthenticated = Boolean(
     token && role
   );
 
-  /*
-   * Context value.
-   */
   const value = useMemo(
     () => ({
       token,

@@ -13,26 +13,38 @@ import Analytics from "./pages/Analytics/Analytics";
 import Disbursement from "./pages/Disbursement/Disbursement";
 
 import ProtectedRoute from "./auth/ProtectedRoute";
+import Unauthorized from "./pages/Unauthorized";
 
 function App() {
   return (
     <Routes>
 
-      {/* =========================
-          PUBLIC ROUTES
-         ========================= */}
+      {/* ================= PUBLIC ROUTES ================= */}
 
       <Route path="/" element={<Login />} />
 
       <Route path="/login" element={<Login />} />
 
+      <Route
+        path="/unauthorized"
+        element={<Unauthorized />}
+      />
 
-      {/* =========================
-          PROTECTED ROUTES
-         ========================= */}
 
-      <Route element={<ProtectedRoute />}>
+      {/* ================= COMMON AUTHENTICATED ROUTES ================= */}
 
+      <Route
+        element={
+          <ProtectedRoute
+            allowedRoles={[
+              "FIELD_OFFICER",
+              "DISTRICT_OFFICER",
+              "FINANCE_APPROVER",
+              "ADMIN",
+            ]}
+          />
+        }
+      >
         <Route
           path="/dashboard"
           element={<Dashboard />}
@@ -41,11 +53,6 @@ function App() {
         <Route
           path="/beneficiaries"
           element={<Beneficiaries />}
-        />
-
-        <Route
-          path="/schemes"
-          element={<Schemes />}
         />
 
         <Route
@@ -59,10 +66,64 @@ function App() {
         />
 
         <Route
+          path="/status"
+          element={<StatusTracking />}
+        />
+      </Route>
+
+
+      {/* ================= SCHEMES ================= */}
+
+      <Route
+        element={
+          <ProtectedRoute
+            allowedRoles={[
+              "DISTRICT_OFFICER",
+              "FINANCE_APPROVER",
+              "ADMIN",
+            ]}
+          />
+        }
+      >
+        <Route
+          path="/schemes"
+          element={<Schemes />}
+        />
+      </Route>
+
+
+      {/* ================= VERIFICATION ================= */}
+
+      <Route
+        element={
+          <ProtectedRoute
+            allowedRoles={[
+              "FIELD_OFFICER",
+              "DISTRICT_OFFICER",
+              "ADMIN",
+            ]}
+          />
+        }
+      >
+        <Route
           path="/verification"
           element={<Verification />}
         />
+      </Route>
 
+
+      {/* ================= FINANCE / DISBURSEMENT / ANALYTICS ================= */}
+
+      <Route
+        element={
+          <ProtectedRoute
+            allowedRoles={[
+              "FINANCE_APPROVER",
+              "ADMIN",
+            ]}
+          />
+        }
+      >
         <Route
           path="/finance"
           element={<FinanceApproval />}
@@ -74,15 +135,9 @@ function App() {
         />
 
         <Route
-          path="/status"
-          element={<StatusTracking />}
-        />
-
-        <Route
           path="/analytics"
           element={<Analytics />}
         />
-
       </Route>
 
     </Routes>

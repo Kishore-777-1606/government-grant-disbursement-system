@@ -11,7 +11,7 @@ import java.util.List;
 
 
 @RestController
-@RequestMapping("/verifications")
+@RequestMapping("/api/verifications")
 public class VerificationController {
 
 
