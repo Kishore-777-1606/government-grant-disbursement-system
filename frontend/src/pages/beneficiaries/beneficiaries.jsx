@@ -1,4 +1,7 @@
 import { useEffect, useRef, useState } from "react";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
+import { IconButton } from "@mui/material";
 import { updateBeneficiaryVerification } from "../../services/beneficiaryService";
 import {
     Typography,
@@ -25,11 +28,16 @@ import MainLayout from "../../layouts/MainLayout";
 import {
     getAllBeneficiaries,
     uploadBeneficiaryDocument,
-    getBeneficiaryDocumentUrl
+    getBeneficiaryDocumentUrl,
+    deleteBeneficiary
 } from "../../services/beneficiaryService";
 import AddBeneficiaryDialog from "../../components/beneficiaries/AddBeneficiaryDialog";
 
 function Beneficiaries() {
+    const [beneficiaryToEdit, setBeneficiaryToEdit] = useState(null);
+
+    const canEdit = ["FIELD_OFFICER", "ADMIN"].includes(currentRole);
+    const canDelete = currentRole === "ADMIN";
 
     const [beneficiaries, setBeneficiaries] = useState([]);
     const [loading, setLoading] = useState(true);

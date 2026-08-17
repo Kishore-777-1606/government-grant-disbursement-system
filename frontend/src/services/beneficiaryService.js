@@ -38,3 +38,11 @@ export const updateBeneficiaryVerification = async (id, aadhaarVerified, bankVer
 export const getBeneficiaryDocumentUrl = (id) => {
     return `http://localhost:8080/beneficiaries/${id}/document`;
 };
+export const updateBeneficiary = async (id, beneficiary) => {
+    const response = await api.put(`/beneficiaries/${id}`, beneficiary);
+    return response.data;
+};
+
+export const deleteBeneficiary = async (id) => {
+    await api.delete(`/beneficiaries/${id}`);
+};
