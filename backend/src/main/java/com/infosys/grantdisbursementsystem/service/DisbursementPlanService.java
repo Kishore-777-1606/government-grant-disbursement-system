@@ -41,9 +41,32 @@ public class DisbursementPlanService {
             Integer numInstallments
     ) {
 
-        Objects.requireNonNull(application);
-        Objects.requireNonNull(totalAmount);
-        Objects.requireNonNull(numInstallments);
+        Objects.requireNonNull(
+                application,
+                "Application cannot be null"
+        );
+
+        Objects.requireNonNull(
+                totalAmount,
+                "Total amount cannot be null"
+        );
+
+        Objects.requireNonNull(
+                numInstallments,
+                "Number of installments cannot be null"
+        );
+
+        if (numInstallments <= 0) {
+            throw new IllegalArgumentException(
+                    "Number of installments must be greater than zero"
+            );
+        }
+
+        if (totalAmount <= 0) {
+            throw new IllegalArgumentException(
+                    "Total amount must be greater than zero"
+            );
+        }
 
         DisbursementPlan plan = new DisbursementPlan();
 
@@ -62,31 +85,30 @@ public class DisbursementPlanService {
 
         double allocatedSoFar = 0;
 
-        for(int i = 1; i <= numInstallments; i++) {
+        for (int i = 1; i <= numInstallments; i++) {
 
             double installmentAmount;
 
-            if(i == numInstallments) {
+            if (i == numInstallments) {
 
                 installmentAmount =
                         totalAmount - allocatedSoFar;
 
-            }
-            else {
+            } else {
 
                 installmentAmount = baseAmount;
 
                 allocatedSoFar += baseAmount;
             }
 
-            // Delegates to ComplianceMilestoneService so there is a single,
-            // type-aware due-date policy.
+            // Create compliance milestone
             ComplianceMilestone milestone =
                     milestoneService.createMilestone(
                             application,
                             milestoneTypeForInstallment(i)
                     );
 
+            // Create installment
             DisbursementInstallment installment =
                     new DisbursementInstallment();
 
@@ -100,8 +122,7 @@ public class DisbursementPlanService {
                     installmentAmount
             );
 
-            // The scheduled release date follows the milestone's own due
-            // date.
+            // Scheduled release date follows milestone due date
             installment.setScheduledDate(
                     milestone.getDueDate()
             );
@@ -111,6 +132,7 @@ public class DisbursementPlanService {
             installmentRepository.save(installment);
         }
 
+        // Update application status
         application.setStatus(
                 "Disbursement In Progress"
         );
@@ -124,11 +146,13 @@ public class DisbursementPlanService {
             int installmentNumber
     ) {
 
-        if(installmentNumber == 1)
+        if (installmentNumber == 1) {
             return "Documentation";
+        }
 
-        if(installmentNumber == 2)
+        if (installmentNumber == 2) {
             return "Ground Verification";
+        }
 
         return "Utilization Proof";
     }
@@ -137,7 +161,11 @@ public class DisbursementPlanService {
             Long installmentId
     ) {
 
-        Long id = Objects.requireNonNull(installmentId);
+        Long id =
+                Objects.requireNonNull(
+                        installmentId,
+                        "Installment ID cannot be null"
+                );
 
         DisbursementInstallment installment =
                 installmentRepository.findById(id)
@@ -148,14 +176,16 @@ public class DisbursementPlanService {
                                 )
                         );
 
-        if(installment.getMilestone() == null) {
+        // Check milestone exists
+        if (installment.getMilestone() == null) {
 
             throw new IllegalStateException(
                     "Installment has no linked milestone"
             );
         }
 
-        if(!"Completed".equalsIgnoreCase(
+        // Check milestone is completed
+        if (!"Completed".equalsIgnoreCase(
                 installment.getMilestone().getStatus()
         )) {
 
@@ -164,10 +194,21 @@ public class DisbursementPlanService {
             );
         }
 
+        // Prevent duplicate release
+        if ("Released".equalsIgnoreCase(
+                installment.getStatus()
+        )) {
+
+            throw new IllegalStateException(
+                    "Installment is already released"
+            );
+        }
+
         // Store old status before changing it
         String oldStatus =
                 installment.getStatus();
 
+        // Release installment
         installment.setStatus("Released");
 
         installment.setActualReleaseDate(
@@ -187,6 +228,7 @@ public class DisbursementPlanService {
                 "Released"
         );
 
+        // Check whether all installments are released
         checkAndUpdatePlanCompletion(
                 installment.getDisbursementPlan()
                         .getPlanId()
@@ -199,7 +241,11 @@ public class DisbursementPlanService {
             Long planId
     ) {
 
-        Long id = Objects.requireNonNull(planId);
+        Long id =
+                Objects.requireNonNull(
+                        planId,
+                        "Plan ID cannot be null"
+                );
 
         DisbursementPlan plan =
                 planRepository.findById(id)
@@ -215,19 +261,39 @@ public class DisbursementPlanService {
                         .findByDisbursementPlanPlanId(id);
 
         boolean allReleased =
-                installments.stream()
+                !installments.isEmpty()
+                        && installments.stream()
                         .allMatch(inst ->
-                                "Released"
-                                        .equalsIgnoreCase(
-                                                inst.getStatus()
-                                        )
+                                "Released".equalsIgnoreCase(
+                                        inst.getStatus()
+                                )
                         );
 
-        if(allReleased) {
+        if (allReleased) {
 
+            // =========================
+            // COMPLETE DISBURSEMENT PLAN
+            // =========================
             plan.setStatus("Completed");
 
             planRepository.save(plan);
+
+            // =========================
+            // COMPLETE APPLICATION
+            // =========================
+            Application application =
+                    plan.getApplication();
+
+            if (application != null) {
+
+                application.setStatus(
+                        "Completed"
+                );
+
+                applicationRepository.save(
+                        application
+                );
+            }
         }
     }
 }
