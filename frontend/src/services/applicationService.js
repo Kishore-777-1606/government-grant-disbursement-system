@@ -1,8 +1,8 @@
 import api from "./api";
 
 export const getAllApplications = async () => {
-    const response = await api.get("/api/v1/applications");
-    return response.data;
+  const response = await api.get("/api/v1/applications");
+  return response.data;
 };
 
 export const createApplication = async (application) => {

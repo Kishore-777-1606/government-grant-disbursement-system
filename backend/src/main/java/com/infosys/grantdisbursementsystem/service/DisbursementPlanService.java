@@ -2,19 +2,26 @@ package com.infosys.grantdisbursementsystem.service;
 
 import com.infosys.grantdisbursementsystem.entity.*;
 import com.infosys.grantdisbursementsystem.exception.ResourceNotFoundException;
-import com.infosys.grantdisbursementsystem.repository.*;
+
+import com.infosys.grantdisbursementsystem.repository.ApplicationRepository;
+import com.infosys.grantdisbursementsystem.repository.DisbursementInstallmentRepository;
+import com.infosys.grantdisbursementsystem.repository.DisbursementPlanRepository;
 
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Objects;
 
 @Service
 public class DisbursementPlanService {
 
     private final DisbursementPlanRepository planRepository;
+
     private final DisbursementInstallmentRepository installmentRepository;
+
     private final ApplicationRepository applicationRepository;
+
     private final ComplianceMilestoneService milestoneService;
 
     // Audit Log Service
@@ -38,8 +45,7 @@ public class DisbursementPlanService {
     public DisbursementPlan createPlan(
             Application application,
             Double totalAmount,
-            Integer numInstallments
-    ) {
+            Integer numInstallments) {
 
         Objects.requireNonNull(
                 application,
@@ -56,19 +62,20 @@ public class DisbursementPlanService {
                 "Number of installments cannot be null"
         );
 
-        if (numInstallments <= 0) {
-            throw new IllegalArgumentException(
-                    "Number of installments must be greater than zero"
-            );
-        }
-
         if (totalAmount <= 0) {
             throw new IllegalArgumentException(
                     "Total amount must be greater than zero"
             );
         }
 
-        DisbursementPlan plan = new DisbursementPlan();
+        if (numInstallments <= 0) {
+            throw new IllegalArgumentException(
+                    "Number of installments must be greater than zero"
+            );
+        }
+
+        DisbursementPlan plan =
+                new DisbursementPlan();
 
         plan.setApplication(application);
         plan.setTotalGrantAmount(totalAmount);
@@ -92,7 +99,9 @@ public class DisbursementPlanService {
             if (i == numInstallments) {
 
                 installmentAmount =
-                        totalAmount - allocatedSoFar;
+                        Math.round(
+                                (totalAmount - allocatedSoFar) * 100
+                        ) / 100.0;
 
             } else {
 
@@ -102,10 +111,13 @@ public class DisbursementPlanService {
             }
 
             // Create compliance milestone
+            String milestoneType =
+                    milestoneTypeForInstallment(i);
+
             ComplianceMilestone milestone =
                     milestoneService.createMilestone(
                             application,
-                            milestoneTypeForInstallment(i)
+                            milestoneType
                     );
 
             // Create installment
@@ -143,8 +155,7 @@ public class DisbursementPlanService {
     }
 
     private String milestoneTypeForInstallment(
-            int installmentNumber
-    ) {
+            int installmentNumber) {
 
         if (installmentNumber == 1) {
             return "Documentation";
@@ -256,7 +267,7 @@ public class DisbursementPlanService {
                                 )
                         );
 
-        var installments =
+        List<DisbursementInstallment> installments =
                 installmentRepository
                         .findByDisbursementPlanPlanId(id);
 

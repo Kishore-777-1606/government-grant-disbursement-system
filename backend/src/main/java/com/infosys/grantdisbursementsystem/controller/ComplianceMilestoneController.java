@@ -20,6 +20,29 @@ public class ComplianceMilestoneController {
         this.milestoneService = milestoneService;
     }
 
+    @PreAuthorize("hasAnyRole('FIELD_OFFICER', 'DISTRICT_OFFICER', 'FINANCE_APPROVER', 'ADMIN')")
+    @GetMapping
+    public List<ComplianceMilestone> getAllMilestones() {
+
+        return milestoneService.getAllMilestones();
+    }
+
+    @PreAuthorize("hasAnyRole('DISTRICT_OFFICER', 'ADMIN')")
+    @GetMapping("/check-overdue")
+    public String checkOverdue() {
+
+        milestoneService.flagOverdueMilestones();
+
+        return "Overdue check completed";
+    }
+
+    @PreAuthorize("hasAnyRole('FIELD_OFFICER', 'DISTRICT_OFFICER', 'FINANCE_APPROVER', 'ADMIN')")
+    @GetMapping("/reminders")
+    public List<ComplianceMilestone> getReminders() {
+
+        return milestoneService.getUpcomingReminders();
+    }
+
     @PreAuthorize("hasAnyRole('FIELD_OFFICER', 'DISTRICT_OFFICER', 'ADMIN')")
     @PutMapping("/{id}/complete")
     public ComplianceMilestone completeMilestone(@PathVariable Long id) {
@@ -43,12 +66,5 @@ public class ComplianceMilestoneController {
             @RequestParam(required = false) String reason) {
 
         return milestoneService.markNonCompliant(id, reason);
-    }
-
-    @PreAuthorize("hasAnyRole('FIELD_OFFICER', 'DISTRICT_OFFICER', 'FINANCE_APPROVER', 'ADMIN')")
-    @GetMapping("/reminders")
-    public List<ComplianceMilestone> getReminders() {
-
-        return milestoneService.getUpcomingReminders();
     }
 }

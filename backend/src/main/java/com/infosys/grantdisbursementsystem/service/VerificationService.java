@@ -25,7 +25,9 @@ public class VerificationService {
     public static final double HIGH_VALUE_THRESHOLD = 50000.0;
 
     private final VerificationRepository verificationRepository;
+
     private final ApplicationRepository applicationRepository;
+
     private final FinanceApprovalRepository financeApprovalRepository;
 
     // Audit Log Service
@@ -37,6 +39,7 @@ public class VerificationService {
             FinanceApprovalRepository financeApprovalRepository,
             AuditLogService auditLogService
     ) {
+
         this.verificationRepository = verificationRepository;
         this.applicationRepository = applicationRepository;
         this.financeApprovalRepository = financeApprovalRepository;

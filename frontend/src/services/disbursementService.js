@@ -1,39 +1,152 @@
 import api from "./api";
 
+// =====================================================
+// GET ALL DISBURSEMENT PLANS
+// =====================================================
+
 export const getAllPlans = async () => {
     const response = await api.get("/api/disbursement-plans");
     return response.data;
 };
 
-export const getAllInstallments = async () => {
-    const response = await api.get("/api/disbursement-plans/installments/all");
+
+// =====================================================
+// GET ONE DISBURSEMENT PLAN
+// =====================================================
+
+export const getPlanById = async (planId) => {
+    const response = await api.get(
+        `/api/disbursement-plans/${planId}`
+    );
+
     return response.data;
 };
 
-export const releaseInstallment = async (installmentId) => {
+
+// =====================================================
+// CREATE DISBURSEMENT PLAN
+// =====================================================
+
+export const createDisbursementPlan = async (
+    applicationId,
+    totalAmount,
+    numberOfInstallments
+) => {
+
+    const response = await api.post(
+        "/api/disbursement-plans",
+        {
+            applicationId: Number(applicationId),
+            totalAmount: Number(totalAmount),
+            numberOfInstallments: Number(numberOfInstallments)
+        }
+    );
+
+    return response.data;
+};
+
+
+// =====================================================
+// GET ALL INSTALLMENTS
+// =====================================================
+
+export const getAllInstallments = async () => {
+
+    const response = await api.get(
+        "/api/disbursement-plans/installments/all"
+    );
+
+    return response.data;
+};
+
+
+// =====================================================
+// GET INSTALLMENTS BY PLAN
+// =====================================================
+
+export const getInstallmentsByPlan = async (planId) => {
+
+    const response = await api.get(
+        `/api/disbursement-plans/${planId}/installments`
+    );
+
+    return response.data;
+};
+
+
+// =====================================================
+// RELEASE INSTALLMENT
+// =====================================================
+
+export const releaseInstallment = async (
+    installmentId
+) => {
+
     const response = await api.post(
         `/api/disbursement-plans/release/${installmentId}`
     );
+
     return response.data;
 };
 
-export const completeMilestone = async (milestoneId) => {
-    const response = await api.put(`/api/milestones/${milestoneId}/complete`);
+
+// =====================================================
+// COMPLETE MILESTONE
+// =====================================================
+
+export const completeMilestone = async (
+    milestoneId
+) => {
+
+    const response = await api.put(
+        `/api/milestones/${milestoneId}/complete`
+    );
+
     return response.data;
 };
+
+
+// =====================================================
+// GET MILESTONE REMINDERS
+// =====================================================
 
 export const getMilestoneReminders = async () => {
-    const response = await api.get("/api/milestones/reminders");
+
+    const response = await api.get(
+        "/api/milestones/reminders"
+    );
+
     return response.data;
 };
-export const createPlan = async (planData) => {
-    const response = await api.post("/api/disbursement-plans", planData);
+
+
+// =====================================================
+// CHECK OVERDUE MILESTONES
+// =====================================================
+
+export const checkOverdueMilestones = async () => {
+
+    const response = await api.get(
+        "/api/milestones/check-overdue"
+    );
+
     return response.data;
 };
+
+
+// =====================================================
+// MARK MILESTONE IN PROGRESS
+// =====================================================
+
 export const markMilestoneInProgress = async (milestoneId) => {
     const response = await api.put(`/api/milestones/${milestoneId}/in-progress`);
     return response.data;
 };
+
+
+// =====================================================
+// MARK MILESTONE NON-COMPLIANT
+// =====================================================
 
 export const markMilestoneNonCompliant = async (milestoneId, reason) => {
     const response = await api.put(

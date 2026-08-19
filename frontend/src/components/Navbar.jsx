@@ -6,24 +6,43 @@ import {
   Avatar,
   Button,
 } from "@mui/material";
+
 import LogoutIcon from "@mui/icons-material/Logout";
 import { useNavigate } from "react-router-dom";
+
+import { useAuth } from "../auth/useAuth";
 
 function Navbar() {
   const navigate = useNavigate();
 
-  const stored = localStorage.getItem("user");
-  const user = stored ? JSON.parse(stored) : null;
+  const {
+    username,
+    role,
+    logout,
+  } = useAuth();
+
+  const displayName =
+    username || "User";
+
+  const displayRole = role
+    ? role
+        .replaceAll("_", " ")
+        .toLowerCase()
+        .replace(/\b\w/g, (letter) =>
+          letter.toUpperCase()
+        )
+    : "";
+
+  /*
+   * Get first letter for Avatar
+   */
+  const avatarLetter =
+    displayName.charAt(0).toUpperCase();
 
   const handleLogout = () => {
-    localStorage.removeItem("user");
-    navigate("/");
+    logout();
+    navigate("/login");
   };
-
-  // Prefer full name; fall back to username, then a generic label if
-  // somehow rendered with no stored user (shouldn't happen behind ProtectedRoute).
-  const displayName = user?.fullName || user?.username || "User";
-  const initial = displayName.charAt(0).toUpperCase();
 
   return (
     <AppBar
@@ -40,10 +59,16 @@ function Navbar() {
           justifyContent: "space-between",
         }}
       >
-        <Typography variant="h6" fontWeight="bold">
-          Government Grant Disbursement Tracking System
+        {/* Application title */}
+        <Typography
+          variant="h6"
+          fontWeight="bold"
+        >
+          Government Grant Disbursement
+          Tracking System
         </Typography>
 
+        {/* User information */}
         <Box
           sx={{
             display: "flex",
@@ -51,9 +76,38 @@ function Navbar() {
             gap: 2,
           }}
         >
-          <Typography>Welcome, {displayName}</Typography>
+          <Box
+            sx={{
+              textAlign: "right",
+            }}
+          >
+            <Typography
+              variant="body2"
+              fontWeight="bold"
+            >
+              Welcome, {displayName}
+            </Typography>
 
-          <Avatar sx={{ bgcolor: "#0D47A1" }}>{initial}</Avatar>
+            {displayRole && (
+              <Typography
+                variant="caption"
+                sx={{
+                  opacity: 0.85,
+                }}
+              >
+                {displayRole}
+              </Typography>
+            )}
+          </Box>
+
+          <Avatar
+            sx={{
+              bgcolor: "#0D47A1",
+              fontWeight: "bold",
+            }}
+          >
+            {avatarLetter}
+          </Avatar>
 
           <Button
             onClick={handleLogout}

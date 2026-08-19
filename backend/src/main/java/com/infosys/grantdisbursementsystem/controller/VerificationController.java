@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/verifications")
+@RequestMapping("/api/verifications")
 public class VerificationController {
 
     private final VerificationService verificationService;

@@ -1,6 +1,6 @@
 import api from "./api";
 
 export const getAllApplications = async () => {
-    const response = await api.get("/api/v1/applications");
+    const response = await api.get("/v1/applications");
     return response.data;
 };

@@ -7,7 +7,10 @@ import {
   Toolbar,
   Typography,
   Box,
+  Divider,
+  Button,
 } from "@mui/material";
+
 import {
   Dashboard,
   People,
@@ -20,38 +23,199 @@ import {
   Assessment,
   Payments,
   History,
+  Logout,
 } from "@mui/icons-material";
 
-import { Link, useLocation } from "react-router-dom";
+import {
+  Link,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
+
+import { useAuth } from "../auth/useAuth";
 
 const drawerWidth = 260;
 
-// Mirrors the @PreAuthorize rules on the backend controllers — a role that
-// can't call the underlying APIs shouldn't see the menu item either.
+/*
+ * Role-based menu configuration
+ */
 const menuItems = [
-  { text: "Dashboard", icon: <Dashboard />, path: "/dashboard", roles: ["FIELD_OFFICER", "DISTRICT_OFFICER", "FINANCE_APPROVER", "ADMIN"] },
-  { text: "Beneficiaries", icon: <People />, path: "/beneficiaries", roles: ["FIELD_OFFICER", "DISTRICT_OFFICER", "FINANCE_APPROVER", "ADMIN"] },
-  { text: "Schemes", icon: <Description />, path: "/schemes", roles: ["FIELD_OFFICER", "DISTRICT_OFFICER", "FINANCE_APPROVER", "ADMIN"] },
-  { text: "Applications", icon: <Assignment />, path: "/applications", roles: ["FIELD_OFFICER", "DISTRICT_OFFICER", "FINANCE_APPROVER", "ADMIN"] },
-  { text: "Eligibility", icon: <Verified />, path: "/eligibility", roles: ["FIELD_OFFICER", "DISTRICT_OFFICER", "FINANCE_APPROVER", "ADMIN"] },
-  { text: "Verification", icon: <CheckCircle />, path: "/verification", roles: ["FIELD_OFFICER", "DISTRICT_OFFICER", "FINANCE_APPROVER", "ADMIN"] },
-  { text: "Finance Approval", icon: <AccountBalanceWallet />, path: "/finance", roles: ["DISTRICT_OFFICER", "FINANCE_APPROVER", "ADMIN"] },
-  { text: "Disbursement", icon: <Payments />, path: "/disbursement", roles: ["FIELD_OFFICER", "DISTRICT_OFFICER", "FINANCE_APPROVER", "ADMIN"] },
-  { text: "Status Tracking", icon: <AccountTree />, path: "/status", roles: ["FIELD_OFFICER", "DISTRICT_OFFICER", "FINANCE_APPROVER", "ADMIN"] },
-  { text: "Analytics", icon: <Assessment />, path: "/analytics", roles: ["DISTRICT_OFFICER", "FINANCE_APPROVER", "ADMIN"] },
-  { text: "Audit Log", icon: <History />, path: "/audit-log", roles: ["ADMIN", "DISTRICT_OFFICER"] },
+  {
+    text: "Dashboard",
+    icon: <Dashboard />,
+    path: "/dashboard",
+    roles: [
+      "FIELD_OFFICER",
+      "DISTRICT_OFFICER",
+      "FINANCE_APPROVER",
+      "ADMIN",
+    ],
+  },
 
+  {
+    text: "Beneficiaries",
+    icon: <People />,
+    path: "/beneficiaries",
+    roles: [
+      "FIELD_OFFICER",
+      "DISTRICT_OFFICER",
+      "FINANCE_APPROVER",
+      "ADMIN",
+    ],
+  },
+
+  {
+    text: "Schemes",
+    icon: <Description />,
+    path: "/schemes",
+    roles: [
+      "DISTRICT_OFFICER",
+      "FINANCE_APPROVER",
+      "ADMIN",
+    ],
+  },
+
+  {
+    text: "Applications",
+    icon: <Assignment />,
+    path: "/applications",
+    roles: [
+      "FIELD_OFFICER",
+      "DISTRICT_OFFICER",
+      "FINANCE_APPROVER",
+      "ADMIN",
+    ],
+  },
+
+  {
+    text: "Eligibility",
+    icon: <Verified />,
+    path: "/eligibility",
+    roles: [
+      "FIELD_OFFICER",
+      "DISTRICT_OFFICER",
+      "FINANCE_APPROVER",
+      "ADMIN",
+    ],
+  },
+
+  {
+    text: "Verification",
+    icon: <CheckCircle />,
+    path: "/verification",
+    roles: [
+      "FIELD_OFFICER",
+      "DISTRICT_OFFICER",
+      "ADMIN",
+    ],
+  },
+
+  {
+    text: "Finance Approval",
+    icon: <AccountBalanceWallet />,
+    path: "/finance",
+    roles: [
+      "FINANCE_APPROVER",
+      "ADMIN",
+    ],
+  },
+
+  {
+    text: "Disbursement",
+    icon: <Payments />,
+    path: "/disbursement",
+    roles: [
+      "FINANCE_APPROVER",
+      "ADMIN",
+    ],
+  },
+
+  {
+    text: "Status Tracking",
+    icon: <AccountTree />,
+    path: "/status",
+    roles: [
+      "FIELD_OFFICER",
+      "DISTRICT_OFFICER",
+      "FINANCE_APPROVER",
+      "ADMIN",
+    ],
+  },
+
+  {
+    text: "Analytics",
+    icon: <Assessment />,
+    path: "/analytics",
+    roles: [
+      "FINANCE_APPROVER",
+      "ADMIN",
+    ],
+  },
+
+  {
+    text: "Audit Log",
+    icon: <History />,
+    path: "/audit-log",
+    roles: [
+      "ADMIN",
+      "DISTRICT_OFFICER",
+    ],
+  },
 ];
 
 function Sidebar() {
   const location = useLocation();
+  const navigate = useNavigate();
 
-  const stored = localStorage.getItem("user");
-  const currentRole = stored ? JSON.parse(stored)?.role : null;
+  const {
+    role,
+    username,
+    logout,
+  } = useAuth();
 
-  const visibleItems = menuItems.filter((item) =>
-    currentRole ? item.roles.includes(currentRole) : false
+  /*
+   * Normalize role so that
+   * FIELD_OFFICER and field_officer
+   * are treated consistently.
+   */
+  const currentRole = role?.toUpperCase();
+
+  /*
+   * Show only menu items allowed
+   * for the current user's role.
+   */
+  const visibleMenuItems = menuItems.filter(
+    (item) =>
+      item.roles.includes(currentRole)
   );
+
+  /*
+   * Logout handler
+   */
+  const handleLogout = () => {
+    logout();
+
+    navigate("/login", {
+      replace: true,
+    });
+  };
+
+  /*
+   * Convert role into readable text.
+   *
+   * Example:
+   * FINANCE_APPROVER
+   * becomes
+   * Finance Approver
+   */
+  const formattedRole = currentRole
+    ? currentRole
+        .replaceAll("_", " ")
+        .toLowerCase()
+        .replace(/\b\w/g, (letter) =>
+          letter.toUpperCase()
+        )
+    : "";
 
   return (
     <Drawer
@@ -65,54 +229,161 @@ function Sidebar() {
           background: "#0D47A1",
           color: "white",
           borderRight: "none",
+          boxSizing: "border-box",
         },
       }}
     >
+      {/* Space for Navbar */}
       <Toolbar />
 
-      <Box sx={{ textAlign: "center", py: 2 }}>
-        <Typography variant="h5" fontWeight="bold">
+      {/* =========================
+          LOGO / USER INFORMATION
+         ========================= */}
+
+      <Box
+        sx={{
+          textAlign: "center",
+          py: 2,
+          px: 2,
+        }}
+      >
+        <Typography
+          variant="h5"
+          fontWeight="bold"
+        >
           🏛 GrantFlow
         </Typography>
 
-        <Typography variant="body2" sx={{ opacity: 0.8 }}>
+        <Typography
+          variant="body2"
+          sx={{
+            opacity: 0.8,
+            mt: 0.5,
+          }}
+        >
           Government Portal
         </Typography>
+
+        {/* Username */}
+        {username && (
+          <Typography
+            variant="body2"
+            sx={{
+              mt: 2,
+              fontWeight: "bold",
+            }}
+          >
+            {username}
+          </Typography>
+        )}
+
+        {/* Role */}
+        {formattedRole && (
+          <Typography
+            variant="caption"
+            sx={{
+              display: "block",
+              mt: 0.5,
+              opacity: 0.8,
+            }}
+          >
+            {formattedRole}
+          </Typography>
+        )}
       </Box>
 
-      <List sx={{ px: 2 }}>
-        {visibleItems.map((item) => (
+      <Divider
+        sx={{
+          borderColor:
+            "rgba(255,255,255,0.2)",
+          mx: 2,
+        }}
+      />
+
+      {/* =========================
+          NAVIGATION MENU
+         ========================= */}
+
+      <List
+        sx={{
+          px: 2,
+          py: 2,
+          flexGrow: 1,
+        }}
+      >
+        {visibleMenuItems.map((item) => (
           <ListItemButton
             key={item.text}
             component={Link}
             to={item.path}
-            selected={location.pathname === item.path}
+            selected={
+              location.pathname === item.path
+            }
             sx={{
               borderRadius: 3,
               mb: 1,
               color: "white",
 
+              "& .MuiListItemIcon-root": {
+                color: "white",
+                minWidth: 42,
+              },
+
               "&.Mui-selected": {
-                background: "#1565C0",
+                backgroundColor: "#1565C0",
               },
 
               "&.Mui-selected:hover": {
-                background: "#1976D2",
+                backgroundColor: "#1976D2",
               },
 
               "&:hover": {
-                background: "#1976D2",
+                backgroundColor: "#1976D2",
               },
             }}
           >
-            <ListItemIcon sx={{ color: "white" }}>
+            <ListItemIcon>
               {item.icon}
             </ListItemIcon>
 
-            <ListItemText primary={item.text} />
+            <ListItemText
+              primary={item.text}
+            />
           </ListItemButton>
         ))}
       </List>
+
+      {/* =========================
+          LOGOUT
+         ========================= */}
+
+      <Box
+        sx={{
+          p: 2,
+        }}
+      >
+        <Button
+          fullWidth
+          variant="outlined"
+          startIcon={<Logout />}
+          onClick={handleLogout}
+          sx={{
+            color: "white",
+            borderColor:
+              "rgba(255,255,255,0.5)",
+            borderRadius: 2,
+            py: 1,
+
+            "&:hover": {
+              borderColor: "white",
+              backgroundColor:
+                "rgba(255,255,255,0.1)",
+            },
+          }}
+        >
+          Logout
+        </Button>
+      </Box>
     </Drawer>
   );
 }

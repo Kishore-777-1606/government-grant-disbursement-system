@@ -1,110 +1,164 @@
 import { Routes, Route } from "react-router-dom";
-import FinanceApproval from "./pages/FinanceApproval/FinanceApproval";
 import Login from "./pages/login/Login";
-import Dashboard from "./pages/dashboard/Dashboard";
-import Beneficiaries from "./pages/beneficiaries/beneficiaries";
+import Dashboard from "./pages/Dashboard/Dashboard";
+import Beneficiaries from "./pages/Beneficiaries/Beneficiaries";
 import Schemes from "./pages/Schemes/Schemes";
 import Applications from "./pages/Applications/Applications";
 import Eligibility from "./pages/Eligibility/Eligibility";
+import FinanceApproval from "./pages/FinanceApproval/FinanceApproval";
 import Verification from "./pages/Verification/Verification";
 import StatusTracking from "./pages/StatusTracking/StatusTracking";
 import Analytics from "./pages/Analytics/Analytics";
 import Disbursement from "./pages/Disbursement/Disbursement";
-import ProtectedRoute from "./routes/ProtectedRoute";
+
+import ProtectedRoute from "./auth/ProtectedRoute";
+import Unauthorized from "./pages/Unauthorized";
 import AuditLog from "./pages/AuditLog/AuditLog";
 
 function App() {
   return (
     <Routes>
+
+      {/* ================= PUBLIC ROUTES ================= */}
+
       <Route path="/" element={<Login />} />
+
+      <Route path="/login" element={<Login />} />
+
       <Route
-        path="/dashboard"
-        element={
-          <ProtectedRoute>
-            <Dashboard />
-          </ProtectedRoute>
-        }
+        path="/unauthorized"
+        element={<Unauthorized />}
       />
+
+
+      {/* ================= COMMON AUTHENTICATED ROUTES ================= */}
+
       <Route
-        path="/beneficiaries"
         element={
-          <ProtectedRoute>
-            <Beneficiaries />
-          </ProtectedRoute>
+          <ProtectedRoute
+            allowedRoles={[
+              "FIELD_OFFICER",
+              "DISTRICT_OFFICER",
+              "FINANCE_APPROVER",
+              "ADMIN",
+            ]}
+          />
         }
-      />
+      >
+        <Route
+          path="/dashboard"
+          element={<Dashboard />}
+        />
+
+        <Route
+          path="/beneficiaries"
+          element={<Beneficiaries />}
+        />
+
+        <Route
+          path="/applications"
+          element={<Applications />}
+        />
+
+        <Route
+          path="/eligibility"
+          element={<Eligibility />}
+        />
+
+        <Route
+          path="/status"
+          element={<StatusTracking />}
+        />
+      </Route>
+
+
+      {/* ================= SCHEMES ================= */}
+
       <Route
-        path="/schemes"
         element={
-          <ProtectedRoute>
-            <Schemes />
-          </ProtectedRoute>
+          <ProtectedRoute
+            allowedRoles={[
+              "DISTRICT_OFFICER",
+              "FINANCE_APPROVER",
+              "ADMIN",
+            ]}
+          />
         }
-      />
+      >
+        <Route
+          path="/schemes"
+          element={<Schemes />}
+        />
+      </Route>
+
+
+      {/* ================= VERIFICATION ================= */}
+
       <Route
-        path="/applications"
         element={
-          <ProtectedRoute>
-            <Applications />
-          </ProtectedRoute>
+          <ProtectedRoute
+            allowedRoles={[
+              "FIELD_OFFICER",
+              "DISTRICT_OFFICER",
+              "ADMIN",
+            ]}
+          />
         }
-      />
+      >
+        <Route
+          path="/verification"
+          element={<Verification />}
+        />
+      </Route>
+
+
+      {/* ================= FINANCE / DISBURSEMENT / ANALYTICS ================= */}
+
       <Route
-        path="/eligibility"
         element={
-          <ProtectedRoute>
-            <Eligibility />
-          </ProtectedRoute>
+          <ProtectedRoute
+            allowedRoles={[
+              "FINANCE_APPROVER",
+              "ADMIN",
+            ]}
+          />
         }
-      />
+      >
+        <Route
+          path="/finance"
+          element={<FinanceApproval />}
+        />
+
+        <Route
+          path="/disbursement"
+          element={<Disbursement />}
+        />
+
+        <Route
+          path="/analytics"
+          element={<Analytics />}
+        />
+      </Route>
+
+
+      {/* ================= AUDIT LOG ================= */}
+
       <Route
-        path="/verification"
         element={
-          <ProtectedRoute>
-            <Verification />
-          </ProtectedRoute>
+          <ProtectedRoute
+            allowedRoles={[
+              "DISTRICT_OFFICER",
+              "ADMIN",
+            ]}
+          />
         }
-      />
-      <Route
-        path="/finance"
-        element={
-          <ProtectedRoute>
-            <FinanceApproval />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/disbursement"
-        element={
-          <ProtectedRoute>
-            <Disbursement />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/status"
-        element={
-          <ProtectedRoute>
-            <StatusTracking />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/analytics"
-        element={
-          <ProtectedRoute>
-            <Analytics />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/audit-log"
-        element={
-          <ProtectedRoute>
-            <AuditLog />
-          </ProtectedRoute>
-        }
-      />
+      >
+        <Route
+          path="/audit-log"
+          element={<AuditLog />}
+        />
+      </Route>
+
     </Routes>
   );
 }

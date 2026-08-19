@@ -2,6 +2,7 @@ package com.infosys.grantdisbursementsystem.service;
 
 import com.infosys.grantdisbursementsystem.entity.Application;
 import com.infosys.grantdisbursementsystem.entity.ComplianceMilestone;
+import com.infosys.grantdisbursementsystem.exception.ResourceNotFoundException;
 import com.infosys.grantdisbursementsystem.repository.ComplianceMilestoneRepository;
 
 import org.springframework.scheduling.annotation.Scheduled;
@@ -30,8 +31,19 @@ public class ComplianceMilestoneService {
 
     public ComplianceMilestone createMilestone(
             Application application,
-            String milestoneType
-    ) {
+            String milestoneType) {
+
+        if (application == null) {
+            throw new IllegalArgumentException(
+                    "Application cannot be null"
+            );
+        }
+
+        if (milestoneType == null || milestoneType.isBlank()) {
+            throw new IllegalArgumentException(
+                    "Milestone type is required"
+            );
+        }
 
         ComplianceMilestone milestone =
                 new ComplianceMilestone();
@@ -67,11 +79,12 @@ public class ComplianceMilestoneService {
         List<ComplianceMilestone> pending =
                 milestoneRepository.findByStatus("Pending");
 
+        LocalDate today = LocalDate.now();
+
         for (ComplianceMilestone milestone : pending) {
 
             if (milestone.getDueDate() != null
-                    && milestone.getDueDate()
-                    .isBefore(LocalDate.now())) {
+                    && milestone.getDueDate().isBefore(today)) {
 
                 milestone.setStatus("Overdue");
 
@@ -98,6 +111,8 @@ public class ComplianceMilestoneService {
         List<ComplianceMilestone> reminders =
                 new ArrayList<>();
 
+        LocalDate today = LocalDate.now();
+
         for (ComplianceMilestone milestone : pending) {
 
             if (milestone.getDueDate() == null) {
@@ -106,12 +121,11 @@ public class ComplianceMilestoneService {
 
             long daysLeft =
                     ChronoUnit.DAYS.between(
-                            LocalDate.now(),
+                            today,
                             milestone.getDueDate()
                     );
 
-            if (daysLeft <= 3 && daysLeft >= 0) {
-
+            if (daysLeft >= 0 && daysLeft <= 3) {
                 reminders.add(milestone);
             }
         }
@@ -119,13 +133,25 @@ public class ComplianceMilestoneService {
         return reminders;
     }
 
+    public List<ComplianceMilestone> getAllMilestones() {
+
+        return milestoneRepository.findAll();
+    }
+
     public ComplianceMilestone completeMilestone(Long milestoneId) {
+
+        if (milestoneId == null) {
+            throw new IllegalArgumentException(
+                    "Milestone ID cannot be null"
+            );
+        }
 
         ComplianceMilestone milestone =
                 milestoneRepository.findById(milestoneId)
                         .orElseThrow(() ->
-                                new RuntimeException(
-                                        "Milestone not found"
+                                new ResourceNotFoundException(
+                                        "Milestone not found with ID: "
+                                                + milestoneId
                                 )
                         );
 
@@ -169,6 +195,7 @@ public class ComplianceMilestoneService {
 
         return savedMilestone;
     }
+
     /**
      * Marks a milestone as actively being worked on — e.g. the beneficiary/officer
      * has started the required action but hasn't yet submitted proof for review.
@@ -180,8 +207,9 @@ public class ComplianceMilestoneService {
         ComplianceMilestone milestone =
                 milestoneRepository.findById(milestoneId)
                         .orElseThrow(() ->
-                                new RuntimeException(
-                                        "Milestone not found"
+                                new ResourceNotFoundException(
+                                        "Milestone not found with ID: "
+                                                + milestoneId
                                 )
                         );
 
@@ -226,8 +254,9 @@ public class ComplianceMilestoneService {
         ComplianceMilestone milestone =
                 milestoneRepository.findById(milestoneId)
                         .orElseThrow(() ->
-                                new RuntimeException(
-                                        "Milestone not found"
+                                new ResourceNotFoundException(
+                                        "Milestone not found with ID: "
+                                                + milestoneId
                                 )
                         );
 

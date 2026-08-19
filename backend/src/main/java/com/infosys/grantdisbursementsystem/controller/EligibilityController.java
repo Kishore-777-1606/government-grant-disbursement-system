@@ -13,7 +13,7 @@ import java.util.Objects;
 
 
 @RestController
-@RequestMapping("/eligibility")
+@RequestMapping("/api/eligibility")
 public class EligibilityController {
 
 

@@ -1,50 +1,76 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+
 import {
+  Alert,
   Box,
   Button,
-  Alert,
+  CircularProgress,
+  Container,
+  IconButton,
+  InputAdornment,
   Paper,
   TextField,
   Typography,
-  CircularProgress,
-  InputAdornment,
 } from "@mui/material";
+
 import {
-  AccountBalance as AccountBalanceIcon,
-  Person as PersonOutlineIcon,
-  Lock as LockOutlinedIcon,
+  Visibility,
+  VisibilityOff,
+  LockOutlined,
 } from "@mui/icons-material";
-import { login } from "../../services/authService";
+
+import { useLocation, useNavigate } from "react-router-dom";
+
+import { useAuth } from "../../auth/useAuth";
 
 function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const { login } = useAuth();
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+
+  const [showPassword, setShowPassword] = useState(false);
+
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const from = location.state?.from?.pathname || "/dashboard";
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
     setError("");
 
-    if (!username.trim() || !password) {
-      setError("Please enter both username and password.");
+    const trimmedUsername = username.trim();
+
+    if (!trimmedUsername) {
+      setError("Please enter your username.");
       return;
     }
 
-    setLoading(true);
+    if (!password) {
+      setError("Please enter your password.");
+      return;
+    }
+
     try {
-      const user = await login(username.trim(), password);
-      localStorage.setItem("user", JSON.stringify(user));
-      navigate("/dashboard");
+      setLoading(true);
+
+      await login(trimmedUsername, password);
+
+      navigate(from, {
+        replace: true,
+      });
     } catch (err) {
-      // Backend returns { message } for both 404 (bad credentials) and
-      // 400 (disabled account); anything else falls back to a generic message.
+      console.error("Login failed:", err);
+
       const message =
-        err.response?.data?.message ||
-        "Unable to log in. Please try again.";
+        err?.response?.data?.message ||
+        err?.message ||
+        "Login failed. Please check your credentials.";
+
       setError(message);
     } finally {
       setLoading(false);
@@ -59,110 +85,177 @@ function Login() {
         alignItems: "center",
         justifyContent: "center",
         background:
-          "linear-gradient(135deg, #0D47A1 0%, #1565C0 50%, #1976D2 100%)",
+          "linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%)",
         px: 2,
       }}
     >
-      <Paper
-        elevation={6}
-        sx={{
-          width: "100%",
-          maxWidth: 420,
-          p: { xs: 3, sm: 5 },
-          borderRadius: 3,
-        }}
-      >
-        {/* Brand header */}
-        <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", mb: 4 }}>
+      <Container maxWidth="sm">
+        <Paper
+          elevation={8}
+          sx={{
+            p: {
+              xs: 3,
+              sm: 5,
+            },
+            borderRadius: 4,
+          }}
+        >
+          {/* Login Icon */}
           <Box
             sx={{
-              width: 56,
-              height: 56,
-              borderRadius: "50%",
               display: "flex",
-              alignItems: "center",
               justifyContent: "center",
-              background: "#E3F2FD",
-              mb: 1.5,
+              mb: 2,
             }}
           >
-            <AccountBalanceIcon sx={{ color: "#1565C0", fontSize: 30 }} />
+            <Box
+              sx={{
+                width: 64,
+                height: 64,
+                borderRadius: "50%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: "primary.main",
+                color: "white",
+              }}
+            >
+              <LockOutlined fontSize="large" />
+            </Box>
           </Box>
-          <Typography variant="h5" fontWeight={700} textAlign="center">
-            GrantFlow
-          </Typography>
-          <Typography variant="body2" color="text.secondary" textAlign="center">
-            Government Grant Disbursement Tracking System
-          </Typography>
-        </Box>
 
-        <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
-          Sign in to your account
-        </Typography>
+          {/* Heading */}
+          <Typography
+            variant="h4"
+            fontWeight="bold"
+            gutterBottom
+            sx={{ textAlign: "center" }}
+          >
+            Welcome Back
+          </Typography>
 
-        <Box component="form" onSubmit={handleSubmit} noValidate>
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{
+              mb: 3,
+              textAlign: "center",
+            }}
+          >
+            Sign in to the Government Grant
+            Disbursement System
+          </Typography>
+
+          {/* Error */}
           {error && (
-            <Alert severity="error" sx={{ mb: 2 }}>
+            <Alert
+              severity="error"
+              sx={{ mb: 2 }}
+              onClose={() => setError("")}
+            >
               {error}
             </Alert>
           )}
 
-          <TextField
-            label="Username"
-            fullWidth
-            margin="normal"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            autoFocus
-            disabled={loading}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <PersonOutlineIcon color="action" />
-                </InputAdornment>
-              ),
-            }}
-          />
-
-          <TextField
-            label="Password"
-            type="password"
-            fullWidth
-            margin="normal"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            disabled={loading}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <LockOutlinedIcon color="action" />
-                </InputAdornment>
-              ),
-            }}
-          />
-
-          <Button
-            type="submit"
-            variant="contained"
-            fullWidth
-            size="large"
-            sx={{ mt: 3, py: 1.3, fontWeight: 600 }}
-            disabled={loading}
+          {/* Login Form */}
+          <Box
+            component="form"
+            onSubmit={handleSubmit}
+            noValidate
           >
-            {loading ? <CircularProgress size={24} color="inherit" /> : "Login"}
-          </Button>
-        </Box>
+            <TextField
+              fullWidth
+              label="Username"
+              value={username}
+              onChange={(event) =>
+                setUsername(event.target.value)
+              }
+              margin="normal"
+              autoComplete="username"
+              disabled={loading}
+              autoFocus
+            />
 
-        <Typography
-          variant="caption"
-          color="text.secondary"
-          display="block"
-          textAlign="center"
-          sx={{ mt: 4 }}
-        >
-          Authorized personnel only. All activity is logged and monitored.
-        </Typography>
-      </Paper>
+            <TextField
+              fullWidth
+              label="Password"
+              type={showPassword ? "text" : "password"}
+              value={password}
+              onChange={(event) =>
+                setPassword(event.target.value)
+              }
+              margin="normal"
+              autoComplete="current-password"
+              disabled={loading}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      type="button"
+                      onClick={() =>
+                        setShowPassword(
+                          (previous) => !previous
+                        )
+                      }
+                      edge="end"
+                      disabled={loading}
+                      aria-label={
+                        showPassword
+                          ? "Hide password"
+                          : "Show password"
+                      }
+                    >
+                      {showPassword ? (
+                        <VisibilityOff />
+                      ) : (
+                        <Visibility />
+                      )}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
+
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              size="large"
+              disabled={loading}
+              sx={{
+                mt: 3,
+                py: 1.4,
+                borderRadius: 2,
+                fontWeight: "bold",
+              }}
+            >
+              {loading ? (
+                <>
+                  <CircularProgress
+                    size={22}
+                    color="inherit"
+                    sx={{ mr: 1 }}
+                  />
+                  Signing in...
+                </>
+              ) : (
+                "Login"
+              )}
+            </Button>
+          </Box>
+
+          <Typography
+            variant="caption"
+            color="text.secondary"
+            display="block"
+            textAlign="center"
+            sx={{ mt: 4 }}
+          >
+            Authorized personnel only. All activity is logged
+            and monitored.
+          </Typography>
+        </Paper>
+      </Container>
     </Box>
   );
 }
