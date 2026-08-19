@@ -1,7 +1,7 @@
 import { Routes, Route } from "react-router-dom";
 import Login from "./pages/login/Login";
-import Dashboard from "./pages/Dashboard/Dashboard";
-import Beneficiaries from "./pages/Beneficiaries/Beneficiaries";
+import Dashboard from "./pages/dashboard/Dashboard";
+import Beneficiaries from "./pages/beneficiaries/beneficiaries";
 import Schemes from "./pages/Schemes/Schemes";
 import Applications from "./pages/Applications/Applications";
 import Eligibility from "./pages/Eligibility/Eligibility";

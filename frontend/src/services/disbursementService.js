@@ -5,7 +5,7 @@ import api from "./api";
 // =====================================================
 
 export const getAllPlans = async () => {
-    const response = await api.get("/api/disbursement-plans");
+    const response = await api.get("/disbursement-plans");
     return response.data;
 };
 
@@ -16,7 +16,7 @@ export const getAllPlans = async () => {
 
 export const getPlanById = async (planId) => {
     const response = await api.get(
-        `/api/disbursement-plans/${planId}`
+        `/disbursement-plans/${planId}`
     );
 
     return response.data;
@@ -34,7 +34,7 @@ export const createDisbursementPlan = async (
 ) => {
 
     const response = await api.post(
-        "/api/disbursement-plans",
+        "/disbursement-plans",
         {
             applicationId: Number(applicationId),
             totalAmount: Number(totalAmount),
@@ -53,7 +53,7 @@ export const createDisbursementPlan = async (
 export const getAllInstallments = async () => {
 
     const response = await api.get(
-        "/api/disbursement-plans/installments/all"
+        "/disbursement-plans/installments/all"
     );
 
     return response.data;
@@ -67,7 +67,7 @@ export const getAllInstallments = async () => {
 export const getInstallmentsByPlan = async (planId) => {
 
     const response = await api.get(
-        `/api/disbursement-plans/${planId}/installments`
+        `/disbursement-plans/${planId}/installments`
     );
 
     return response.data;
@@ -83,7 +83,7 @@ export const releaseInstallment = async (
 ) => {
 
     const response = await api.post(
-        `/api/disbursement-plans/release/${installmentId}`
+        `/disbursement-plans/release/${installmentId}`
     );
 
     return response.data;
@@ -99,7 +99,7 @@ export const completeMilestone = async (
 ) => {
 
     const response = await api.put(
-        `/api/milestones/${milestoneId}/complete`
+        `/milestones/${milestoneId}/complete`
     );
 
     return response.data;
@@ -113,7 +113,7 @@ export const completeMilestone = async (
 export const getMilestoneReminders = async () => {
 
     const response = await api.get(
-        "/api/milestones/reminders"
+        "/milestones/reminders"
     );
 
     return response.data;
@@ -127,7 +127,7 @@ export const getMilestoneReminders = async () => {
 export const checkOverdueMilestones = async () => {
 
     const response = await api.get(
-        "/api/milestones/check-overdue"
+        "/milestones/check-overdue"
     );
 
     return response.data;
@@ -139,7 +139,7 @@ export const checkOverdueMilestones = async () => {
 // =====================================================
 
 export const markMilestoneInProgress = async (milestoneId) => {
-    const response = await api.put(`/api/milestones/${milestoneId}/in-progress`);
+    const response = await api.put(`/milestones/${milestoneId}/in-progress`);
     return response.data;
 };
 
@@ -150,7 +150,7 @@ export const markMilestoneInProgress = async (milestoneId) => {
 
 export const markMilestoneNonCompliant = async (milestoneId, reason) => {
     const response = await api.put(
-        `/api/milestones/${milestoneId}/non-compliant`,
+        `/milestones/${milestoneId}/non-compliant`,
         null,
         { params: reason ? { reason } : {} }
     );

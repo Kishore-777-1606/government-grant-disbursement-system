@@ -4,25 +4,17 @@ import {
   Typography,
   Box,
   Avatar,
-  Button,
 } from "@mui/material";
-
-import LogoutIcon from "@mui/icons-material/Logout";
-import { useNavigate } from "react-router-dom";
 
 import { useAuth } from "../auth/useAuth";
 
 function Navbar() {
-  const navigate = useNavigate();
-
   const {
     username,
     role,
-    logout,
   } = useAuth();
 
-  const displayName =
-    username || "User";
+  const displayName = username || "User";
 
   const displayRole = role
     ? role
@@ -33,16 +25,7 @@ function Navbar() {
         )
     : "";
 
-  /*
-   * Get first letter for Avatar
-   */
-  const avatarLetter =
-    displayName.charAt(0).toUpperCase();
-
-  const handleLogout = () => {
-    logout();
-    navigate("/login");
-  };
+  const avatarLetter = displayName.charAt(0).toUpperCase();
 
   return (
     <AppBar
@@ -108,20 +91,6 @@ function Navbar() {
           >
             {avatarLetter}
           </Avatar>
-
-          <Button
-            onClick={handleLogout}
-            startIcon={<LogoutIcon />}
-            sx={{
-              color: "white",
-              borderColor: "rgba(255,255,255,0.5)",
-              textTransform: "none",
-            }}
-            variant="outlined"
-            size="small"
-          >
-            Logout
-          </Button>
         </Box>
       </Toolbar>
     </AppBar>

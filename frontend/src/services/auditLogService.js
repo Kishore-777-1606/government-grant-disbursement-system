@@ -5,6 +5,6 @@ export const getAuditLogs = async (entityType, entityId) => {
     if (entityType) params.entityType = entityType;
     if (entityId) params.entityId = entityId;
 
-    const response = await api.get("/api/audit-logs", { params });
+    const response = await api.get("/audit-logs", { params });
     return response.data;
 };
