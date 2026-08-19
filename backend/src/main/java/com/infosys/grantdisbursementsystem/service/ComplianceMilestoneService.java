@@ -76,8 +76,8 @@ public class ComplianceMilestoneService {
 
     public void flagOverdueMilestones() {
 
-        List<ComplianceMilestone> pending =
-                milestoneRepository.findByStatus("Pending");
+       List<ComplianceMilestone> pending =
+        milestoneRepository.findByStatusIgnoreCase("Pending");
 
         LocalDate today = LocalDate.now();
 
@@ -106,7 +106,7 @@ public class ComplianceMilestoneService {
     public List<ComplianceMilestone> getUpcomingReminders() {
 
         List<ComplianceMilestone> pending =
-                milestoneRepository.findByStatus("Pending");
+        milestoneRepository.findByStatusIgnoreCase("Pending");
 
         List<ComplianceMilestone> reminders =
                 new ArrayList<>();
