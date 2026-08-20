@@ -73,6 +73,15 @@ public class DisbursementPlanService {
                     "Number of installments must be greater than zero"
             );
         }
+                if (!"Approved".equalsIgnoreCase(application.getStatus())) {
+            throw new IllegalStateException(
+                    "Cannot create a disbursement plan for application #"
+                            + application.getApplicationId()
+                            + " — status is '"
+                            + application.getStatus()
+                            + "', not 'Approved'. Finance approval must be completed first."
+            );
+        }
 
         DisbursementPlan plan =
                 new DisbursementPlan();

@@ -74,10 +74,11 @@ function App() {
 
       {/* ================= SCHEMES ================= */}
 
-      <Route
+            <Route
         element={
           <ProtectedRoute
             allowedRoles={[
+              "FIELD_OFFICER",
               "DISTRICT_OFFICER",
               "FINANCE_APPROVER",
               "ADMIN",
@@ -114,7 +115,7 @@ function App() {
 
       {/* ================= FINANCE / DISBURSEMENT / ANALYTICS ================= */}
 
-      <Route
+            <Route
         element={
           <ProtectedRoute
             allowedRoles={[
@@ -130,13 +131,26 @@ function App() {
         />
 
         <Route
-          path="/disbursement"
-          element={<Disbursement />}
-        />
-
-        <Route
           path="/analytics"
           element={<Analytics />}
+        />
+      </Route>
+
+      <Route
+        element={
+          <ProtectedRoute
+            allowedRoles={[
+              "FIELD_OFFICER",
+              "DISTRICT_OFFICER",
+              "FINANCE_APPROVER",
+              "ADMIN",
+            ]}
+          />
+        }
+      >
+        <Route
+          path="/disbursement"
+          element={<Disbursement />}
         />
       </Route>
 

@@ -95,6 +95,13 @@ function Disbursement() {
 
     const canMarkNonCompliant =
         ["DISTRICT_OFFICER", "ADMIN"].includes(currentRole);
+            // Matches backend's @PreAuthorize on GET /api/disbursement-plans
+    const canViewPlans =
+        ["DISTRICT_OFFICER", "FINANCE_APPROVER", "ADMIN"].includes(currentRole);
+
+    // Matches backend's @PreAuthorize on POST /api/disbursement-plans
+    const canCreatePlan =
+        ["DISTRICT_OFFICER", "ADMIN"].includes(currentRole);
 
     // =================================================
     // STATE
@@ -135,18 +142,25 @@ function Disbursement() {
 
             // -----------------------------------------
             // CHECK OVERDUE MILESTONES
+            // Matches backend's @PreAuthorize on
+            // GET /api/milestones/check-overdue —
+            // only these roles can call it, so don't
+            // even attempt it for the others.
             // -----------------------------------------
 
-            try {
+            if (canMarkNonCompliant) {
 
-                await checkOverdueMilestones();
+                try {
 
-            } catch (err) {
+                    await checkOverdueMilestones();
 
-                console.warn(
-                    "Overdue check failed:",
-                    err
-                );
+                } catch (err) {
+
+                    console.warn(
+                        "Overdue check failed:",
+                        err
+                    );
+                }
             }
 
 
@@ -154,13 +168,13 @@ function Disbursement() {
             // LOAD ALL DATA
             // -----------------------------------------
 
-            const [
+                        const [
                 planData,
                 installmentData,
                 reminderData,
                 applicationData
             ] = await Promise.all([
-                getAllPlans(),
+                canViewPlans ? getAllPlans() : Promise.resolve([]),
                 getAllInstallments(),
                 getMilestoneReminders(),
                 getAllApplications()
@@ -204,9 +218,11 @@ function Disbursement() {
             // SET APPLICATIONS
             // -----------------------------------------
 
-            setApplications(
+                        setApplications(
                 Array.isArray(applicationData)
-                    ? applicationData
+                    ? applicationData.filter(
+                          (app) => app.status === "Approved"
+                      )
                     : []
             );
 
@@ -229,7 +245,7 @@ function Disbursement() {
 
         }
 
-    }, []);
+    }, [canMarkNonCompliant, canViewPlans]);
 
 
     // =================================================
@@ -635,10 +651,11 @@ function Disbursement() {
             )}
 
 
-            {/* =========================================
+                        {/* =========================================
                 CREATE DISBURSEMENT PLAN
             ========================================= */}
 
+            {canCreatePlan && (
             <Paper
                 sx={{
                     p: 3,
@@ -694,7 +711,7 @@ function Disbursement() {
                         {applications.length === 0 ? (
 
                             <MenuItem disabled>
-                                No applications available
+                               No approved applications available
                             </MenuItem>
 
                         ) : (
@@ -782,11 +799,12 @@ function Disbursement() {
                             : "Create Disbursement Plan"
                         }
 
-                    </Button>
+                                       </Button>
 
                 </Box>
 
             </Paper>
+            )}
 
 
             {/* =========================================
@@ -816,7 +834,7 @@ function Disbursement() {
                 PLAN SUMMARY
             ========================================= */}
 
-            {!loading && plans.length > 0 && (
+                       {!loading && canViewPlans && plans.length > 0 && (
 
                 <Paper
                     sx={{

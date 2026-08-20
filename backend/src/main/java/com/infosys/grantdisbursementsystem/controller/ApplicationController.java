@@ -19,7 +19,7 @@ public class ApplicationController {
         this.service = service;
     }
 
-    @PreAuthorize("hasAnyRole('FIELD_OFFICER', 'FINANCE_APPROVER','ADMIN')")
+       @PreAuthorize("hasAnyRole('FIELD_OFFICER', 'DISTRICT_OFFICER', 'ADMIN')")
     @PostMapping
     public Application submitApplication(
             @RequestBody Application application) {

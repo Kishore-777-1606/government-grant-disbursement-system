@@ -64,11 +64,12 @@ const menuItems = [
     ],
   },
 
-  {
+   {
     text: "Schemes",
     icon: <Description />,
     path: "/schemes",
     roles: [
+      "FIELD_OFFICER",
       "DISTRICT_OFFICER",
       "FINANCE_APPROVER",
       "ADMIN",
@@ -120,11 +121,13 @@ const menuItems = [
     ],
   },
 
-  {
+   {
     text: "Disbursement",
     icon: <Payments />,
     path: "/disbursement",
     roles: [
+      "FIELD_OFFICER",
+      "DISTRICT_OFFICER",
       "FINANCE_APPROVER",
       "ADMIN",
     ],

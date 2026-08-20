@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import {
     Dialog,
@@ -12,7 +12,7 @@ import {
     Alert
 } from "@mui/material";
 
-import { createApplication } from "../../services/applicationService";
+import { createApplication, updateApplication } from "../../services/applicationService";
 
 const EMPTY_APPLICATION = {
     beneficiaryId: "",
@@ -23,7 +23,9 @@ const EMPTY_APPLICATION = {
     remarks: "New Application"
 };
 
-function NewApplicationDialog({ open, handleClose, refreshData }) {
+function NewApplicationDialog({ open, handleClose, refreshData, applicationToEdit }) {
+
+    const isEditMode = Boolean(applicationToEdit);
 
     const [application, setApplication] = useState(EMPTY_APPLICATION);
     const [errors, setErrors] = useState({});
@@ -33,6 +35,17 @@ function NewApplicationDialog({ open, handleClose, refreshData }) {
         message: "",
         severity: "success"
     });
+
+    useEffect(() => {
+        if (open) {
+            if (applicationToEdit) {
+                setApplication({ ...EMPTY_APPLICATION, ...applicationToEdit });
+            } else {
+                setApplication(EMPTY_APPLICATION);
+            }
+            setErrors({});
+        }
+    }, [open, applicationToEdit]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -78,7 +91,7 @@ function NewApplicationDialog({ open, handleClose, refreshData }) {
         return Object.keys(newErrors).length === 0;
     };
 
-    const handleSubmit = async () => {
+        const handleSubmit = async () => {
 
         if (!validate()) {
             return;
@@ -88,15 +101,21 @@ function NewApplicationDialog({ open, handleClose, refreshData }) {
 
         try {
 
-            await createApplication({
+            const payload = {
                 ...application,
                 beneficiaryId: Number(application.beneficiaryId),
                 schemeId: Number(application.schemeId)
-            });
+            };
 
-            setSnackbar({
+            if (isEditMode) {
+                await updateApplication(applicationToEdit.applicationId, payload);
+            } else {
+                await createApplication(payload);
+            }
+
+                       setSnackbar({
                 open: true,
-                message: "Application submitted successfully",
+                message: isEditMode ? "Application updated successfully" : "Application submitted successfully",
                 severity: "success"
             });
 

@@ -209,8 +209,13 @@ CREATE TABLE users (
 -- ----------------------------------------------------------------------------
 CREATE TABLE audit_log (
     log_id               BIGINT          NOT NULL AUTO_INCREMENT,
+    actor_user_id        BIGINT          NULL,
+    entity_id            BIGINT          NOT NULL,
+    actor_role           VARCHAR(50)     NULL,
+    action               VARCHAR(100)    NOT NULL,
     action_type          VARCHAR(100)    NULL,
     performed_by         VARCHAR(100)    NULL,
+    entity_type          VARCHAR(100)    NULL,
     entity_affected      VARCHAR(100)    NULL,
     details              TEXT            NULL,
     timestamp            TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,

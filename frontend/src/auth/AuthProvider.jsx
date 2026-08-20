@@ -1,5 +1,6 @@
 import {
   useCallback,
+  useEffect,
   useMemo,
   useState,
 } from "react";
@@ -46,9 +47,29 @@ export function AuthProvider({ children }) {
     getStoredValue(ROLE_KEY)
   );
 
-  const [username, setUsername] = useState(() =>
+   const [username, setUsername] = useState(() =>
     getStoredValue(USERNAME_KEY)
   );
+
+  // Keeps the legacy shared localStorage("user") key in sync whenever
+  // auth state changes — not just at login — so a page refresh mid-session
+  // doesn't leave it stale for the pages that still read from it directly.
+  useEffect(() => {
+    if (token && role) {
+      try {
+        localStorage.setItem(
+          LEGACY_USER_KEY,
+          JSON.stringify({
+            token,
+            username,
+            role,
+          })
+        );
+      } catch {
+        // Ignore storage errors
+      }
+    }
+  }, [token, role, username]);
 
   const login = useCallback(
     async (usernameValue, password) => {
