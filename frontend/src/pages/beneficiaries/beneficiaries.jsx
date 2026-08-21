@@ -5,7 +5,7 @@ import { IconButton } from "@mui/material";
 import {
     getAllBeneficiaries,
     uploadBeneficiaryDocument,
-    getBeneficiaryDocumentUrl,
+    viewBeneficiaryDocument,
     deleteBeneficiary,
     updateBeneficiaryVerification
 } from "../../services/beneficiaryService";
@@ -337,18 +337,30 @@ function Beneficiaries() {
 
                                         {b.documentPath ? (
 
-                                            <>
-                                                <Link
-                                                    href={getBeneficiaryDocumentUrl(
-                                                        b.id
-                                                    )}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    sx={{ mr: 1 }}
-                                                >
-                                                    {b.documentOriginalName ||
-                                                        "View"}
-                                                </Link>
+    <>
+        <Link
+            component="button"
+            onClick={() =>
+                viewBeneficiaryDocument(
+                    b.id
+                ).catch((err) => {
+                    console.error(
+                        "View document error:",
+                        err
+                    );
+                    setSnackbar({
+                        open: true,
+                        message:
+                            "Could not open the document. Please try again.",
+                        severity: "error"
+                    });
+                })
+            }
+            sx={{ mr: 1, cursor: "pointer" }}
+        >
+            {b.documentOriginalName ||
+                "View"}
+        </Link>
 
                                                 <Button
                                                     size="small"

@@ -41,12 +41,10 @@ public AnalyticsController(
     this.reportExportService = reportExportService;
 }
 
-    // ================= DASHBOARD SUMMARY =================
-    // No @PreAuthorize below this point (except the exports further down):
-    // these endpoints feed the shared Dashboard/Analytics pages that every
-    // role lands on after login. They're still behind login itself
-    // (SecurityConfig requires authentication for anyRequest()) — this is a
-    // deliberate "any authenticated role" decision, not an unreviewed gap.
+     // ================= DASHBOARD SUMMARY =================
+    // Restricted to DISTRICT_OFFICER, FINANCE_APPROVER, ADMIN — Field
+    // Officers are a ground-verification role and don't need reporting/
+    // analytics access. Applies consistently to every endpoint below.
 
     @PreAuthorize("hasAnyRole('DISTRICT_OFFICER', 'FINANCE_APPROVER', 'ADMIN')")
     @GetMapping("/dashboard-summary")

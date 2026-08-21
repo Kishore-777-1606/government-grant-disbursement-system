@@ -40,12 +40,11 @@ const drawerWidth = 260;
  * Role-based menu configuration
  */
 const menuItems = [
-  {
+    {
     text: "Dashboard",
     icon: <Dashboard />,
     path: "/dashboard",
     roles: [
-      "FIELD_OFFICER",
       "DISTRICT_OFFICER",
       "FINANCE_APPROVER",
       "ADMIN",

@@ -20,6 +20,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 
 import MainLayout from "../../layouts/MainLayout";
+import { useAuth } from "../../auth/useAuth";
 
 import {
     getAllApplications,
@@ -27,6 +28,13 @@ import {
 } from "../../services/applicationService";
 
 function Applications() {
+
+    const { role } = useAuth();
+
+    // Mirrors the backend's @PreAuthorize on POST /api/applications —
+    // FINANCE_APPROVER can't create applications, so don't show the button.
+    const canCreateApplication =
+        ["FIELD_OFFICER", "DISTRICT_OFFICER", "ADMIN"].includes(role);
 
     const [applications, setApplications] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -117,18 +125,19 @@ function Applications() {
                 <Typography variant="h4">
                     Applications
                 </Typography>
-
-                <Button
-                    variant="contained"
-                    onClick={() => {
-                        // Clear edit state before creating
-                        // a new application.
-                        setApplicationToEdit(null);
-                        setOpenDialog(true);
-                    }}
-                >
-                    New Application
-                </Button>
+                {canCreateApplication && (
+                    <Button
+                        variant="contained"
+                        onClick={() => {
+                            // Clear edit state before creating
+                            // a new application.
+                            setApplicationToEdit(null);
+                            setOpenDialog(true);
+                        }}
+                    >
+                        New Application
+                    </Button>
+                )}
 
             </Stack>
 

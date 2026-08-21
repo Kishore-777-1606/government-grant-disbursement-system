@@ -37,9 +37,7 @@ function Login() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const from = location.state?.from?.pathname || "/dashboard";
-
-  const handleSubmit = async (event) => {
+    const handleSubmit = async (event) => {
     event.preventDefault();
     setError("");
 
@@ -58,7 +56,21 @@ function Login() {
     try {
       setLoading(true);
 
-      await login(trimmedUsername, password);
+      const response = await login(trimmedUsername, password);
+
+      // If the user was redirected here from a specific page (e.g. their
+      // session expired mid-task), send them back there. Otherwise, land
+      // them on a page their role can actually see — Dashboard is
+      // District Officer/Finance Approver/Admin only, so a Field Officer
+      // landing there would immediately bounce to /unauthorized.
+      const roleDefaultLandingPage =
+        response?.role === "FIELD_OFFICER"
+          ? "/applications"
+          : "/dashboard";
+
+      const from =
+        location.state?.from?.pathname ||
+        roleDefaultLandingPage;
 
       navigate(from, {
         replace: true,

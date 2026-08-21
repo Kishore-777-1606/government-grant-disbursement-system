@@ -107,9 +107,42 @@ export const updateBeneficiaryVerification = async (id, aadhaarVerified, bankVer
 };
 
 // =====================================================
-// BENEFICIARY DOCUMENT URL
+// VIEW BENEFICIARY DOCUMENT (JWT-protected)
 // =====================================================
+//
+// A plain <a href> can't attach the Authorization header, and the
+// backend endpoint is intentionally protected — so we fetch the file
+// through the shared `api` instance (which the JWT interceptor already
+// covers), turn the response into a Blob, and open that in a new tab
+// instead of linking straight to the backend URL.
 
-export const getBeneficiaryDocumentUrl = (id) => {
-    return `http://localhost:8080/beneficiaries/${id}/document`;
+export const viewBeneficiaryDocument = async (id) => {
+
+    const response = await api.get(
+        `/beneficiaries/${id}/document`,
+        {
+            responseType: "blob",
+        }
+    );
+
+    const blobUrl = window.URL.createObjectURL(
+        response.data
+    );
+
+    const newTab = window.open(blobUrl, "_blank");
+
+    // If the popup was blocked, at least don't leave a dangling
+    // object URL with nothing pointing at it.
+    if (!newTab) {
+        window.URL.revokeObjectURL(blobUrl);
+        throw new Error(
+            "Could not open the document — check if your browser blocked the popup."
+        );
+    }
+
+    // Revoke once the new tab has had time to actually load the blob.
+    // Revoking immediately can race the browser before it reads the file.
+    setTimeout(() => {
+        window.URL.revokeObjectURL(blobUrl);
+    }, 30000);
 };

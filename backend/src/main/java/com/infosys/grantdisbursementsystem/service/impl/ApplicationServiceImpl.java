@@ -121,8 +121,75 @@ public class ApplicationServiceImpl implements ApplicationService {
                 );
 
 
+        // ---------------------------------------------------------
+        // P7b — reject if the scheme is inactive or outside its
+        // active date window.
+        // ---------------------------------------------------------
 
-// Default the applied amount to the scheme's grant amount when the
+        if (Boolean.FALSE.equals(scheme.getIsActive())) {
+
+                       throw new IllegalStateException(
+                    "Cannot submit an application for an inactive scheme: "
+                            + scheme.getName()
+            );
+        }
+
+        java.time.LocalDate today =
+                java.time.LocalDate.now();
+
+        if (scheme.getStartDate() != null
+                && today.isBefore(scheme.getStartDate())) {
+
+            throw new IllegalStateException(
+                    "This scheme has not started yet — it opens on "
+                            + scheme.getStartDate()
+            );
+        }
+
+        if (scheme.getEndDate() != null
+                && today.isAfter(scheme.getEndDate())) {
+
+            throw new IllegalStateException(
+                    "This scheme has closed — it ended on "
+                            + scheme.getEndDate()
+            );
+        }
+
+
+        // ---------------------------------------------------------
+        // P7a — reject if this beneficiary already has an active or
+        // pending application for this same scheme.
+        // ---------------------------------------------------------
+
+        List<Application> existingApplications =
+                repository.findByBeneficiaryIdAndSchemeId(
+                        application.getBeneficiaryId(),
+                        application.getSchemeId()
+                );
+
+        boolean hasActiveOrPending = existingApplications.stream()
+                .anyMatch(existing ->
+                        existing.getStatus() != null
+                                && !existing.getStatus()
+                                        .equalsIgnoreCase("Rejected")
+                                && !existing.getStatus()
+                                        .equalsIgnoreCase("Not Eligible")
+                );
+
+        if (hasActiveOrPending) {
+
+                       throw new IllegalStateException(
+                    "Beneficiary "
+                            + application.getBeneficiaryId()
+                            + " already has an active or pending application"
+                            + " for scheme "
+                            + scheme.getName()
+            );
+        }
+
+
+
+        // Default the applied amount to the scheme's grant amount when the
         // caller didn't supply one, so downstream routing/disbursement
         // always has an amount to work with. When the caller DID supply one
         // (a per-application requested amount), it must not exceed what the
@@ -295,6 +362,22 @@ public class ApplicationServiceImpl implements ApplicationService {
                         )
                 );
 
+        // P7c — once verification has started, the core application
+        // details shouldn't change out from under whoever's reviewing it.
+        // "Eligible"/"Not Eligible" are the pre-verification states — once
+        // it moves past that, editing is blocked.
+        if (existing.getStatus() != null
+                && !existing.getStatus().equalsIgnoreCase("Eligible")
+                && !existing.getStatus().equalsIgnoreCase("Not Eligible")) {
+
+            throw new IllegalStateException(
+                    "Cannot edit application #"
+                            + existing.getApplicationId()
+                            + " — verification has already started (status: "
+                            + existing.getStatus()
+                            + ")"
+            );
+        }
         // Merge field-by-field instead of saving the incoming body as-is —
         // a blind save() would null out any field the caller's payload
         // happened to omit. status and eligibilityScore are intentionally

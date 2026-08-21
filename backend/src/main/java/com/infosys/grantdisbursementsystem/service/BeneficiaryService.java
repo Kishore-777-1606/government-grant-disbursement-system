@@ -159,12 +159,24 @@ public class BeneficiaryService {
         );
 
         beneficiary.setBankVerified(
-                beneficiaryDetails.getBankVerified()
-        );
+        beneficiaryDetails.getBankVerified()
+);
 
-        beneficiary.setIsActive(
-                beneficiaryDetails.getIsActive()
-        );
+beneficiary.setCategory(
+        beneficiaryDetails.getCategory()
+);
+
+beneficiary.setAnnualIncome(
+        beneficiaryDetails.getAnnualIncome()
+);
+
+beneficiary.setDisabilityStatus(
+        beneficiaryDetails.getDisabilityStatus()
+);
+
+beneficiary.setIsActive(
+        beneficiaryDetails.getIsActive()
+);
 
         return beneficiaryRepository.save(
                 beneficiary

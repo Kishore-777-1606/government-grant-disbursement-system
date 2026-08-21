@@ -82,6 +82,20 @@ public class DisbursementPlanService {
                             + "', not 'Approved'. Finance approval must be completed first."
             );
         }
+               if (application.getApprovedAmount() != null
+                && totalAmount != null
+                && java.math.BigDecimal.valueOf(totalAmount)
+                        .compareTo(application.getApprovedAmount()) > 0) {
+
+            throw new IllegalArgumentException(
+                    "Disbursement plan amount (₹"
+                            + totalAmount
+                            + ") cannot exceed the approved grant amount (₹"
+                            + application.getApprovedAmount()
+                            + ") for application #"
+                            + application.getApplicationId()
+            );
+        }
 
         DisbursementPlan plan =
                 new DisbursementPlan();

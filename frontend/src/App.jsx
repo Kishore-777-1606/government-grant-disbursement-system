@@ -32,7 +32,6 @@ function App() {
 
 
       {/* ================= COMMON AUTHENTICATED ROUTES ================= */}
-
       <Route
         element={
           <ProtectedRoute
@@ -45,11 +44,6 @@ function App() {
           />
         }
       >
-        <Route
-          path="/dashboard"
-          element={<Dashboard />}
-        />
-
         <Route
           path="/beneficiaries"
           element={<Beneficiaries />}
@@ -72,9 +66,29 @@ function App() {
       </Route>
 
 
+      {/* ================= DASHBOARD ================= */}
+
+      <Route
+        element={
+          <ProtectedRoute
+            allowedRoles={[
+              "DISTRICT_OFFICER",
+              "FINANCE_APPROVER",
+              "ADMIN",
+            ]}
+          />
+        }
+      >
+        <Route
+          path="/dashboard"
+          element={<Dashboard />}
+        />
+      </Route>
+
+
       {/* ================= SCHEMES ================= */}
 
-            <Route
+      <Route
         element={
           <ProtectedRoute
             allowedRoles={[
@@ -113,9 +127,9 @@ function App() {
       </Route>
 
 
-      {/* ================= FINANCE / DISBURSEMENT / ANALYTICS ================= */}
+      {/* ================= FINANCE / ANALYTICS ================= */}
 
-            <Route
+      <Route
         element={
           <ProtectedRoute
             allowedRoles={[
@@ -135,6 +149,9 @@ function App() {
           element={<Analytics />}
         />
       </Route>
+
+
+      {/* ================= DISBURSEMENT ================= */}
 
       <Route
         element={
