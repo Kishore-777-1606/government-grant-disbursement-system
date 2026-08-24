@@ -14,6 +14,7 @@ import {
   Chip,
   Box,
   Stack,
+  Alert,
 } from "@mui/material";
 
 import {
@@ -63,6 +64,10 @@ const statConfig = [
 ];
 
 function Dashboard() {
+  const stored = localStorage.getItem("user");
+  const currentUser = stored ? JSON.parse(stored) : null;
+  const displayName = currentUser?.fullName || currentUser?.username || "User";
+
   const [stats, setStats] = useState({
     totalBeneficiaries: 0,
     totalApplications: 0,
@@ -71,6 +76,7 @@ function Dashboard() {
   });
 
   const [applications, setApplications] = useState([]);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     const loadDashboardData = async () => {
@@ -150,8 +156,11 @@ function Dashboard() {
           });
 
         setApplications(recentApplications);
-      } catch (error) {
-        console.error("Dashboard data loading error:", error);
+      } catch (err) {
+        console.error("Dashboard data loading error:", err);
+        setError(
+          err?.response?.data?.message || "Unable to load dashboard data."
+        );
       }
     };
 
@@ -161,6 +170,12 @@ function Dashboard() {
   return (
     <MainLayout>
       <Box>
+        {error && (
+          <Alert severity="error" sx={{ mb: 3 }}>
+            {error}
+          </Alert>
+        )}
+
         {/* Welcome Banner */}
         <Paper
           elevation={0}
@@ -174,7 +189,7 @@ function Dashboard() {
           }}
         >
           <Typography variant="h4" fontWeight={700}>
-            Welcome, Admin!
+            Welcome, {displayName}!
           </Typography>
 
           <Typography

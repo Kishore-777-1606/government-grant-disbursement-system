@@ -9,7 +9,8 @@ import {
     TableHead,
     TableRow,
     CircularProgress,
-    Chip
+    Chip,
+    Alert
 } from "@mui/material";
 
 import MainLayout from "../../layouts/MainLayout";
@@ -19,6 +20,7 @@ function StatusTracking() {
 
     const [applications, setApplications] = useState([]);
     const [loading, setLoading] = useState(true);
+      const [error, setError] = useState("");
 
     useEffect(() => {
         loadApplications();
@@ -31,9 +33,12 @@ function StatusTracking() {
             const data = await getAllApplications();
             setApplications(data);
 
-        } catch (err) {
+               } catch (err) {
 
             console.error(err);
+            setError(
+                err?.response?.data?.message || "Unable to load application status data."
+            );
 
         } finally {
 
@@ -69,13 +74,23 @@ function StatusTracking() {
 
         <MainLayout>
 
-            <Typography variant="h4" gutterBottom>
+                       <Typography variant="h4" gutterBottom>
                 Application Status Tracking
             </Typography>
 
-            {loading ? (
+            {error && (
+                <Alert severity="error" sx={{ mb: 2 }}>
+                    {error}
+                </Alert>
+            )}
+
+                        {loading ? (
 
                 <CircularProgress />
+
+            ) : applications.length === 0 ? (
+
+                <Alert severity="info">No applications found.</Alert>
 
             ) : (
 
