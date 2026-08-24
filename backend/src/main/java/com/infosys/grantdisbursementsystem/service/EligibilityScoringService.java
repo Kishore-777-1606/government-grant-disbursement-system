@@ -19,7 +19,7 @@ public class EligibilityScoringService {
     public static final double AADHAAR_VERIFIED_WEIGHT = 20;
     public static final double BANK_VERIFIED_WEIGHT = 20;
     public static final double ACTIVE_SCHEME_WEIGHT = 30;
-    public static final double ELIGIBLE_THRESHOLD = 70;
+    public static final double ELIGIBLE_THRESHOLD = 60;
 
 
     public double calculateScore(Beneficiary beneficiary, Scheme scheme) {

@@ -98,7 +98,7 @@ public class VerificationService {
             );
 
         }
-        else if (score < 80 && !highValue) {
+       else if (score < 100 && !highValue) {
 
             application.setStatus("Field Verification Pending");
 
@@ -119,14 +119,14 @@ public class VerificationService {
 
             verification.setVerificationStatus("Pending");
 
-            verification.setRemarks(
-                    score < 80
-                            ?
-                            "Waiting for District Officer Verification "
-                                    + "(escalated: high-value application)"
-                            :
-                            "Waiting for District Officer Verification"
-            );
+           verification.setRemarks(
+        highValue
+                ?
+                "Waiting for District Officer Verification "
+                        + "(escalated: high-value application)"
+                :
+                "Waiting for District Officer Verification"
+);
         }
 
         applicationRepository.save(application);

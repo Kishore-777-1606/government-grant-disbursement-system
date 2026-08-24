@@ -385,15 +385,14 @@ function AddBeneficiaryDialog({
                 "Beneficiary save error:",
                 error
             );
-
             const backendMessage =
-                error?.response?.data?.message ||
                 (
                     error?.response?.data?.fieldErrors &&
                     Object.values(
                         error.response.data.fieldErrors
                     ).join(", ")
                 ) ||
+                error?.response?.data?.message ||
                 (
                     isEditMode
                         ? "Failed to update beneficiary"

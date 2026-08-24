@@ -68,11 +68,19 @@ public class DisbursementPlanService {
             );
         }
 
-        if (numInstallments <= 0) {
+              if (numInstallments <= 0) {
             throw new IllegalArgumentException(
                     "Number of installments must be greater than zero"
             );
         }
+
+        if (planRepository.findByApplication(application).isPresent()) {
+            throw new IllegalStateException(
+                    "A disbursement plan already exists for application #"
+                            + application.getApplicationId()
+            );
+        }
+
                 if (!"Approved".equalsIgnoreCase(application.getStatus())) {
             throw new IllegalStateException(
                     "Cannot create a disbursement plan for application #"
