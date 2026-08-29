@@ -64,16 +64,16 @@ function Applications() {
     }, []);
 
     const loadApplications = async () => {
-        try {
-            const data = await getAllApplications();
-
-            setApplications(data);
-        } catch (err) {
-            console.error(err);
-        } finally {
-            setLoading(false);
-        }
-    };
+    try {
+        const data = await getAllApplications();
+        setApplications(data);
+    } catch (err) {
+        console.error(err);
+        alert(err?.response?.data?.message || "Failed to load applications");
+    } finally {
+        setLoading(false);
+    }
+};
 
     // Open application in edit mode
     const handleEditClick = (app) => {

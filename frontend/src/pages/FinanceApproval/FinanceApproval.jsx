@@ -51,18 +51,24 @@ function FinanceApproval() {
     };
 
     const handleApprove = async (id) => {
-
+    try {
         await approveFinance(id);
         loadApprovals();
+    } catch (err) {
+        console.error(err);
+        alert(err?.response?.data?.message || "Failed to approve — please try again");
+    }
+};
 
-    };
-
-    const handleReject = async (id) => {
-
+const handleReject = async (id) => {
+    try {
         await rejectFinance(id);
         loadApprovals();
-
-    };
+    } catch (err) {
+        console.error(err);
+        alert(err?.response?.data?.message || "Failed to reject — please try again");
+    }
+};
 
     return (
 
