@@ -1,4 +1,3 @@
-@"
 FROM eclipse-temurin:17-jdk AS build
 WORKDIR /app
 COPY .mvn/ .mvn/
@@ -13,4 +12,3 @@ WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
 EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "app.jar"]
-"@ | Out-File -FilePath Dockerfile -Encoding utf8 -NoNewline
